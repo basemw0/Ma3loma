@@ -25,8 +25,16 @@ export default function CreationWizard(){
         <CommunityDetails communityDetails = {communityDetails} setCommunityDetails = {setCommunityDetails} communityVisuals= {communityVisuals}/>,
         <CommunityVisuals communityVisuals= {communityVisuals} setCommunityVisuals ={setCommunityVisuals} communityDetails = {communityDetails}/>
     ]
+    
+    const createCommunity = async()=>{
+        //Axios request to createCommunity
+    }
     const handleNext = ()=>{
         setStep((prev)=>{
+            if(prev == 3){
+                createCommunity()
+                return
+            }
             return prev+1
         })
     }
@@ -47,7 +55,7 @@ export default function CreationWizard(){
             sx={{ maxWidth: 400, flexGrow: 1 }}
             nextButton={
                 <Button size="small" onClick={handleNext} >
-                Next
+                {step == 3? "Finish" : "Next"}
                 {theme.direction === 'rtl' ? (
                     <KeyboardArrowLeft />
                 ) : (
