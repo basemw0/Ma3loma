@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { mockCategories } from "../../mockData/Topics";
+import { mockCategories } from "../../../mockData/Topics";
 import Stack from '@mui/material/Stack';
 import TopicSearch from "./TopicSearch";
 import SelectedTopics from './SelectedTopics'
