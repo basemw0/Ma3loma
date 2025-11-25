@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const ALLOWED_INTERESTS = require("../config/interests");
+const uniqueValidator = require('mongoose-unique-validator');
 
 const UserSchema = new mongoose.Schema({
   username: { 
@@ -25,6 +26,10 @@ const UserSchema = new mongoose.Schema({
     type: String, 
     required: true, 
     minlength: [6, "Password must be at least 6 characters"] 
+  },
+  image:{
+    type: String,
+    required: true,
   },
 //   isVerified: { 
 //     type: Boolean, 
@@ -57,4 +62,5 @@ joinedCommunities: [{
   }],  savedPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
 }, { timestamps: true });
 
+UserSchema.plugin(uniqueValidator, { message: '{PATH} must be unique.' });
 module.exports = mongoose.model("User", UserSchema);
