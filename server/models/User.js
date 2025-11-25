@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const ALLOWED_INTERESTS = require("../config/interests");
 
 const UserSchema = new mongoose.Schema({
   username: { 
@@ -33,8 +34,27 @@ const UserSchema = new mongoose.Schema({
 //     type: String // Stores the unique token sent to email
 //   },
 
-  joinedCommunities: [{ type: mongoose.Schema.Types.ObjectId, ref: "Community" }],
-  savedPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
+interests: [{ 
+    type: String, 
+    enum: {
+      values: ALLOWED_INTERESTS,
+      message: '{VALUE} is not a supported interest' // Custom error message
+    }
+  }],
+  
+joinedCommunities: [{
+    _id: false, // Save space
+    community: { 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: "Community",
+      required: true
+    },
+    role: { 
+      type: String, 
+      default: "member" // This will match the roles in Community
+    },
+    joinedAt: { type: Date, default: Date.now }
+  }],  savedPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
 }, { timestamps: true });
 
 module.exports = mongoose.model("User", UserSchema);
