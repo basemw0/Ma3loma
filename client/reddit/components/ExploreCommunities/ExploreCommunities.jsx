@@ -6,7 +6,6 @@ import CategoryList from "./CategoryList"
 import DisplayCategories from "./DisplayCategories"
 export default function ExploreCommunities(){
     //Function to retrieve mn 3and 3am badra
-    
     const cat = categories.map((category , index)=>{
         let status = 0 
         if (index == 0 ) status = 1
