@@ -49,6 +49,23 @@ const getPostsCommunity = async (req, res) =>{
 }
 
 
+const getPostDetails = async (req, res) =>{
+    try {
+        const { pid } = req.params;
+
+        const post = await Post.findById(pid)
+            .populate({
+                path: 'comments', 
+                populate: { path: 'userID', select: 'username image' } 
+            });
+
+        res.status(200).json(post);
+    } catch (error) {
+        res.status(500).json({message: error.message});
+    }
+}
+
+
 const createPost = async (req, res) =>{
     try{
 
@@ -280,6 +297,7 @@ const awardPost = async (req, res)=>{
 module.exports = {
     getPostsHomePage,
     getPostsCommunity,
+    getPostDetails,
     createPost,
     deletePost,
     editPost,
