@@ -7,6 +7,8 @@ const router = express.Router();
 
 router.get('/', communityController.getCommunities);
 
+router.get('/Category', communityController.getCommunitiesByCategory)
+
 router.get('/search', communityController.searchCommunity)
 
 router.get('/:id', communityController.getCommunityById);
@@ -18,10 +20,7 @@ router.post(
       .not()
       .isEmpty()
       .withMessage('Community name is required'),
-    check('userID')
-      .not()
-      .isEmpty()
-      .withMessage('User ID is required')
+    
   ],
   communityController.createCommunity
 )
@@ -29,9 +28,6 @@ router.post(
 router.post(
   '/:id/join',
   [
-    check('userID')
-      .not()
-      .isEmpty(),
     check('action')
       .isIn([0, 1])
       .withMessage('Action must be 1 (join) or 0 (leave)')

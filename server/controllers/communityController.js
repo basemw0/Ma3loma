@@ -12,6 +12,64 @@ const getCommunities= async (req, res) => {
   try {
    
     let communities = await Community.aggregate([
+      // {$match:{privacy:{ $in: ["public", "restricted"] }}},
+      { $sort: { numberOfMembers: -1 } },
+      { $limit: 1000 }
+    ]);
+
+    if (!userID) {
+      return res.json(communities.map(c => ({
+        ...c,
+        isMember: false,
+        userRole: "guest"
+      })));
+    }
+
+    const user = await User.findById(userID).select("joinedCommunities");
+
+    if (!user) {
+      return res.json(communities.map(c => ({
+        ...c,
+        isMember: false,
+        userRole: "guest"
+      })));
+    }
+
+   
+    const userMap = {};
+    user.joinedCommunities.forEach(entry => {
+      userMap[entry.community.toString()] = entry.role;
+    });
+
+    const personalizedCommunities = communities.map(comm => {
+      const myRole = userMap[comm._id.toString()]; 
+      
+      return {
+        ...comm,
+        isMember: !!myRole, // Converts "admin" to true, undefined to false
+        userRole: myRole || "guest"
+      };
+    });
+
+    res.json(personalizedCommunities);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server Error");
+  }
+}
+
+const getCommunitiesByCategory= async (req, res) => {
+  const userID = req.user.id;
+  const {category}=req.query
+
+  try {
+   
+    let communities = await Community.aggregate([
+      {$match: {
+      // privacy: { $in: ["public", "restricted"] },
+      interests: category 
+    }},
       { $sort: { numberOfMembers: -1 } },
       { $limit: 1000 }
     ]);
@@ -60,7 +118,7 @@ const getCommunities= async (req, res) => {
 
 // ✅ CREATE COMMUNITY ENDPOINT
 const createCommunity = async (req, res) => {
-const { name, description, interests,icon,banner } = req.body;
+const { name, description, interests,icon,banner,privacy } = req.body;
 const userID = req.user.id;
   if (!name || !userID) {
     return res.status(400).json({ message: "Name and UserID are required" });
@@ -72,7 +130,8 @@ const userID = req.user.id;
       description,
       interests: interests || [],
       icon: icon || undefined, 
-      banner: banner || undefined
+      banner: banner || undefined,
+      privacy:privacy||undefined
 
       // numberOfMembers defaults to 1
     });
@@ -107,7 +166,7 @@ const userID = req.user.id;
 // ✅ JOIN / LEAVE COMMUNITY (Toggle)
 const joinCommunity= async (req, res) => {
   const communityID = req.params.id;
-  const {  action } = req.body; // action = "join" or "leave"
+  const {  action } = req.body; 
   const userID = req.user.id;
   try {
     let userUpdateResult;
