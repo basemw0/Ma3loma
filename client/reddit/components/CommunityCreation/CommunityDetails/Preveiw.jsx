@@ -14,7 +14,7 @@ export default function Preview(props) {
       {communityVisuals.banner && (
         <Box
           component="img"
-          src={URL.createObjectURL(communityVisuals.banner)}
+          src={communityVisuals.banner}
           alt="banner"
           sx={{
             width: '100%',
@@ -32,7 +32,7 @@ export default function Preview(props) {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           {communityVisuals.icon && (
             <Avatar
-              src={URL.createObjectURL(communityVisuals.icon)}
+              src={communityVisuals.icon}
               alt="community icon"
               sx={{ width: 40, height: 40 }}
             />
