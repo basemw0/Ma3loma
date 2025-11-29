@@ -7,7 +7,7 @@ const { validationResult } = require('express-validator');
 
 
 const getCommunities= async (req, res) => {
-  const userID = "4c740372-7c91-4bc2-945c-58a7ee0109b5";
+  const userID = "4c740372-7c91-4bc2-945c-58a7ee0109b5"
 
   try {
    
@@ -60,8 +60,8 @@ const getCommunities= async (req, res) => {
 }
 
 const getCommunitiesByCategory = async (req, res) => {
-  const userID ="4c740372-7c91-4bc2-945c-58a7ee0109b5";
-  const {q}=req.query
+  const userID = "4c740372-7c91-4bc2-945c-58a7ee0109b5"
+  const {category}=req.query
 
   try {
    
@@ -119,7 +119,7 @@ const getCommunitiesByCategory = async (req, res) => {
 // ✅ CREATE COMMUNITY ENDPOINT
 const createCommunity = async (req, res) => {
 const { name, description, interests,icon,banner,privacy } = req.body;
-const userID = "4c740372-7c91-4bc2-945c-58a7ee0109b5";
+const userID = req.user.id;
   if (!name || !userID) {
     return res.status(400).json({ message: "Name and UserID are required" });
   }
@@ -166,7 +166,7 @@ const userID = "4c740372-7c91-4bc2-945c-58a7ee0109b5";
 const updateCommunity = async (req, res) => {
   const communityID = req.params.id;
   const { name, description, interests,icon,banner,privacy } = req.body;
-  const userID = "4c740372-7c91-4bc2-945c-58a7ee0109b5";
+  const userID = "4c740372-7c91-4bc2-945c-58a7ee0109b5"
   if (!communityID || !userID) {
     return res.status(400).json({ message: "communityID and UserID are required" });
   }
@@ -214,7 +214,7 @@ const updateCommunity = async (req, res) => {
 const joinCommunity= async (req, res) => {
   const communityID = req.params.id;
   const {  action } = req.body; 
-  const userID = "4c740372-7c91-4bc2-945c-58a7ee0109b5";
+  const userID = "4c740372-7c91-4bc2-945c-58a7ee0109b5"
   try {
     let userUpdateResult;
 
@@ -266,7 +266,7 @@ const joinCommunity= async (req, res) => {
 // ✅ GET COMMUNITY BY ID (With "Am I a Member?" Check)
 const getCommunityById= async (req, res) => {
   const communityID = req.params.id;
-  const userID = "4c740372-7c91-4bc2-945c-58a7ee0109b5";
+  const userID = "4c740372-7c91-4bc2-945c-58a7ee0109b5"
   try {
     const community = await Community.findById(communityID);
     

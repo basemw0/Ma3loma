@@ -14,7 +14,7 @@ export default function Topic(props){
                 height : 32 , 
                 textTransform : 'none' , 
                 margin:0.5,
-                backgroundColor : '#E5EBEE' , 
+                backgroundColor : 'rgba(229, 235, 238, 1)' , 
                 color : 'black' ,
                 '&.Mui-selected': {
                     backgroundColor: '#C8D2DA',

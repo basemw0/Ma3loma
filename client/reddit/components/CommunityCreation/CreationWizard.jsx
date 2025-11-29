@@ -10,6 +10,7 @@ import Button from '@mui/material/Button';
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import { Box } from "@mui/material"
+import axios from 'axios'
 
 export default function CreationWizard(){
     const [allCategories , setAllCategories] = useState(mockCategories)
@@ -26,18 +27,23 @@ export default function CreationWizard(){
         <CommunityVisuals communityVisuals= {communityVisuals} setCommunityVisuals ={setCommunityVisuals} communityDetails = {communityDetails}/>
     ]
     
-    const createCommunity = ()=>{
+    const createCommunity = async ()=>{
+        console.log(selectedTopics)
         const communityObject  = {
             name : communityDetails.name,
             description: communityDetails.description,
             banner : communityVisuals.banner,
             icon : communityVisuals.icon,
             privacy : privacy,
-            selectedTopics :selectedTopics
+            interests :selectedTopics
         }
-     
-        alert("WTF")
-    
+        try{
+        await axios.post("https://domelike-delaney-cauline.ngrok-free.dev/api/communities/create",communityObject)
+        alert("Community created succesfully")
+        }
+        catch(e){
+            alert("Error:" , e.message)
+        }
     }
     const handleNext = () => {
         if (step === 3) {

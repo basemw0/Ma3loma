@@ -1,6 +1,7 @@
 import Button from '@mui/material/Button';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import { styled } from '@mui/material/styles';
+import uploadToCloudinary from '../../../src/utils/uploadCloudinary'
 
 export default function UploadButton(props) {
   const {setCommunityVisuals , icon} = props
@@ -15,15 +16,17 @@ export default function UploadButton(props) {
     whiteSpace: 'nowrap',
     width: 1,
   });
-  const handleChange = (file)=>{
+  const handleChange = async (file)=>{
     if(icon){
+      let url = await uploadToCloudinary(file)
       setCommunityVisuals((prev)=>{
-        return {...prev , icon : file}
+        return {...prev , icon : url.url}
       })
     }
     else{
+      let url = await uploadToCloudinary(file)
       setCommunityVisuals((prev)=>{
-        return {...prev , banner : file}
+        return {...prev , banner : url.url}
       })
     }
 
