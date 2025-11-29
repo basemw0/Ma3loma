@@ -4,8 +4,8 @@ const bcrypt = require('bcryptjs');
 
 const connectDB = async () => {
   try {
-    // Your specific MongoDB URI
-    const uri = "mongodb+srv://username:pass@redditclone.5d2hpqu.mongodb.net/?appName=redditClone";
+    // Your specific MongoDB URI (Ensure you replace 'username' and 'pass' with real credentials or use .env)
+    const uri = "mongodb+srv://AmirTamer:Amirpassword@redditclone.5d2hpqu.mongodb.net/?appName=redditClone";
     
     await mongoose.connect(uri);
     console.log("✅ MongoDB Connected Successfully!");
@@ -15,7 +15,7 @@ const connectDB = async () => {
   }
 };
 
-// This is the magic line that fixes your error:
+// This export allows the main server file to use connectDB
 module.exports = connectDB;
 
 const User = require('./models/User');
@@ -33,8 +33,9 @@ const COMMUNITIES = [
 
 const seedData = async () => {
   try {
-    // 1. Connect to DB
-    connectDB();
+    // 1. Connect to DB (Call it inside if we plan to run this file directly)
+    await connectDB();
+    
     // 2. Clear existing data
     console.log('🧹 Clearing old data...');
     await User.deleteMany({});
@@ -53,6 +54,8 @@ const seedData = async () => {
         username: `User_${i + 1}`,
         email: `user${i + 1}@example.com`,
         password: hashedPassword,
+        // ✅ FIX: Add required 'image' field, using a unique placeholder avatar.
+        image: `https://i.pravatar.cc/150?u=user${i + 1}`,
         goldBalance: 1000, // Give them gold so they can give awards!
         joinedCommunities: [],
         savedPosts: []
@@ -72,11 +75,8 @@ const seedData = async () => {
         description: commData.description,
         Roles: ["admin", "moderator", "member"], // Matches your schema capitalization
         
-        // Add User 0 as Admin, User 1 as Member
-        members: [
-          { user: savedUsers[0]._id, role: 'admin' }, 
-          { user: savedUsers[1]._id, role: 'member' }
-        ],
+        // The original schema (Community.js) relies on numberOfMembers: 1 default,
+        // and the joinedCommunities array being in the User model.
         
         // Define Awards (Matches your schema capitalization)
         Awards: [
@@ -89,24 +89,39 @@ const seedData = async () => {
       const savedComm = await community.save();
       savedCommunities.push(savedComm);
 
-      // Update Users to know they joined these communities
-      await User.updateMany(
-        { _id: { $in: [savedUsers[0]._id, savedUsers[1]._id] } },
-        { $push: { joinedCommunities: savedComm._id } }
+      // --- Membership Handling ---
+      // The Community model defaults numberOfMembers to 1 (for the creator).
+      // We will add the creator (User 0) as 'admin' and another user (User 1) as 'member'.
+
+      // 1. Update User 0 (Admin/Creator) to know they joined.
+      await User.findByIdAndUpdate(
+        savedUsers[0]._id,
+        // ✅ FIX: Use the full object structure required by User.js schema for joinedCommunities
+        { $push: { joinedCommunities: { community: savedComm._id, role: 'admin' } } }
+      );
+
+      // 2. Update User 1 (Member) to know they joined.
+      await User.findByIdAndUpdate(
+        savedUsers[1]._id,
+        // ✅ FIX: Use the full object structure required by User.js schema for joinedCommunities
+        { $push: { joinedCommunities: { community: savedComm._id, role: 'member' } } }
+      );
+      
+      // 3. Update the Community's member count to 2.
+      await Community.findByIdAndUpdate(
+        savedComm._id,
+        { $set: { numberOfMembers: 2 } }
       );
     }
     console.log(`✅ ${savedCommunities.length} communities created.`);
 
-    // ... imports and setup keep the same ...
-
-    // 5. Create Posts (Update the URLs here)
+    // 5. Create Posts
     console.log('📝 Creating Posts...');
     const savedPosts = [];
     const postConfigs = [
       { 
         title: "Look at my setup!", 
         type: "image", 
-        // ✅ CHANGED: A reliable image URL
         url: "https://images.unsplash.com/photo-1555099962-4199c345e5dd?w=600&q=80", 
         content: "Is this clean code?" 
       },
@@ -124,7 +139,6 @@ const seedData = async () => {
       },
     ];
 
-// ... rest of the file remains exactly the same ...
     for (const comm of savedCommunities) {
       for (const config of postConfigs) {
         const randomUser = savedUsers[Math.floor(Math.random() * savedUsers.length)];
@@ -132,14 +146,14 @@ const seedData = async () => {
         const post = new Post({
           title: `[${comm.name}] ${config.title}`,
           content: config.content,
-          mediaUrl: config.url, // Storing URL string, not file
+          mediaUrl: config.url,
           mediaType: config.type,
           userID: randomUser._id,
           communityID: comm._id,
           upvotes: [savedUsers[0]._id, savedUsers[1]._id], // 2 fake upvotes
           downvotes: [],
           
-          // Let's give this post an award!
+          // Give this post an award (Ensure "Gold" exists in the community's awards)
           awardsReceived: [{
             awardName: "Gold",
             givenBy: savedUsers[0]._id,
@@ -149,6 +163,9 @@ const seedData = async () => {
 
         const savedPost = await post.save();
         savedPosts.push(savedPost);
+        
+        // Also save the post to User 0's savedPosts list
+        await User.findByIdAndUpdate(savedUsers[0]._id, { $push: { savedPosts: savedPost._id } });
       }
     }
     console.log(`✅ ${savedPosts.length} posts created.`);
@@ -158,7 +175,7 @@ const seedData = async () => {
     
     for (const post of savedPosts) {
       // Comment 1: Text only
-      await Comment.create({
+      const comment1 = await Comment.create({
         content: "Great post!",
         mediaType: "none",
         postID: post._id,
@@ -168,13 +185,14 @@ const seedData = async () => {
       });
 
       // Comment 2: With an Image (Reaction GIF style)
-      const mediaComment = await Comment.create({
+      const comment2 = await Comment.create({
         content: "My reaction to this:",
         mediaUrl: "https://placehold.co/100x100/orange/white?text=Reaction",
         mediaType: "image",
         postID: post._id,
         userID: savedUsers[1]._id,
         upvotes: [savedUsers[2]._id],
+        // Give this comment an award (Ensure "Rocket" exists in the community's awards)
         awardsReceived: [{
            awardName: "Rocket",
            givenBy: savedUsers[0]._id
@@ -182,7 +200,7 @@ const seedData = async () => {
       });
       
       // Link comment back to post
-      await Post.findByIdAndUpdate(post._id, { $push: { comments: mediaComment._id }});
+      await Post.findByIdAndUpdate(post._id, { $push: { comments: comment1._id, comments: comment2._id }});
     }
 
     console.log('✅ Comments created.');
@@ -195,4 +213,5 @@ const seedData = async () => {
   }
 };
 
+// Uncomment the line below and run 'node server/db.js' to seed your database.
 // seedData();

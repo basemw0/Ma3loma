@@ -10,7 +10,7 @@ import Button from '@mui/material/Button';
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import { Box } from "@mui/material"
-
+import axios from 'axios';
 export default function CreationWizard(){
     const [allCategories , setAllCategories] = useState(mockCategories)
     const [selectedTopics , setSelectedTopics] = useState([])
@@ -27,7 +27,21 @@ export default function CreationWizard(){
     ]
     
     const createCommunity = async()=>{
-        //Axios request to createCommunity
+        const communityObject  = {
+            name : communityDetails.name,
+            description: communityDetails.description,
+            banner : communityVisuals.banner,
+            icon : communityVisuals.icon,
+            privacy : privacy,
+            selectedTopics :selectedTopics
+        }
+        try{
+        await axios.post("http://localhost:5000/api/communities/create" , communityObject)
+        alert("Community Created")
+        }
+        catch(e){
+            alert("error:" + e.message)
+        }
     }
     const handleNext = ()=>{
         setStep((prev)=>{

@@ -1,7 +1,7 @@
-const User = require('./models/User');
-const Post = require('./models/Post');
-const Comment = require('./models/Comment'); 
-const Community = require('./models/Community'); 
+const User = require('../models/User');
+const Post = require('../models/Post');
+const Comment = require('../models/Comment'); 
+const Community = require('../models/Community'); 
 const bcrypt = require('bcryptjs');
 const { validationResult } = require('express-validator');
 

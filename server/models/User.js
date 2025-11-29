@@ -1,8 +1,14 @@
 const mongoose = require("mongoose");
 const ALLOWED_INTERESTS = require("../config/interests");
+const allTopics = ALLOWED_INTERESTS.flatMap(item => item.topics);
+const crypto = require('crypto');
+
 const uniqueValidator = require('mongoose-unique-validator');
 
 const UserSchema = new mongoose.Schema({
+  // ✅ Explicit String ID with UUID default
+  _id: { type: String, default: () => crypto.randomUUID() },
+
   username: { 
     type: String, 
     required: [true, "Username is required"], 
@@ -12,14 +18,14 @@ const UserSchema = new mongoose.Schema({
   },
   goldBalance: { 
     type: Number, 
-    default: 100, // New users start with 0 gold
+    default: 100, 
     min: [0, "Gold balance cannot be negative"] 
   },
   email: { 
     type: String, 
     required: [true, "Email is required"], 
     unique: true,
-    match: [/.+\@.+\..+/, "Please enter a valid email address"], // Basic Regex validation
+    match: [/.+\@.+\..+/, "Please enter a valid email address"], 
     lowercase: true 
   },
   password: { 
@@ -27,39 +33,31 @@ const UserSchema = new mongoose.Schema({
     required: true, 
     minlength: [6, "Password must be at least 6 characters"] 
   },
-  image:{
+  image: {
     type: String,
     required: true,
   },
-//   isVerified: { 
-//     type: Boolean, 
-//     default: false 
-//   },
-//   verificationToken: { 
-//     type: String // Stores the unique token sent to email
-//   },
-
-interests: [{ 
+  interests: [{ 
     type: String, 
     enum: {
-      values: ALLOWED_INTERESTS,
-      message: '{VALUE} is not a supported interest' // Custom error message
+      values: allTopics, // Uses the flattened array
+      message: '{VALUE} is not a supported interest' 
     }
   }],
-  
-joinedCommunities: [{
-    _id: false, // Save space
+  joinedCommunities: [{
+    _id: false, 
     community: { 
-      type: mongoose.Schema.Types.ObjectId, 
+      type: String, // ✅ Ref converted to String
       ref: "Community",
       required: true
     },
     role: { 
       type: String, 
-      default: "member" // This will match the roles in Community
+      default: "member" 
     },
     joinedAt: { type: Date, default: Date.now }
-  }],  savedPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
+  }],
+  savedPosts: [{ type: String, ref: "Post" }] // ✅ Ref converted to String
 }, { timestamps: true });
 
 UserSchema.plugin(uniqueValidator, { message: '{PATH} must be unique.' });
