@@ -4,19 +4,39 @@ const Community = require('../models/Community.js')
 
 const getPostsHomePage = async (req, res) =>{
     try{
-        const uid = req.user.id;
-        const user = await User.findById(uid).select('joinedCommunities interests');
+        
+        const uid = req.user ? req.user.id : null; 
 
-        if (!user) return res.status(404).json({ message: "User not found" });
+        let query = {}; 
 
-        let userCommsIds = user.joinedCommunities.map(jc => jc.community);
+        if (uid) {
+            
+            const user = await User.findById(uid).select('joinedCommunities interests');
+            
+            
+            if (!user) return res.status(404).json({ message: "User not found" });
 
-        if(user.interests && user.interests.length > 0){
-            const interestCommsIds = await Community.distinct('_id', {interests: {$in : user.interests}});
+            let userCommsIds = user.joinedCommunities.map(jc => jc.community);
 
-            userCommsIds = Array.from(new Set ([...userCommsIds, ...interestCommsIds]));
+            if (user.interests && user.interests.length > 0) {
+                const interestCommsIds = await Community.distinct('_id', {
+                    interests: { $in: user.interests }
+                });
+                userCommsIds = Array.from(new Set([...userCommsIds, ...interestCommsIds]));
+            }
+
+            
+            if (userCommsIds.length > 0) {
+                query = { communityID: { $in: userCommsIds } };
+            }
+            
         }
-        const posts = await Post.find({communityID: {$in: userCommsIds}}).sort({createdAt: -1}).populate('userID', 'username image').populate('communityID', 'name');
+
+        
+        const posts = await Post.find(query)
+            .sort({ createdAt: -1 })
+            .populate('userID', 'username image')
+            .populate('communityID', 'name');
 
         res.status(200).send(posts);
 
@@ -29,11 +49,13 @@ const getPostsHomePage = async (req, res) =>{
 const getPostsCommunity = async (req, res) =>{
     try{
         const {cid} = req.params;
-        const uid = req.user.id;
+        const uid = req.user ? req.user.id : null; 
 
-
-        const userExists = await User.exists({_id:uid});
-        if (!userExists) return res.status(404).json({ message: "User not found" });
+        
+        if (uid) {
+            const userExists = await User.exists({ _id: uid });
+            if (!userExists) return res.status(404).json({ message: "User not found" });
+        }
 
         const commExists = await Community.exists({_id:cid});
         if (!commExists) return res.status(404).json({ message: "Community not found" });
