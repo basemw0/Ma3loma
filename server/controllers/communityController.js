@@ -8,7 +8,7 @@ const { validationResult } = require('express-validator');
 
 
 const getCommunities= async (req, res) => {
-  const userID = "fe68c3e5-043a-4491-882c-e3f0e36277af"
+  const userID = "48b2ab90-3eb7-4295-a2f4-cfde2bc3a2bb"
   const limit = req.params.limit;
 
 
@@ -20,8 +20,8 @@ const getCommunities= async (req, res) => {
     let communities = await Community.aggregate([
       // {$match:{privacy:{ $in: ["public", "restricted"] }}},
       { $sort: { numberOfMembers: -1 } },
-      { $skip: 3 * (limit - 1) },
-      { $limit: 3 }
+      { $skip: 25 * (limit - 1) },
+      { $limit: 25 }
     ]);
 
     // Helper function to format the response consistently
@@ -79,7 +79,7 @@ const getCommunities= async (req, res) => {
 
 const getCommunitiesByCategory = async (req, res) => {
   // Hardcoded ID per your snippet
-  const userID = "fe68c3e5-043a-4491-882c-e3f0e36277af"; 
+  const userID = "48b2ab90-3eb7-4295-a2f4-cfde2bc3a2bb"; 
   const { q } = req.query; 
 
   try {
@@ -212,7 +212,7 @@ const userID = req.user.id;
 const updateCommunity = async (req, res) => {
   const communityID = req.params.id;
   const { name, description, interests,icon,banner,privacy } = req.body;
-  const userID = "fe68c3e5-043a-4491-882c-e3f0e36277af"
+  const userID = "48b2ab90-3eb7-4295-a2f4-cfde2bc3a2bb"
   if (!communityID || !userID) {
     return res.status(400).json({ message: "communityID and UserID are required" });
   }
@@ -262,7 +262,7 @@ const joinCommunity= async (req, res) => {
   const { action } = req.body; 
   console.log(communityID)
   const community = await Community.findById(communityID)
-  const userID = "fe68c3e5-043a-4491-882c-e3f0e36277af"
+  const userID = "48b2ab90-3eb7-4295-a2f4-cfde2bc3a2bb"
   try {
     let userUpdateResult;
 
@@ -314,7 +314,7 @@ const joinCommunity= async (req, res) => {
 // ✅ GET COMMUNITY BY ID (With "Am I a Member?" Check)
 const getCommunityById= async (req, res) => {
   const communityID = req.params.id;
-  const userID = "fe68c3e5-043a-4491-882c-e3f0e36277af"
+  const userID = "48b2ab90-3eb7-4295-a2f4-cfde2bc3a2bb"
   try {
     const community = await Community.findById(communityID).populate({
       path: "moderators.user",   
@@ -362,7 +362,7 @@ const getCommunityById= async (req, res) => {
 
 const searchCommunity = async (req, res) => {
   const { q } = req.query;
-  const userID = "fe68c3e5-043a-4491-882c-e3f0e36277af" 
+  const userID = "48b2ab90-3eb7-4295-a2f4-cfde2bc3a2bb"
   console.log(q)
 
   try {

@@ -26,7 +26,7 @@ export default function CommunitiesPage(){
         <Box sx={{display : 'flex', width : '100%' , minHeight : '80vh' , flexDirection : 'column'  , alignItems : 'center'}}>
             {/* <SearchBar setNavPage = {setNavPage} fetchCommunities = {fetchCommunities}/> */}
             <Communities communitiesArr = {communitiesArr} />
-            <PageNav navPage = {navPage} setNavPage = {setNavPage} count ={Math.ceil(nCommunities / 3)} fetchCommunities = {fetchCommunities}/>
+            <PageNav navPage = {navPage} setNavPage = {setNavPage} count ={Math.ceil(nCommunities / 25)} fetchCommunities = {fetchCommunities}/>
         </Box>
     )
 
