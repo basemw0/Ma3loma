@@ -25,25 +25,39 @@ const getPostComments = async (req, res) =>{
 
 const createComment = async (req, res) =>{
     try{
-        const{content, mediaUrl, mediaType, postID} = req.body; 
+        const{content, mediaUrl, mediaType, postID, parentID} = req.body; 
         const userID = "fe68c3e5-043a-4491-882c-e3f0e36277af"
 
         const postExists = await Post.exists({_id:postID});
         if(!postExists) return res.status(404).json({message: 'Post Not Exist (CommentController)'});
 
+        
+
+        const parentExists = await Comment.exists({_id:parentID});
+        if(!parentExists) return res.status(404).json({message: 'Post Not Exist (CommentController)'});
+        
+        
         const newComment = await Comment.create({
             content,
             mediaUrl,
             mediaType,
             postID,
-            userID
+            userID,
+            parentID: parentID || null // Save the link (or null)
         });
 
-        await Post.findByIdAndUpdate(postID,{
-            $push:{
-                comments: newComment._id
-            }
-        });
+        
+        if (parentID) {
+            
+            await Comment.findByIdAndUpdate(parentID, {
+                $push: { replies: newComment._id }
+            });
+        } else {
+            
+            await Post.findByIdAndUpdate(postID, {
+                $push: { comments: newComment._id }
+            });
+        }
 
         res.status(201).json(newComment);
 
@@ -65,9 +79,17 @@ const deleteComment = async (req, res) =>{
             return res.status(403).json({ message: "Not authorized" });
         }
 
-        await Post.findByIdAndUpdate(comment.postID, {
-            $pull: { comments: coid }
-        });
+        if (comment.parentID) {
+            
+            await Comment.findByIdAndUpdate(comment.parentID, {
+                $pull: { replies: coid }
+            });
+        } else {
+            
+            await Post.findByIdAndUpdate(comment.postID, {
+                $pull: { comments: coid }
+            });
+        }
 
         await Comment.findByIdAndDelete(coid);
 

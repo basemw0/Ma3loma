@@ -17,6 +17,16 @@ const CommentSchema = new mongoose.Schema({
   postID: { type: String, ref: "Post", required: true },
   userID: { type: String, ref: "User", required: true },
 
+  
+  parentID: { 
+    type: String, 
+    ref: "Comment", 
+    default: null 
+  },
+  
+  
+  replies: [{ type: String, ref: "Comment" }],
+
   upvotes: [{ type: String, ref: "User" }],
   downvotes: [{ type: String, ref: "User" }],
   awardsReceived: [{
@@ -25,5 +35,14 @@ const CommentSchema = new mongoose.Schema({
       givenAt: { type: Date, default: Date.now } 
   }]
 }, { timestamps: true });
+
+CommentSchema.pre('findOneAndDelete', async function(next) {
+  const doc = await this.model.findOne(this.getQuery());
+  if (doc && doc.replies.length > 0) {
+    
+    await mongoose.model('Comment').deleteMany({ _id: { $in: doc.replies } });
+  }
+  next();
+});
 
 module.exports = mongoose.model("Comment", CommentSchema);

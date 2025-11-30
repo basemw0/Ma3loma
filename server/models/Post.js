@@ -28,4 +28,15 @@ const PostSchema = new mongoose.Schema({
   }]
 }, { timestamps: true });
 
+// ✅ AUTOMATIC CLEANUP HOOK
+PostSchema.pre('findOneAndDelete', async function(next) {
+    const doc = await this.model.findOne(this.getQuery());
+    if (doc) {
+        // 1. Delete all comments that have this postID
+        // (This triggers the Comment model's own hook to delete their replies too!)
+        await mongoose.model('Comment').deleteMany({ postID: doc._id });
+    }
+    next();
+});
+
 module.exports = mongoose.model("Post", PostSchema);
