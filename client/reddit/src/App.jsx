@@ -8,7 +8,7 @@ import CreationWizard from '../components/CommunityCreation/CreationWizard';
 function App() {
   return (
     <>
-    <CommunitiesPage/>
+    <CommunityPage communityId = "fbdc00d6-c7b0-4de8-895e-f98f5aea30b0"/>
     </>
     
   );

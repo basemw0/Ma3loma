@@ -7,12 +7,12 @@ import Box from '@mui/material/Box';
 import axios from 'axios';
 import { useEffect } from 'react';
 export default function CommunitiesPage(){
-    const numOfCommunities = 0
+    const [nCommunities , setNcommunities] = useState(0)
     const fetchCommunities = async (number)=>{
-        response = await axios.get(`http://localhost:3000/api/communities/${number}`)
-        responseObject = response.data
-        if(numOfCommunities == 0) numOfCommunities = responseObject.total
-        setCommunitiesArr(response.data.communities)
+        let response = await axios.get(`http://localhost:3000/api/communities/best/${number}`)
+        let responseObject = response.data
+        setNcommunities(responseObject.total)
+        setCommunitiesArr(responseObject.communities)
     }
     const [communitiesArr , setCommunitiesArr] = useState([])
     const [navPage , setNavPage] = useState(1)
@@ -26,7 +26,7 @@ export default function CommunitiesPage(){
         <Box sx={{display : 'flex', width : '100%' , minHeight : '80vh' , flexDirection : 'column'  , alignItems : 'center'}}>
             {/* <SearchBar setNavPage = {setNavPage} fetchCommunities = {fetchCommunities}/> */}
             <Communities communitiesArr = {communitiesArr} />
-            <PageNav navPage = {navPage} setNavPage = {setNavPage} count ={(numOfCommunities/250)+1} fetchCommunities = {fetchCommunities}/>
+            <PageNav navPage = {navPage} setNavPage = {setNavPage} count ={Math.ceil(nCommunities / 3)} fetchCommunities = {fetchCommunities}/>
         </Box>
     )
 

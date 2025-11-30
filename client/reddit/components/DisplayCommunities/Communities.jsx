@@ -4,10 +4,9 @@ import Typography from '@mui/material/Typography';
 
 export default function Communities(props){
     const { communitiesArr } = props;
-
     return (
         <Box sx={{ 
-            maxWidth: '70%',
+            width: '70%',
             maxHeight: '80%',
             display: 'flex',
             flexDirection: 'column',
@@ -41,18 +40,16 @@ export default function Communities(props){
     return (
       <Community
         key={index}
-        Cnum={index + 1}
+        Cnum={index+ 1}
         communityName={comm.name}
         communityDescription={comm.description}
-        numOfMembers={comm.numberofMembers}
+        numOfMembers={comm.numberOfMembers}
         imgUrl={comm.icon}
         color={cardColor}
       />
     );
   })}
-</Box>
-
-
+    </Box>
         </Box>
     );
 }

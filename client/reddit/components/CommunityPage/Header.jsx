@@ -52,7 +52,7 @@ export default function Header(props) {
         {/* Left side - Avatar and Name */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <Avatar
-            src={community.iconUrl}
+            src={community.icon}
             sx={{
               width: { xs: 56, md: 72 },
               height: { xs: 56, md: 72 },
