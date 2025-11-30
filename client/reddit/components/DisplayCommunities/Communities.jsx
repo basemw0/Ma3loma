@@ -36,7 +36,7 @@ export default function Communities(props){
             }}
             >
   {communitiesArr.map((comm, index) => {
-    const cardColor = (index % 6 < 3) ? "white" : "lightgrey";
+    const cardColor = (index % 8 < 4) ? "white" : "lightgrey";
 
     return (
       <Community
