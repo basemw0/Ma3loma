@@ -26,7 +26,7 @@ const getPostComments = async (req, res) =>{
 const createComment = async (req, res) =>{
     try{
         const{content, mediaUrl, mediaType, postID, parentID} = req.body; 
-        const userID = ""48b2ab90-3eb7-4295-a2f4-cfde2bc3a2bb""
+        const userID = "48b2ab90-3eb7-4295-a2f4-cfde2bc3a2bb"
 
         const postExists = await Post.exists({_id:postID});
         if(!postExists) return res.status(404).json({message: 'Post Not Exist (CommentController)'});
