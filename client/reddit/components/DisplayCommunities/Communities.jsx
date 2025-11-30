@@ -1,37 +1,58 @@
 import Box from '@mui/material/Box';
 import Community from './Community';
 import Typography from '@mui/material/Typography';
+
 export default function Communities(props){
-    const {communitiesArr} = props
-    return(
-        <Box sx={{maxWidth : '70%' , maxHeight: '80%' , display : 'flex' , flexDirection : 'column' , justifyContent : 'center' , alignItems :'center'}}>
-            <Typography variant='h6' sx={{margin : '20px'}}>
-            Best of Reddit
+    const { communitiesArr } = props;
+
+    return (
+        <Box sx={{ 
+            maxWidth: '70%',
+            maxHeight: '80%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center'
+        }}>
+            
+            <Typography variant='h6' sx={{ m: 2 }}>
+                Best of Reddit
             </Typography>
 
-            <Typography variant='subtitle1' sx={{margin : '0px' , alignSelf : 'flex-start'}}>
-           Top Communities
+            <Typography variant='subtitle1' sx={{ alignSelf: 'flex-start' }}>
+                Top Communities
             </Typography>
-            <Typography variant='caption' sx={{marginBottom : '10px' , opacity : '0.5' , alignSelf : 'flex-start'}}>
+
+            <Typography variant='caption' sx={{ mb: 2, opacity: 0.5, alignSelf: 'flex-start' }}>
                 Browse Reddit's largest communities
             </Typography>
-            <Box sx={{maxWidth : '100%' , maxHeight: '100%' , display : 'flex' , flexWrap : 'wrap' , margin: 'auto'}}> 
-            {
-                communitiesArr.map((comm , index)=>{
-                    const cardColor = (index % 6 < 3) ? "white" : "lightgrey";
-                    return <Community
-                    Cnum = {index+1}
-                    communityName = {comm.name}
-                    communityDescription = {comm.description}
-                    numOfMembers = {comm.numberofMembers}
-                    imgUrl  = {comm.icon}
-                    color = {cardColor}
-                    />
-                })
-            }
-            </Box>
+
+            <Box
+            sx={{
+                width: "100%",
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",  
+                gap: 2,                                  
+                alignItems: "start"
+            }}
+            >
+  {communitiesArr.map((comm, index) => {
+    const cardColor = (index % 8 < 4) ? "white" : "lightgrey";
+
+    return (
+      <Community
+        key={index}
+        Cnum={index + 1}
+        communityName={comm.name}
+        communityDescription={comm.description}
+        numOfMembers={comm.numberofMembers}
+        imgUrl={comm.icon}
+        color={cardColor}
+      />
+    );
+  })}
+</Box>
+
+
         </Box>
-
-    )
-
+    );
 }

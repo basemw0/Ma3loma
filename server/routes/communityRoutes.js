@@ -5,7 +5,6 @@ const communityController = require('../controllers/communityController');
 
 const router = express.Router();
 
-router.get('/', communityController.getCommunities);
 
 router.get('/Category', communityController.getCommunitiesByCategory)
 
@@ -24,6 +23,7 @@ router.post(
   ],
   communityController.createCommunity
 )
+router.get('/best/:limit', communityController.getCommunities);
 
 router.post(
   '/:id/join',
