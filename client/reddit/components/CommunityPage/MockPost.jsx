@@ -101,7 +101,7 @@ export default function MockPost({ post }) {
             {post.community[0].toUpperCase()}
           </div>
           <span style={{ fontSize: '12px', color: '#878a8c' }}>
-            r/{post.community} • Posted by u/{post.author} • {post.time}
+            r/{post.community} • Posted by u/{post.author} • {post.createdAt}
           </span>
         </div>
 

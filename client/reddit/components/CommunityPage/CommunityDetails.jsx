@@ -194,8 +194,8 @@ export default function CommunityDetails(props) {
       <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, width: '100%' }}>
         <Box
           component="img"
-          src={mod.image}
-          alt={mod.username}
+          src={mod['user'].image}
+          alt={mod['user'].username}
           sx={{
             width: 40,
             height: 40,
@@ -206,7 +206,7 @@ export default function CommunityDetails(props) {
         />
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
-            {mod.username}
+            {mod['user'].username}
           </Typography>
         </Box>
       </Box>

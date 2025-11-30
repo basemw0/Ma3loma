@@ -75,7 +75,7 @@ const getPostDetails = async (req, res) =>{
     try {
         const { pid } = req.params;
 
-        const post = await Post.findById(pid)
+        const post = await Post.findById(pid).populate('userID', 'username image').populate('communityID', 'name')
             .populate({
                 path: 'comments', 
                 populate: { path: 'userID', select: 'username image' } 
