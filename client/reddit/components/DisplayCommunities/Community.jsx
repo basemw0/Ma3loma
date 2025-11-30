@@ -8,17 +8,16 @@ import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
 
 export default function Community(props){
-    const {communityName , communityDescription , numOfMembers , Cnum , imgUrl}  = props
+    const {communityName , communityDescription , numOfMembers , Cnum , imgUrl , color = ""}  = props
 
+    
   return (
-    <Card sx={{ maxWidth: 310, maxHeight: 76 , border : 'none', boxShadow : 'none'}}>
-      <Box sx={{ p: 1.5 }}>
-        <Stack direction="row" spacing={1.2} sx={{ alignItems: 'center' }}>
+    <Card sx={{ maxWidth: 310, maxHeight: 76 , border : 'none', boxShadow : 'none' , bgcolor : color , borderRadius : 0}}>
+      <Box sx={{ p: 1 }}>
+        <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
           {Cnum == 'no'? '': <Typography variant="h6" component="div" sx={{ mb: 0  , width : 25}}>
             {Cnum}
           </Typography>}
-          
-
           <Avatar alt="Remy Sharp" src={imgUrl} sx={{ width: 50, height: 50 }} />
 
           <Stack direction="column" sx={{ ml: 0.5, alignItems: 'flex-start' }}>

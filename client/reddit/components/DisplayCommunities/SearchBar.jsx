@@ -6,12 +6,12 @@ import { useState } from 'react';
 import { generateMockCommunities } from '../../mockData/mockCommunities';
 
 export default function SearchBar(props) {
-  const {setCommunitiesArr , setNavPage} = props
+  const {fetchCommnities , setNavPage} = props
   const [query , setQuery] = useState('')
   const handleEnter = (e)=>{
     if(e.key == 'Enter'){
+    fetchCommnities(query)
     setQuery('')
-    setCommunitiesArr(generateMockCommunities(15))
     setNavPage(1)
     }
   }
@@ -24,7 +24,7 @@ export default function SearchBar(props) {
         variant="outlined"
         size="small"
         value={query}
-        onChange={(event , value)=>{setQuery(value)}}
+        onChange={(e) => setQuery(e.target.value)}
         onKeyDown={(e)=>{handleEnter(e)}}
         sx={{ 
           width: 500, 

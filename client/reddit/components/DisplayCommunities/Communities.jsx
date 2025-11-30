@@ -1,7 +1,6 @@
 import Box from '@mui/material/Box';
 import Community from './Community';
 import Typography from '@mui/material/Typography';
-
 export default function Communities(props){
     const {communitiesArr} = props
     return(
@@ -18,13 +17,15 @@ export default function Communities(props){
             </Typography>
             <Box sx={{maxWidth : '100%' , maxHeight: '100%' , display : 'flex' , flexWrap : 'wrap' , margin: 'auto'}}> 
             {
-                communitiesArr.map((comm)=>{
+                communitiesArr.map((comm , index)=>{
+                    const cardColor = (index % 6 < 3) ? "white" : "lightgrey";
                     return <Community
-                    Cnum = {comm.Cnum}
-                    communityName = {comm.communityName}
-                    communityDescription = {comm.communityDescription}
-                    numOfMembers = {comm.numOfMembers}
-                    imgUrl  = {comm.imgUrl}
+                    Cnum = {index+1}
+                    communityName = {comm.name}
+                    communityDescription = {comm.description}
+                    numOfMembers = {comm.numberofMembers}
+                    imgUrl  = {comm.icon}
+                    color = {cardColor}
                     />
                 })
             }
