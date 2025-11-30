@@ -6,13 +6,14 @@ import { useState } from 'react';
 import { generateMockCommunities } from '../../mockData/mockCommunities';
 
 export default function SearchBar(props) {
-  const {fetchCommnities , setNavPage} = props
+  const {fetchCommunities , setNavPage} = props
   const [query , setQuery] = useState('')
   const handleEnter = (e)=>{
     if(e.key == 'Enter'){
-    fetchCommnities(query)
-    setQuery('')
+    // alert(query)
+    fetchCommunities(query)
     setNavPage(1)
+    setQuery('')
     }
   }
 
