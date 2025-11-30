@@ -127,27 +127,54 @@ export default function CommunityDetails(props) {
       </Box>
       <Divider sx={{marginTop : 1.5 , marginBottom : 1.5}}/>
       {/* <Paper sx={{ width: 320 }}> */}
-      <Typography variant='subtitle' sx={{opacity: 0.4}}>
-            {community.name} Rules
-          </Typography>
-      <Box sx={{textAlign : 'left'}} >
-        {community.rules.map((rule , index)=>{
-            return  <MenuItem>
-          <Accordion>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-          aria-controls="panel1-content"
-          id="panel1-header"
-        >
-          <Typography component="span">{index+1} {rule.title}</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-         {rule.description}
-        </AccordionDetails>
-      </Accordion>
-        </MenuItem>
-        })}
-      </Box>
+      <Typography 
+  variant="subtitle2" 
+  sx={{ 
+    opacity: 0.4, 
+    mb: 1, 
+    fontWeight: 500 
+  }}
+>
+  {community.name} Rules
+</Typography>
+
+<Box sx={{ textAlign: "left" }}>
+  {community.rules.map((rule, index) => (
+    <Accordion
+      key={index}
+      disableGutters
+      elevation={0}
+      square
+      sx={{
+        mb: 1,
+        bgcolor: "#ffffff",
+        borderRadius: 1,
+        border: "1px solid #e2e2e2",
+        "&:before": { display: "none" },
+        "& .MuiAccordionSummary-root": {
+          minHeight: 40,
+          "&.Mui-expanded": { minHeight: 40 }
+        },
+        "& .MuiAccordionSummary-content": {
+          m: 0,
+          "&.Mui-expanded": { m: 0 }
+        }
+      }}
+    >
+      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+        <Typography sx={{ fontSize: "0.85rem", fontWeight: 500 }}>
+          {index + 1}. {rule.title}
+        </Typography>
+      </AccordionSummary>
+
+      <AccordionDetails sx={{ pt: 0.5 }}>
+        <Typography sx={{ fontSize: "0.8rem", color: "#555" }}>
+          {rule.description}
+        </Typography>
+      </AccordionDetails>
+    </Accordion>
+  ))}
+</Box>
       <Divider sx={{margin : 1 }}/>
         <Typography variant='subtitle' sx={{opacity: 0.4 , padding : 1}}>
             Moderators
@@ -167,7 +194,7 @@ export default function CommunityDetails(props) {
       <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, width: '100%' }}>
         <Box
           component="img"
-          src={mod.avatar}
+          src={mod.image}
           alt={mod.username}
           sx={{
             width: 40,
@@ -181,33 +208,6 @@ export default function CommunityDetails(props) {
           <Typography sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
             {mod.username}
           </Typography>
-          {/* {mod.flair && (
-            <Box
-              sx={{
-                fontSize: '0.75rem',
-                color: '#1c1c1c',
-                bgcolor: mod.flairColor || '#f0f0f0',
-                display: 'inline-block',
-                px: 1.5,
-                py: 0.5,
-                borderRadius: '12px',
-                mt: 0.5
-              }}
-            >
-              {mod.flair}
-            </Box>
-          )} */}
-          {mod.subtitle && (
-            <Typography
-              sx={{
-                fontSize: '0.8rem',
-                color: '#7c7c7c',
-                mt: 0.5
-              }}
-            >
-              {mod.subtitle}
-            </Typography>
-          )}
         </Box>
       </Box>
     </MenuItem>

@@ -247,4 +247,4 @@ const seedData = async () => {
 };
 
 // Uncomment the line below and run 'node server/db.js' to seed your database.
-seedData();
+// seedData();
