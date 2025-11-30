@@ -104,7 +104,7 @@ const createPost = async (req, res) =>{
     try{
 
         const {title, content, mediaUrl, mediaType, communityID} = req.body;
-        const userID = "fe68c3e5-043a-4491-882c-e3f0e36277af"
+        const userID = "48b2ab90-3eb7-4295-a2f4-cfde2bc3a2bb"
 
         const newPost = await Post.create({
             title,

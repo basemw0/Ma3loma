@@ -44,7 +44,7 @@ const seedData = async () => {
       moderators: {
         $each: [
           { user: "4c740372-7c91-4bc2-945c-58a7ee0109b5" },
-          { user: "fe68c3e5-043a-4491-882c-e3f0e36277af" }
+          { user: "48b2ab90-3eb7-4295-a2f4-cfde2bc3a2bb" }
         ]
       },
 

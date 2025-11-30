@@ -9,7 +9,7 @@ import CreationWizard from '../components/CommunityCreation/CreationWizard';
 function App() {
   return (
     <>
-    <ExploreCommunities/>
+    <CommunitiesPage/>
     </>
     
   );
