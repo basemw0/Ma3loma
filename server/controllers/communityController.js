@@ -287,7 +287,10 @@ const getCommunityById= async (req, res) => {
   const communityID = req.params.id;
   const userID = "fe68c3e5-043a-4491-882c-e3f0e36277af"
   try {
-    const community = await Community.findById(communityID);
+    const community = await Community.findById(communityID).populate({
+      path: "moderators.user",   
+      select: "username image goldBalance _id"
+    });
     
     if (!community) {
       return res.status(404).json({ message: "Community not found" });
