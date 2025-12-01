@@ -80,7 +80,7 @@ const getPostDetails = async (req, res) =>{
             .populate('communityID', 'name')
             .populate({
                 path: 'comments',
-                // Optional: Limit to top 10 to save memory
+                
                 options: { sort: { createdAt: -1 }, limit: 10 }, 
                 populate: [
                     

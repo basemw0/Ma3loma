@@ -7,6 +7,8 @@ const connectDB = require("./db");
 const userRoutes = require('./routes/userRoute');
 const communityRoutes = require('./routes/communityRoutes');
 const postRoutes = require('./routes/postRoutes.js');
+const commentRoutes = require('./routes/commentRoutes.js');
+
 
 const app = express();
 app.use(cors());
@@ -19,6 +21,7 @@ connectDB()
 app.use('/api/users', userRoutes);
 app.use('/api/communities', communityRoutes);
 app.use('/api/posts', postRoutes);
+app.user('api/comments', commentRoutes);
 
 
 const PORT = process.env.PORT || 5000;

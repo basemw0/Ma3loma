@@ -1,0 +1,32 @@
+const express = require('express');
+const { check } = require('express-validator');
+
+
+const commentController = require('../controllers/commentController');
+const router = express.Router();
+
+
+router.get('/post/:pid', commentController.getPostComments);
+
+
+router.get('/replies/:coid', commentController.getCommentReplies);
+
+
+
+router.post('/create', verifyToken, commentController.createComment);
+
+
+router.put('/edit/:coid', verifyToken, commentController.editComment);
+
+
+router.delete('/:coid', verifyToken, commentController.deleteComment);
+
+
+
+router.put('/:coid/upvote',commentController.upvoteComment);
+router.put('/:coid/downvote', commentController.downvoteComment);
+
+router.post('/:coid/award', commentController.awardComment);
+
+
+module.exports = router;

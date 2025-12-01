@@ -4,15 +4,22 @@ const Community = require('../models/Community.js')
 const Comment = require('../models/Comment.js');
 
 
-/*
+
 const getPostComments = async (req, res) =>{
     try{
         const {pid} = req.params;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
 
         const postExists = await Post.exists({_id:pid});
         if(!postExists) return res.status(404).json({message: 'Post Not Exist (CommentController)'});
 
-        const comments = await Comment.find({postID: pid}).sort({createdAt: -1}).populate('userID', 'username image');
+        const comments = await Comment.find({postID: pid}).sort({createdAt: -1}).skip(skip).limit(limit).populate('userID', 'username image').populate({
+            path: 'replies',
+            options: {limit: 2, sort: {createdAt: 1}},
+            populate: {path: 'userID', select: 'username image'}
+        });
 
         res.status(200).send(comments);
 
@@ -20,8 +27,29 @@ const getPostComments = async (req, res) =>{
         res.status(500).json({message: error.message});
     }
 }
-*/
-// fy 7aga fy el tafkeer
+
+
+const getCommentReplies = async (req, res) =>{
+    try{
+        const {coid} = req.params;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        const skip = (page - 1) * limit;
+        
+        const commentExists = await Comment.exists({_id: coid});
+        if(!commentExists) return res.status(404).json({message: "Comment not found"});
+
+        const replies = await Comment.find({parentID:coid})
+        .sort({createdAt: 1})
+        .skip(skip)
+        .limit(limit)
+        .populate('userID', 'username image');
+
+        res.status(200).json(replies);
+    }catch(error){
+        res.status(500).json({message: error.message});
+    }
+}
 
 const createComment = async (req, res) =>{
     try{
@@ -43,7 +71,7 @@ const createComment = async (req, res) =>{
             mediaType,
             postID,
             userID,
-            parentID: parentID || null // Save the link (or null)
+            parentID: parentID || null
         });
 
         
@@ -283,6 +311,8 @@ const awardComment = async (req, res)=>{
 
 
 module.exports = {
+    getPostComments,
+    getCommentReplies,
     createComment,
     deleteComment,
     editComment,
