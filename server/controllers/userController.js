@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 
 // Get all users
@@ -42,13 +43,19 @@ const signup = async (req, res) => {
     });
 
     await user.save();
-
+    let token;
+     token = jwt.sign(
+      { id: user._id },
+      'SecretMoot',{expiresIn: 3600},
+    )
+    
     res.status(201).json({ 
       message: 'User created successfully', 
       user: {
         id: user._id,
         username: user.username,
-        email: user.email
+        email: user.email,
+        token: token
       }
     });
   } catch (err) {
@@ -78,6 +85,11 @@ const login = async (req, res) => {
       return res.status(400).json({ message: 'Invalid email or password' });
     }
 
+     let token;
+     token = jwt.sign(
+      { id: user._id },
+      'SecretMoot',{expiresIn: 3600},
+    )
     // Return user data (without password)
     res.status(200).json({
       message: 'Login successful',
@@ -86,7 +98,10 @@ const login = async (req, res) => {
         username: user.username,
         email: user.email,
         goldBalance: user.goldBalance,
-        interests: user.interests
+        interests: user.interests,
+        joinedCommunities: user.joinedCommunities,
+        savedPosts: user.savedPosts,
+        token: token
       }
     });
   } catch (err) {

@@ -18,6 +18,7 @@ router.get('/community/:cid',postController.getPostsCommunity);
 router.get('/:pid', postController.getPostDetails);
 
 
+router.use(checkAuth);
 
 router.post('/create', postController.createPost);
 

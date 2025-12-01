@@ -12,6 +12,8 @@ router.get('/search', communityController.searchCommunity)
 
 router.get('/:id', communityController.getCommunityById);
 
+router.use(checkAuth);
+
 router.post(
   '/create', 
   [

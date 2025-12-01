@@ -1,6 +1,6 @@
 const express = require('express');
 const { check } = require('express-validator');
-
+const checkAuth = require('../middleware/check-auth');
 
 const commentController = require('../controllers/commentController');
 const router = express.Router();
@@ -12,7 +12,7 @@ router.get('/post/:pid', commentController.getPostComments);
 router.get('/replies/:coid', commentController.getCommentReplies);
 
 
-
+router.use(checkAuth);
 router.post('/create', verifyToken, commentController.createComment);
 
 
