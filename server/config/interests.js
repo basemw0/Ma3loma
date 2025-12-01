@@ -1,6 +1,6 @@
 const mockCategories = [
     {
-        name: "Anime & Cosplay",
+        name: "Anime and Cosplay",
         topics: ["Anime & Manga", "Cosplay", "J-Culture", "Fan Art"]
     },
     {
@@ -8,11 +8,11 @@ const mockCategories = [
         topics: ["Performing Arts", "Architecture", "Design", "Art", "Filmmaking", "Digital Art", "Photography", "Drawing", "Sculpture"]
     },
     {
-        name: "Business & Finance",
+        name: "Business and Finance",
         topics: ["Personal Finance", "Crypto", "Economics", "Business News & Discussion", "Deals & Marketplace", "Startups & Entrepreneurship", "Real Estate", "Stocks & Investing", "Venture Capital"]
     },
     {
-        name: "Collectibles & Other Hobbies",
+        name: "Collectibles and Other Hobbies",
         topics: ["Model Building", "Collectibles", "Other Hobbies", "Toys", "Vintage", "Trading Cards", "Tabletop Games"]
     },
     {
@@ -20,15 +20,15 @@ const mockCategories = [
         topics: ["PC Gaming", "Console Gaming", "Esports", "Mobile Gaming", "Retro Gaming", "Indie Games", "Role-Playing Games"]
     },
     {
-        name: "Science & Technology",
+        name: "Science and Technology",
         topics: ["Space", "Physics", "Chemistry", "Biology", "Gadgets", "Programming", "Artificial Intelligence", "Engineering"]
     },
     {
-        name: "Food & Drink",
+        name: "Food and Drink",
         topics: ["Cooking", "Baking", "Recipes", "Wine", "Beer", "Coffee", "Vegan", "Street Food"]
     },
     {
-        name: "Fitness & Health",
+        name: "Fitness and Health",
         topics: ["Weightlifting", "Running", "Yoga", "Mental Health", "Nutrition", "Sleep", "Meditation"]
     }
 ];

@@ -1,18 +1,23 @@
 import { Button, Stack } from "@mui/material";
 import Community from "../DisplayCommunities/Community";
+import axios from "axios";
 export default function CommunityBox(props){
-    const {community , setCommunitiesArr}  = props
-    const handleClick = ()=>{
-        setCommunitiesArr((prev)=>{
-            return prev.map((comm)=>{
-                if(comm.name == community.name){
-                    let status = comm.join_status == 'Joined'?'Not Joined' : 'Joined'
-                    return {...comm , join_status : status}
-                }
-                return comm
-            })
-        })
-        //Backend Add community to user communities Logic ma3 3am badra
+    const {community , retrieveCommunities}  = props
+    const handleClick = async()=>{
+        if(community.isMember == 1){
+            await axios.post(`http://localhost:3000/api/communities/${community._id}/join`, {
+              action : 0
+            } )
+            alert("Unjoined")
+        }
+        else{
+            //Axios request
+            await axios.post("http://localhost:3000/api/communities/" + community._id + '/join', {
+              action : 1
+            } )
+            alert("Joined")
+        }
+        retrieveCommunities()
     }
     return(
         <Stack direction='row' justifyContent= 'space-between' sx={{
@@ -23,13 +28,13 @@ export default function CommunityBox(props){
             backgroundColor: "#fff",
             boxShadow: "0 1px 2px rgba(0,0,0,0.05)",   // subtle lift
             }}>
-            <Community Cnum = 'no' communityName = {community.name}  communityDescription = {community.description} numOfMembers = {community.visitors} imgUrl = {community.image} />
+            <Community Cnum = 'no' communityName = {community.name}  communityDescription = {community.description} numOfMembers = {community.numberOfMembers} imgUrl = {community.icon} />
             <Button 
             onClick={()=>{handleClick()}}
             sx={{
-                backgroundColor: community.join_status === 'Joined' ? '#e0e0e0' : '#fff', // grey if active, white if not
+                backgroundColor: community.isMember == 1? '#e0e0e0' : '#fff', // grey if active, white if not
                 color: '#000',
-                border: community.join_status === 'Joined' ? 'none' : '1px solid #000',   // no border if active
+                border: community.isMember === 1 ? 'none' : '1px solid #000',   // no border if active
                 borderRadius: '20px',                         // roundish
                 padding: '4px 12px',                          // compact padding
                 minWidth: 100,                                  // fit text
@@ -39,10 +44,10 @@ export default function CommunityBox(props){
                 height : '30px',
                 cursor: 'pointer',
                 '&:hover': {
-                backgroundColor: community.join_status === 'Joined'? '#d6d6d6' : '#f0f0f0', // subtle hover effect
+                backgroundColor: community.isMember == 1? '#d6d6d6' : '#f0f0f0', // subtle hover effect
                 },
                 }}>
-                {community.join_status === 'Joined'? "Joined" :" Not Joined"}
+                {community.isMember == 1? "Joined" :"Join"}
             </Button>
 
         </Stack>

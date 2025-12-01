@@ -1,3 +1,4 @@
+import { Avatar } from "@mui/material";
 import { useState } from "react";
 
 
@@ -86,22 +87,13 @@ export default function MockPost({ post }) {
       {/* Content Section */}
       <div style={{ flex: 1 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-          <div style={{
-            width: '24px',
-            height: '24px',
-            borderRadius: '50%',
-            backgroundColor: post.color,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'white',
-            fontSize: '12px',
-            fontWeight: 'bold'
-          }}>
-            {post.community[0].toUpperCase()}
-          </div>
+         <Avatar
+              src={post['userID'].image}
+              alt="community icon"
+              sx={{ width: 40, height: 40 }}
+            />
           <span style={{ fontSize: '12px', color: '#878a8c' }}>
-            r/{post.community} • Posted by u/{post.author} • {post.time}
+            r/{post['communityID'].name} • Posted by u/{post["userID"].username} • {post.createdAt}
           </span>
         </div>
 
@@ -114,7 +106,7 @@ export default function MockPost({ post }) {
         </p>
 
         {/* Action Buttons */}
-        <div style={{ display: 'flex', gap: '16px' }}>
+        {/* <div style={{ display: 'flex', gap: '16px' }}>
           <button style={{
             background: 'none',
             border: 'none',
@@ -143,7 +135,7 @@ export default function MockPost({ post }) {
           }}>
             🔗 Share
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   );

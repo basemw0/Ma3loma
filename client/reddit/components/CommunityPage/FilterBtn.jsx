@@ -7,7 +7,7 @@ import Select from '@mui/material/Select';
 
 export default function FilterBtn(props){
     const [filter, setFilter] = React.useState(1);
-    const {retreivePosts} = props
+    const {getPosts} = props
     const handleChange = (value)=>{
         switch (value){
             case 1: 

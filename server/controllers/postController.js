@@ -76,9 +76,21 @@ const getPostDetails = async (req, res) =>{
         const { pid } = req.params;
 
         const post = await Post.findById(pid)
+            .populate('userID', 'username image')
+            .populate('communityID', 'name')
             .populate({
-                path: 'comments', 
-                populate: { path: 'userID', select: 'username image' } 
+                path: 'comments',
+                // Optional: Limit to top 10 to save memory
+                options: { sort: { createdAt: -1 }, limit: 10 }, 
+                populate: [
+                    
+                    { path: 'userID', select: 'username image' },
+                    
+                    { 
+                        path: 'replies', 
+                        populate: { path: 'userID', select: 'username image' } 
+                    }
+                ]
             });
 
         res.status(200).json(post);
@@ -92,7 +104,7 @@ const createPost = async (req, res) =>{
     try{
 
         const {title, content, mediaUrl, mediaType, communityID} = req.body;
-        const userID = "4c740372-7c91-4bc2-945c-58a7ee0109b5"
+        const userID = "48b2ab90-3eb7-4295-a2f4-cfde2bc3a2bb"
 
         const newPost = await Post.create({
             title,

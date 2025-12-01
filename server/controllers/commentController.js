@@ -25,25 +25,39 @@ const getPostComments = async (req, res) =>{
 
 const createComment = async (req, res) =>{
     try{
-        const{content, mediaUrl, mediaType, postID} = req.body; 
-        const userID = "4c740372-7c91-4bc2-945c-58a7ee0109b5"
+        const{content, mediaUrl, mediaType, postID, parentID} = req.body; 
+        const userID = "48b2ab90-3eb7-4295-a2f4-cfde2bc3a2bb"
 
         const postExists = await Post.exists({_id:postID});
         if(!postExists) return res.status(404).json({message: 'Post Not Exist (CommentController)'});
 
+        
+
+        const parentExists = await Comment.exists({_id:parentID});
+        if(!parentExists) return res.status(404).json({message: 'Post Not Exist (CommentController)'});
+        
+        
         const newComment = await Comment.create({
             content,
             mediaUrl,
             mediaType,
             postID,
-            userID
+            userID,
+            parentID: parentID || null // Save the link (or null)
         });
 
-        await Post.findByIdAndUpdate(postID,{
-            $push:{
-                comments: newComment._id
-            }
-        });
+        
+        if (parentID) {
+            
+            await Comment.findByIdAndUpdate(parentID, {
+                $push: { replies: newComment._id }
+            });
+        } else {
+            
+            await Post.findByIdAndUpdate(postID, {
+                $push: { comments: newComment._id }
+            });
+        }
 
         res.status(201).json(newComment);
 
@@ -65,9 +79,17 @@ const deleteComment = async (req, res) =>{
             return res.status(403).json({ message: "Not authorized" });
         }
 
-        await Post.findByIdAndUpdate(comment.postID, {
-            $pull: { comments: coid }
-        });
+        if (comment.parentID) {
+            
+            await Comment.findByIdAndUpdate(comment.parentID, {
+                $pull: { replies: coid }
+            });
+        } else {
+            
+            await Post.findByIdAndUpdate(comment.postID, {
+                $pull: { comments: coid }
+            });
+        }
 
         await Comment.findByIdAndDelete(coid);
 
@@ -116,6 +138,42 @@ const upvoteComment = async (req, res) =>{
     
     }catch(error){
         res.status(500).json({message:error.message});
+    }
+}
+
+const editComment = async (req, res)=>{
+    try{
+        const {coid} = req.params
+        const {content, mediaUrl, mediaType} = req.body;
+        const uid = req.user.id;
+
+        const userExists = await User.exists({_id:uid});
+        if (!userExists) return res.status(404).json({ message: "User not found" });
+        
+        const comment = await Comment.findById(coid);
+        if(!comment){
+            return res.status(404).json({message: "Comment not found"});
+        }
+
+        if (comment.userID.toString() !== uid) {
+            return res.status(403).json({ message: "You are not authorized to edit this comment" });
+        }
+
+        const comment_u = await Comment.findByIdAndUpdate(coid,
+            {
+                
+                 
+                content, 
+                mediaUrl, 
+                mediaType
+            },
+            {new:true}
+        );
+
+        res.status(200).json(comment_u);
+
+    }catch(error){
+        res.status(500).json({message: error.message});
     }
 }
 
@@ -227,6 +285,7 @@ const awardComment = async (req, res)=>{
 module.exports = {
     createComment,
     deleteComment,
+    editComment,
     upvoteComment,
     downvoteComment,
     awardComment

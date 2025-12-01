@@ -2,120 +2,166 @@ const User = require('../models/User');
 const Post = require('../models/Post');
 const Comment = require('../models/Comment'); 
 const Community = require('../models/Community'); 
+const ALLOWED_INTERESTS = require("../config/interests"); 
 const bcrypt = require('bcryptjs');
 const { validationResult } = require('express-validator');
 
 
 const getCommunities= async (req, res) => {
-  const userID = "4c740372-7c91-4bc2-945c-58a7ee0109b5"
+  const userID = "48b2ab90-3eb7-4295-a2f4-cfde2bc3a2bb"
+  const limit = req.params.limit;
+
 
   try {
-   
+    // 1. ✅ Get the total count of communities in the DB
+    const totalDocs = await Community.countDocuments({});
+
+    // 2. Run your specific aggregation for pagination
     let communities = await Community.aggregate([
       // {$match:{privacy:{ $in: ["public", "restricted"] }}},
       { $sort: { numberOfMembers: -1 } },
-      { $limit: 1000 }
+      { $skip: 25 * (limit - 1) },
+      { $limit: 25 }
     ]);
 
+    // Helper function to format the response consistently
+    const formatResponse = (list) => {
+      return {
+        total: totalDocs, // <--- Sending total count here
+        communities: list
+      };
+    };
+
     if (!userID) {
-      return res.json(communities.map(c => ({
+      const guestCommunities = communities.map(c => ({
         ...c,
         isMember: false,
         userRole: "guest"
-      })));
+      }));
+      return res.json(formatResponse(guestCommunities));
     }
 
     const user = await User.findById(userID).select("joinedCommunities");
 
     if (!user) {
-      return res.json(communities.map(c => ({
+      const guestCommunities = communities.map(c => ({
         ...c,
         isMember: false,
         userRole: "guest"
-      })));
+      }));
+      return res.json(formatResponse(guestCommunities));
     }
 
-   
     const userMap = {};
     user.joinedCommunities.forEach(entry => {
       userMap[entry.community.toString()] = entry.role;
     });
 
     const personalizedCommunities = communities.map(comm => {
-      const myRole = userMap[comm._id.toString()]; 
-      
+      const myRole = userMap[comm._id.toString()];
+
       return {
         ...comm,
-        isMember: !!myRole, // Converts "admin" to true, undefined to false
+        isMember: !!myRole,
         userRole: myRole || "guest"
       };
     });
 
-    res.json(personalizedCommunities);
+    // 3. ✅ Send final response with total count
+    res.json(formatResponse(personalizedCommunities));
 
   } catch (err) {
     console.error(err);
     res.status(500).send("Server Error");
   }
-}
+};
+
 
 const getCommunitiesByCategory = async (req, res) => {
-  const userID = "4c740372-7c91-4bc2-945c-58a7ee0109b5"
-  const {q}=req.query
+  // Hardcoded ID per your snippet
+  const userID = "48b2ab90-3eb7-4295-a2f4-cfde2bc3a2bb"; 
+  const { q } = req.query; 
 
   try {
-   
-    let communities = await Community.aggregate([
-      {$match: {
-      // privacy: { $in: ["public", "restricted"] },
-      interests: q 
-    }},
+    let categoryData
+    if (q==="All"){ categoryData= ALLOWED_INTERESTS.find(cat => cat.name != undefined);}
+    else  categoryData = ALLOWED_INTERESTS.find(cat => cat.name === q);
+
+    if (!categoryData) {
+      return res.status(404).json({ message: "Category not found" });
+    }
+
+    const targetTopics = categoryData.topics;
+
+    const groupedCommunities = await Community.aggregate([
+      { 
+        $match: { 
+          
+          interests: { $in: targetTopics },
+          // privacy: { $in: ["public", "restricted"] } // Optional based on your previous code
+        } 
+      },
+      // Unwind allows us to duplicate the community for each interest it has
+      { $unwind: "$interests" },
+      { 
+        $match: { 
+          // Filter again so we only group by the topics belonging to THIS category
+          // (Removes "Cooking" interest if we are currently looking at "Gaming" category)
+          interests: { $in: targetTopics }
+        } 
+      },
       { $sort: { numberOfMembers: -1 } },
-      { $limit: 1000 }
+      {
+        $group: {
+          _id: "$interests",
+          communities: { $push: "$$ROOT" } 
+        }
+      },
+      {
+        $project: {
+          topic: "$_id",
+          communities: { $slice: ["$communities", 10] }, 
+          _id: 0
+        }
+      }
     ]);
 
-    if (!userID) {
-      return res.json(communities.map(c => ({
-        ...c,
-        isMember: false,
-        userRole: "guest"
-      })));
+    let userMap = {};
+    
+    if (userID) {
+      const user = await User.findById(userID).select("joinedCommunities");
+      if (user && user.joinedCommunities) {
+        user.joinedCommunities.forEach(entry => {
+          userMap[entry.community.toString()] = entry.role;
+        });
+      }
     }
 
-    const user = await User.findById(userID).select("joinedCommunities");
+    
+    const result = groupedCommunities.map(group => {
+      const personalized = group.communities.map(comm => {
+        const myRole = userMap[comm._id.toString()]; 
+        
+        return {
+          ...comm,
+          isMember: !!myRole,
+          userRole: myRole || "guest"
+        };
+      });
 
-    if (!user) {
-      return res.json(communities.map(c => ({
-        ...c,
-        isMember: false,
-        userRole: "guest"
-      })));
-    }
-
-   
-    const userMap = {};
-    user.joinedCommunities.forEach(entry => {
-      userMap[entry.community.toString()] = entry.role;
-    });
-
-    const personalizedCommunities = communities.map(comm => {
-      const myRole = userMap[comm._id.toString()]; 
-      
       return {
-        ...comm,
-        isMember: !!myRole, // Converts "admin" to true, undefined to false
-        userRole: myRole || "guest"
+        topic: group.topic,
+        communities: personalized
       };
     });
 
-    res.json(personalizedCommunities);
+    res.json(result);
 
   } catch (err) {
     console.error(err);
     res.status(500).send("Server Error");
   }
-}
-
+};
 // ✅ CREATE COMMUNITY ENDPOINT
 const createCommunity = async (req, res) => {
 const { name, description, interests,icon,banner,privacy } = req.body;
@@ -166,7 +212,7 @@ const userID = req.user.id;
 const updateCommunity = async (req, res) => {
   const communityID = req.params.id;
   const { name, description, interests,icon,banner,privacy } = req.body;
-  const userID = "4c740372-7c91-4bc2-945c-58a7ee0109b5"
+  const userID = "48b2ab90-3eb7-4295-a2f4-cfde2bc3a2bb"
   if (!communityID || !userID) {
     return res.status(400).json({ message: "communityID and UserID are required" });
   }
@@ -213,8 +259,10 @@ const updateCommunity = async (req, res) => {
 // ✅ JOIN / LEAVE COMMUNITY (Toggle)
 const joinCommunity= async (req, res) => {
   const communityID = req.params.id;
-  const {  action } = req.body; 
-  const userID = "4c740372-7c91-4bc2-945c-58a7ee0109b5"
+  const { action } = req.body; 
+  console.log(communityID)
+  const community = await Community.findById(communityID)
+  const userID = "48b2ab90-3eb7-4295-a2f4-cfde2bc3a2bb"
   try {
     let userUpdateResult;
 
@@ -266,9 +314,12 @@ const joinCommunity= async (req, res) => {
 // ✅ GET COMMUNITY BY ID (With "Am I a Member?" Check)
 const getCommunityById= async (req, res) => {
   const communityID = req.params.id;
-  const userID = "4c740372-7c91-4bc2-945c-58a7ee0109b5"
+  const userID = "48b2ab90-3eb7-4295-a2f4-cfde2bc3a2bb"
   try {
-    const community = await Community.findById(communityID);
+    const community = await Community.findById(communityID).populate({
+      path: "moderators.user",   
+      select: "username image goldBalance _id"
+    });
     
     if (!community) {
       return res.status(404).json({ message: "Community not found" });
@@ -311,7 +362,7 @@ const getCommunityById= async (req, res) => {
 
 const searchCommunity = async (req, res) => {
   const { q } = req.query;
-  const userID = "4c740372-7c91-4bc2-945c-58a7ee0109b5" 
+  const userID = "48b2ab90-3eb7-4295-a2f4-cfde2bc3a2bb"
   console.log(q)
 
   try {

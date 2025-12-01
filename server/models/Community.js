@@ -12,6 +12,18 @@ const CommunitySchema = new mongoose.Schema({
     type: [String], 
     default: ["admin", "member"] 
   },
+   rules:{type: [{
+      _id: false, 
+      title: { type: String, required: true }, 
+      description: { type: String, required: true }
+    }]},
+    moderators: [{
+    _id: false, 
+    user: { 
+      type: String, 
+      ref: "User",
+      required: true
+    }}],
   privacy: {
     type: String,
     enum: ["public", "restricted", "private"],

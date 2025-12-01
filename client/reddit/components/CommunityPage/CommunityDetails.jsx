@@ -1,6 +1,13 @@
 import React from 'react';
-import { Box, Typography, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import CakeIcon from '@mui/icons-material/Cake';
+import Accordion from '@mui/material/Accordion';
+import AccordionActions from '@mui/material/AccordionActions';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import Typography from '@mui/material/Typography';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Button from '@mui/material/Button';
 import PublicIcon from '@mui/icons-material/Public';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import Paper from '@mui/material/Paper';
@@ -35,7 +42,7 @@ export default function CommunityDetails(props) {
           fontSize: '1.1rem'
         }}
       >
-        r/{community.subreddit_name}
+        r/{community.name}
       </Typography>
 
       {/* Description */}
@@ -47,14 +54,14 @@ export default function CommunityDetails(props) {
           mb: 2
         }}
       >
-        {community.subreddit_description}
+        {community.description}
       </Typography>
 
       {/* Created Date */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
         <CakeIcon sx={{ fontSize: 20, color: '#7c7c7c' }} />
         <Typography sx={{ color: '#7c7c7c', fontSize: '0.875rem' }}>
-          Created {community.created_date}
+          Created {community.createdAt}
         </Typography>
       </Box>
 
@@ -62,10 +69,14 @@ export default function CommunityDetails(props) {
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
         <PublicIcon sx={{ fontSize: 20, color: '#7c7c7c' }} />
         <Typography sx={{ color: '#7c7c7c', fontSize: '0.875rem' }}>
-          {community.visibility}
+          {community.privacy}
         </Typography>
       </Box>
-
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+        <Typography sx={{ color: '#7c7c7c', fontSize: '0.875rem' }}>
+          {community.userRole}
+        </Typography>
+      </Box>
       {/* Stats */}
       <Box
         sx={{
@@ -85,21 +96,21 @@ export default function CommunityDetails(props) {
               mb: 0.5
             }}
           >
-            {community.subscribers_count}
+            {community.numOfMembers}
           </Typography>
-          <Typography
+          {/* <Typography
             sx={{
               color: '#7c7c7c',
               fontSize: '0.875rem'
             }}
           >
             {community.subscribers_label}
-          </Typography>
+          </Typography> */}
         </Box>
 
         {/* Online Users */}
         <Box>
-          <Typography
+          {/* <Typography
             sx={{
               fontSize: '1.5rem',
               fontWeight: 700,
@@ -107,29 +118,67 @@ export default function CommunityDetails(props) {
             }}
           >
             {community.online_users_count}
-          </Typography>
-          <Typography
+          </Typography> */}
+          {/* <Typography
             sx={{
               color: '#7c7c7c',
               fontSize: '0.875rem'
             }}
           >
             {community.online_users_label}
-          </Typography>
+          </Typography> */}
         </Box>
       </Box>
       <Divider sx={{marginTop : 1.5 , marginBottom : 1.5}}/>
       {/* <Paper sx={{ width: 320 }}> */}
-      <Typography variant='subtitle' sx={{opacity: 0.4}}>
-            {community.name} Rules
-          </Typography>
-      <MenuList sx={{textAlign : 'left'}} dense>
-        {community.rules.map((rule , index)=>{
-            return  <MenuItem>
-          <ListItemText sx={{padding : 0}} >{index+1} {rule}</ListItemText>
-        </MenuItem>
-        })}
-      </MenuList>
+      <Typography 
+  variant="subtitle2" 
+  sx={{ 
+    opacity: 0.4, 
+    mb: 1, 
+    fontWeight: 500 
+  }}
+>
+  {community.name} Rules
+</Typography>
+
+<Box sx={{ textAlign: "left" }}>
+  {community.rules.map((rule, index) => (
+    <Accordion
+      key={index}
+      disableGutters
+      elevation={0}
+      square
+      sx={{
+        mb: 1,
+        bgcolor: "#ffffff",
+        borderRadius: 1,
+        border: "1px solid #e2e2e2",
+        "&:before": { display: "none" },
+        "& .MuiAccordionSummary-root": {
+          minHeight: 40,
+          "&.Mui-expanded": { minHeight: 40 }
+        },
+        "& .MuiAccordionSummary-content": {
+          m: 0,
+          "&.Mui-expanded": { m: 0 }
+        }
+      }}
+    >
+      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+        <Typography sx={{ fontSize: "0.85rem", fontWeight: 500 }}>
+          {index + 1}. {rule.title}
+        </Typography>
+      </AccordionSummary>
+
+      <AccordionDetails sx={{ pt: 0.5 }}>
+        <Typography sx={{ fontSize: "0.8rem", color: "#555" }}>
+          {rule.description}
+        </Typography>
+      </AccordionDetails>
+    </Accordion>
+  ))}
+</Box>
       <Divider sx={{margin : 1 }}/>
         <Typography variant='subtitle' sx={{opacity: 0.4 , padding : 1}}>
             Moderators
@@ -149,8 +198,8 @@ export default function CommunityDetails(props) {
       <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, width: '100%' }}>
         <Box
           component="img"
-          src={mod.avatar}
-          alt={mod.username}
+          src={mod['user'].image}
+          alt={mod['user'].username}
           sx={{
             width: 40,
             height: 40,
@@ -161,35 +210,8 @@ export default function CommunityDetails(props) {
         />
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
-            {mod.username}
+            {mod['user'].username}
           </Typography>
-          {/* {mod.flair && (
-            <Box
-              sx={{
-                fontSize: '0.75rem',
-                color: '#1c1c1c',
-                bgcolor: mod.flairColor || '#f0f0f0',
-                display: 'inline-block',
-                px: 1.5,
-                py: 0.5,
-                borderRadius: '12px',
-                mt: 0.5
-              }}
-            >
-              {mod.flair}
-            </Box>
-          )} */}
-          {mod.subtitle && (
-            <Typography
-              sx={{
-                fontSize: '0.8rem',
-                color: '#7c7c7c',
-                mt: 0.5
-              }}
-            >
-              {mod.subtitle}
-            </Typography>
-          )}
         </Box>
       </Box>
     </MenuItem>

@@ -31,7 +31,7 @@ export default function Community(props){
             </Typography>
 
             <Typography variant="caption" component="div" sx={{ mb: 0, fontSize: '0.75rem', color: 'text.secondary', lineHeight: 1.2 }}>
-              {numOfMembers}M weekly visitors
+              {numOfMembers}M members
             </Typography>
 
           </Stack>
