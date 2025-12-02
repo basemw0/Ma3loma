@@ -15,11 +15,9 @@ import PostDetails from '../components/post-details/PostDetails';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/post/:pid" element={<PostDetails />} />
-      </Routes>
-    </Router>
+    <>
+      <Login />
+    </>
   );
 }
 export default App;
