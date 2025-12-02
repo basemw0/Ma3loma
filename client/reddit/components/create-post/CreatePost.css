@@ -1,0 +1,92 @@
+.create-post-page {
+  display: flex;
+  padding: 20px;
+}
+
+.create-post-content {
+  width: 100%;
+  max-width: 800px;
+  margin-left: 20px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.create-post-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.create-post-container h1 {
+  font-size: 28px;
+  margin-bottom: 20px;
+  font-weight: bold;
+  font-family: sans-serif;
+}
+
+.post-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.post-form-item {
+  margin-bottom: 15px;
+}
+
+.post-form-item label {
+  font-weight: bold;
+  font-size: 18px;
+  margin-bottom: 66px;
+  font-family: sans-serif;
+}
+
+.post-form-item input,
+.post-form-item textarea,
+.post-form-item select {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.post-form-item textarea {
+  resize: vertical;
+  height: 200px;
+}
+
+.submit-btn {
+  background-color: #ff4500;
+  color: white;
+  padding: 10px 15px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-btn:hover {
+  background-color: #ff5700;
+}
+
+.cancel-btn {
+  background-color: #e1e1e1;
+  color: black;
+  padding: 10px 15px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.error-message {
+  color: red;
+  margin-bottom: 15px;
+}
+
+.post-form-actions {
+  display: flex;
+  gap: 10px;
+}

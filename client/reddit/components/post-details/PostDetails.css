@@ -1,0 +1,135 @@
+/* PostDetails.css */
+
+.post-details {
+  font-family: "Arial", sans-serif;
+  background-color: #fff;
+  padding: 20px;
+  max-width: 800px;
+  margin: 20px auto;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+.post-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.user-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.post-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.username {
+  font-weight: bold;
+  font-size: 14px;
+  color: #0079d3;
+}
+
+.timestamp {
+  font-size: 12px;
+  color: #888;
+}
+
+.post-body {
+  margin-bottom: 20px;
+}
+
+.post-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.post-content {
+  font-size: 16px;
+  color: #444;
+}
+
+.post-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.vote-btn,
+.comment-btn,
+.share-btn,
+.bookmark-btn,
+.more-btn {
+  display: flex;
+  align-items: center;
+  background-color: transparent;
+  border: none;
+  color: #0079d3;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.vote-btn:hover,
+.comment-btn:hover,
+.share-btn:hover,
+.bookmark-btn:hover,
+.more-btn:hover {
+  color: #ff4500;
+}
+
+.vote-btn {
+  font-size: 16px;
+}
+
+.vote-btn svg {
+  margin-right: 5px;
+}
+
+.comments-section {
+  margin-top: 30px;
+}
+
+.comments-list {
+  border-top: 1px solid #ccc;
+  padding-top: 10px;
+}
+
+.comment {
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.comment-author {
+  font-weight: bold;
+  color: #0079d3;
+}
+
+.comment-text {
+  margin-top: 5px;
+  font-size: 14px;
+  color: #333;
+}
+
+.back-to-home {
+  margin-top: 20px;
+}
+
+.back-to-home button {
+  padding: 10px 20px;
+  background-color: #0079d3;
+  border: none;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.back-to-home button:hover {
+  background-color: #005f8a;
+}
