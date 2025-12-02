@@ -11,8 +11,10 @@ const commentRoutes = require('./routes/commentRoutes.js');
 
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+app.use(cors({
+  origin: "http://localhost:5173", // The URL of your frontend (from your screenshot)
+  credentials: true                // Allow cookies/tokens
+}));app.use(express.json());
 
 connectDB()
 

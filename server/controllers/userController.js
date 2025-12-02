@@ -22,7 +22,7 @@ const signup = async (req, res) => {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, email, password } = req.body;
+    const { username, email, password } = req.body;
 
     // Check if user already exists
     let user = await User.findOne({ email });
@@ -36,10 +36,11 @@ const signup = async (req, res) => {
 
     // Create new user
     user = new User({
-      username: name,
+      username: username,
       email,
       password: hashedPassword,
-      image: '', // You can set a default image or handle uploads
+      image: "https://www.redditstatic.com/avatars/avatar_default_02_FF4500.png",
+ // You can set a default image or handle uploads
     });
 
     await user.save();
@@ -101,6 +102,7 @@ const login = async (req, res) => {
         interests: user.interests,
         joinedCommunities: user.joinedCommunities,
         savedPosts: user.savedPosts,
+        image: "https://www.redditstatic.com/avatars/avatar_default_02_FF4500.png",
         token: token
       }
     });

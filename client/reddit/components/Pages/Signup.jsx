@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   SignupWrapper,
   SignupCard,
@@ -12,8 +13,9 @@ import {
 import { Fade, InputAdornment, Box, Typography } from "@mui/material"; // <-- added Box, Typography
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import searchIcon from "./search.png"; // <-- added
-
+import api from "../../src/api/axios";
 export default function Signup() {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
 
   const [email, setEmail] = useState("");
@@ -52,7 +54,28 @@ const continueWithGoogle = () => {
       style={{ width: 18, height: 18 }}
     />
   );
+const handleSignup = async () => {
+    try {
+      const response = await api.post("/api/users/signup", {
+        email: email,
+        username: username, // Send 'username' specifically
+        password: password,
+        image: "https://www.redditstatic.com/avatars/avatar_default_02_FF4500.png"
+      });
 
+      console.log("Signup Success:", response.data);
+      
+      // If your backend sends the token on signup (which it does in your code):
+      if (response.data.user?.token) {
+        localStorage.setItem("token", response.data.user.token);
+        // Redirect to home page
+        window.location.href = "/"; 
+      }
+    } catch (error) {
+      console.error("Signup failed:", error.response?.data);
+      alert(error.response?.data?.message || "Signup failed");
+    }
+  };
   return (
     <SignupWrapper>
       <SignupCard elevation={3}>
@@ -246,9 +269,9 @@ const continueWithGoogle = () => {
               <OrangeButton
                 fullWidth
                 disabled={!username || !password}
+                onClick={handleSignup}  // <--- ATTACH THE HANDLER HERE
                 sx={{
-                  backgroundColor:
-                    !username || !password ? "#ddd" : "#FF4500",
+                  backgroundColor: !username || !password ? "#ddd" : "#FF4500",
                 }}
               >
                 Sign Up

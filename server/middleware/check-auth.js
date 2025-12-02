@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 
 module.exports = (req, res, next) => {
     try{
-        const token = req.headers.authorizatrion.split(" ")[1]; //Auth: 'Bearer token'
+        const token = req.headers.authorization.split(" ")[1]; //Auth: 'Bearer token'
         if (!token) {
         throw new Error('Authentication failed');
         }

@@ -10,7 +10,7 @@ router.get('/', usersController.getUsers);
 router.post(
   '/signup',
   [
-    check('name')
+    check('username')
       .not()
       .isEmpty(),
     check('email')
