@@ -53,17 +53,19 @@ const getCommentReplies = async (req, res) =>{
 
 const createComment = async (req, res) =>{
     try{
-        const{content, mediaUrl, mediaType, postID, parentID} = req.body; 
-        const userID = "48b2ab90-3eb7-4295-a2f4-cfde2bc3a2bb"
+        const{content, mediaUrl = "", mediaType = "none", postID, parentID} = req.body;
+         
+        const userID = "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
 
         const postExists = await Post.exists({_id:postID});
         if(!postExists) return res.status(404).json({message: 'Post Not Exist (CommentController)'});
 
+        if(parentID != null){
+            const parentExists = await Comment.exists({_id:parentID});
+            if(!parentExists) return res.status(404).json({message: 'Post Not Exist (CommentController)'});
+        }
         
 
-        const parentExists = await Comment.exists({_id:parentID});
-        if(!parentExists) return res.status(404).json({message: 'Post Not Exist (CommentController)'});
-        
         
         const newComment = await Comment.create({
             content,
@@ -90,6 +92,7 @@ const createComment = async (req, res) =>{
         res.status(201).json(newComment);
 
     }catch(error){
+        console.log('ahhhh', error.message);
         res.status(500).json({message: error.message});
     }
 }

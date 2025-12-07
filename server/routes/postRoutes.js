@@ -19,7 +19,7 @@ router.get('/community/:cid',postController.getPostsCommunity);
 
 router.get('/:pid', postController.getPostDetails);
 
-router.use(checkAuth);
+//router.use(checkAuth);
 
 router.post('/create', postController.createPost);
 
@@ -36,6 +36,6 @@ router.put('/:pid/downvote', postController.downvotePost);
 
 router.post('/:pid/award/:cid', postController.awardPost);
 
-module.exports = router;
+
 
 module.exports = router;

@@ -5,7 +5,11 @@ const Community = require('../models/Community.js')
 const getPostsHomePage = async (req, res) =>{
     try{
         
-        const uid = req.user ? req.user.id : null; 
+        const uid = req.user ? req.user.id : null;
+        
+        const page = pareseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
 
         let query = {}; 
 
@@ -35,6 +39,8 @@ const getPostsHomePage = async (req, res) =>{
         
         const posts = await Post.find(query)
             .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
             .populate('userID', 'username image')
             .populate('communityID', 'name');
 
@@ -51,6 +57,10 @@ const getPostsCommunity = async (req, res) =>{
         const {cid} = req.params;
         const uid = req.user ? req.user.id : null; 
 
+        const page = pareseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
         
         if (uid) {
             const userExists = await User.exists({ _id: uid });
@@ -60,7 +70,7 @@ const getPostsCommunity = async (req, res) =>{
         const commExists = await Community.exists({_id:cid});
         if (!commExists) return res.status(404).json({ message: "Community not found" });
 
-        const posts = await Post.find({communityID: cid}).sort({createdAt: -1}).populate('userID', 'username image').populate('communityID', 'name');
+        const posts = await Post.find({communityID: cid}).sort({createdAt: -1}).skip(skip).limit(limit).populate('userID', 'username image').populate('communityID', 'name');
 
         res.status(200).send(posts);
         
@@ -104,7 +114,9 @@ const createPost = async (req, res) =>{
     try{
 
         const {title, content, mediaUrl, mediaType, communityID} = req.body;
-        const userID = "48b2ab90-3eb7-4295-a2f4-cfde2bc3a2bb"
+        const userID = "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
+
+        //cid = d17b1418-f818-4af8-b8cc-3202e5b43f93
 
         const newPost = await Post.create({
             title,
@@ -117,6 +129,7 @@ const createPost = async (req, res) =>{
         res.status(201).json(newPost);
 
     }catch(error){
+        console.log('adasdasd', error.message);
         res.status(500).json({message:error.message});
     }
 }
@@ -155,7 +168,7 @@ const editPost = async (req, res)=>{
     try{
         const {pid} = req.params
         const {title, content, mediaUrl, mediaType} = req.body;
-        const uid = req.user.id;
+        const uid = "607d1cab-cd65-4d5c-a8de-110965b4b2d9";
 
         const userExists = await User.exists({_id:uid});
         if (!userExists) return res.status(404).json({ message: "User not found" });

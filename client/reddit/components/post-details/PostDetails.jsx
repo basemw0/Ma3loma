@@ -4,7 +4,8 @@ import { useParams } from "react-router-dom";
 import "./PostDetails.css"; // The CSS for styling (replicating Reddit's style)
 
 export default function PostDetails() {
-  const { pid } = useParams(); // Get the post ID from URL
+  //const { pid } = useParams(); // Get the post ID from URL
+  const pid = '29fc53b4-8d22-4c3c-b27d-2a33702fb34c';
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
@@ -14,8 +15,8 @@ export default function PostDetails() {
   useEffect(() => {
     const fetchPostDetails = async () => {
       try {
-        const postResponse = await axios.get(`http://localhost:5000/api/posts/${pid}`);
-        const commentsResponse = await axios.get(`http://localhost:5000/api/posts/${pid}/comments`);
+        const postResponse = await axios.get(`http://localhost:3000/api/posts/${pid}`);
+        const commentsResponse = await axios.get(`http://localhost:3000/api/comments/post/${pid}`);
 
         setPost(postResponse.data);
         setComments(commentsResponse.data);
@@ -26,7 +27,7 @@ export default function PostDetails() {
     };
 
     fetchPostDetails();
-  }, [pid]);
+  }, [comments]);
 
   // Handle comment submission
   const handleCommentSubmit = async (e) => {
@@ -35,11 +36,13 @@ export default function PostDetails() {
       const commentData = {
         content: newComment,
         postID: pid,
+        parentID: null
       };
-      const response = await axios.post(`http://localhost:5000/api/posts/${pid}/comment`, commentData);
+      const response = await axios.post(`http://localhost:3000/api/comments/create`, commentData);
       setComments([response.data, ...comments]);
       setNewComment(""); // Clear the input after submission
     } catch (error) {
+      alert('error: ', error.message);
       console.error("Error submitting comment:", error);
     }
   };
@@ -53,8 +56,8 @@ export default function PostDetails() {
       <div className="post-header">
         <h1>{post.title}</h1>
         <div className="user-info">
-          <img src={post.user.image} alt="user" className="user-avatar" />
-          <span>{post.user.username}</span>
+          <img src={post.userID.image} alt="user" className="user-avatar" />
+          <span>{post.userID.username}</span>
         </div>
         <div className="post-actions">
           <span>{post.upvotes.length} Upvotes</span>
@@ -73,7 +76,7 @@ export default function PostDetails() {
             <span className="comment-author">{comment.userID.username}:</span>
             <p>{comment.content}</p>
             <div className="comment-actions">
-              <button>Upvote</button>
+              <button onClick={handlevote()}>Upvote</button>
               <button>Downvote</button>
             </div>
           </div>

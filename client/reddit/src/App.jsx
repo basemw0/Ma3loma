@@ -9,20 +9,22 @@ import { Routes } from 'react-router-dom';
 import { Route } from 'react-router-dom';
 import Layout from '../components/Utils/Layout';
 import Content from '../components/content/Content';
-
-
+import CreatePost from '../components/create-post/CreatePost.jsx'
+import EditPost from '../components/edit-post/EditPost.jsx'
+import PostDetails from '../components/post-details/PostDetails.jsx'
 
 function App() {
   return (
     <>
-     <Routes>
+     {/* <Routes>
       <Route path="/" element={<Layout/>}>
         <Route path="api/communities/:communityId" element={<CommunityPage />} />
         <Route path="api/home" element={<Content />} />
         <Route path="api/communities/best/:number" element= {<CommunitiesPage />} />
         <Route path="api/communities/category" element= {<ExploreCommunities />} />
       </Route>
-      </Routes>
+      </Routes> */}
+      <PostDetails/>
     </>
   );
 }

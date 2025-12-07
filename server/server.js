@@ -23,7 +23,7 @@ connectDB()
 app.use('/api/users', userRoutes);
 app.use('/api/communities', communityRoutes);
 app.use('/api/posts', postRoutes);
-app.use('api/comments', commentRoutes);
+app.use('/api/comments', commentRoutes);
 
 
 const PORT = process.env.PORT || 3000;

@@ -3,10 +3,12 @@ import "./EditPost.css";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import { useNavigate, useParams } from "react-router-dom"; // Import useNavigate instead of useHistory
+import axios from 'axios'
 
 const EditPost = () => {
-  const { pid } = useParams();
-  const navigate = useNavigate(); // Use useNavigate hook
+  //const { pid } = useParams();
+  const pid = 'fb99718a-5a36-444c-a796-95612a4ee38a';
+  //const navigate = useNavigate(); // Use useNavigate hook
   const [post, setPost] = useState({
     title: "",
     content: "",
@@ -20,24 +22,31 @@ const EditPost = () => {
     const fetchPost = async () => {
       // Fetching post data based on `pid`
       // For now, we're just using mock data
-      setPost({
-        title: "Sample Post Title",
-        content: "This is a post content. You can edit it.",
-        mediaUrl: "https://example.com/sample.jpg",
-        mediaType: "image",
-        communityID: "communityId123",
-      });
+      alert('hamada')
+      const response = await axios.get(`http://localhost:3000/api/posts/${pid}`);
+      if(response.data){
+        const post = response.data;
+        setPost({
+        title: post.title,
+        content: post.content,
+        mediaUrl: post.mediaUrl,
+        mediaType: post.mediaType,
+        communityID: post.communityID,
+        });
+      }
+      
     };
 
     fetchPost();
-  }, [pid]);
+  }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     // Submit the post update logic
-    console.log(post);
+    //alert('hoba tito mambo',post);
+    await axios.put(`http://localhost:3000/api/posts/edit/${pid}`, post);
     // Redirect back to the post detail page (or homepage)
-    navigate(`/post/${pid}`); // Use navigate to redirect
+    //navigate(`/post/${pid}`); // Use navigate to redirect
   };
 
   const handleChange = (e) => {

@@ -19,13 +19,13 @@ const CreatePost = () => {
       title,
       content,
       mediaUrl,
-      mediaType: mediaUrl ? "image" : "text",  // Assigning mediaType based on URL
-      communityID: selectedCommunity,
+      mediaType: mediaUrl ? "image" : "none",  // Assigning mediaType based on URL ///4of ya omar ezay nfr2 ben el ragle wa el set 8er el far2 ely kol el nas 3arfah (image wa video)
+      communityID: "d17b1418-f818-4af8-b8cc-3202e5b43f93",
     };
 
     try {
       // Make Axios POST request to your backend
-      const response = await axios.post("http://localhost:5000/posts/create", newPost);
+      const response = await axios.post("http://localhost:3000/api/posts/create", newPost);
       console.log("Post Created: ", response.data);
       
       // Reset form after successful post
@@ -36,7 +36,7 @@ const CreatePost = () => {
       setErrorMessage("");  // Reset error message
 
     } catch (error) {
-      console.error("Error creating post: ", error);
+      alert("Error creating post: ", error.message);
       setErrorMessage("Something went wrong while creating the post.");
     }
   };
@@ -76,7 +76,7 @@ const CreatePost = () => {
               />
             </div>
 
-            <div className="post-form-item">
+            {/* <div className="post-form-item">
               <label>Select Community</label>
               <select
                 value={selectedCommunity}
@@ -87,7 +87,7 @@ const CreatePost = () => {
                 <option value="community2">Community 2</option>
                 <option value="community3">Community 3</option>
               </select>
-            </div>
+            </div> */}
 
             {errorMessage && <div className="error-message">{errorMessage}</div>}
 
