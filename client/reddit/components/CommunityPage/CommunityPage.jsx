@@ -16,8 +16,9 @@ export default function CommunityPage() {
         try {
             let response = await axios.get("http://localhost:3000/api/communities/" + id);
             let data = response.data;
-            setCommunity(data);      // <<< IMPORTANT
+            setCommunity(data); 
             setJoined(data.isMember? "Joined" : "Not Joined");
+            alert(data.isMember)
         } 
         catch (e) {
             alert("Error: " + e.message);

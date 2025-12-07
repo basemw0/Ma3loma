@@ -9,7 +9,7 @@ import { useSearchParams } from "react-router-dom";
 
 export default function ExploreCommunities(){
     const [searchParams , setSearchParams] =  useSearchParams();
-    const query =  searchParams.get("q") || "All";
+    const query =  searchParams.get("q") || "All"
     const cat = categoryNames.map((category , index)=>{
         let status = 0 
         if (index == 0 ) status = 1

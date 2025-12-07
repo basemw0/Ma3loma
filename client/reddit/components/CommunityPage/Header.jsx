@@ -7,21 +7,28 @@ import axios from 'axios';
 export default function Header(props) {
     const {community , setJoined , joined} = props
     const handleJoinClick = async (status)=>{
+      try{
         if(status == 'Joined'){
-            setJoined('Not Joined')
+            alert(status)
             await axios.post(`http://localhost:3000/api/communities/${community._id}/join`, {
               action : 0
             } )
+            setJoined('Not Joined')
             alert("Unjoined")
         }
         else{
-            setJoined('Joined')
+            alert(status)
             //Axios request
             await axios.post("http://localhost:3000/api/communities/" + community._id + '/join', {
               action : 1
             } )
+            setJoined('Joined')
             alert("Joined")
         }
+      }
+      catch(e){
+        alert("Error" + e.message)
+      }
     }
   return (
     <Box sx={{ width: '100%', bgcolor: '#fff' }}>
