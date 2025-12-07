@@ -1,135 +1,210 @@
-/* PostDetails.css */
-
+/* ============================
+   MAIN WRAPPER
+============================ */
 .post-details {
-  font-family: "Arial", sans-serif;
-  background-color: #fff;
-  padding: 20px;
-  max-width: 800px;
-  margin: 20px auto;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  font-family: "Segoe UI", Arial, sans-serif;
+  background-color: #ffffff;
+  padding: 30px;
+  max-width: 850px;
+  margin: 40px auto;
+  border-radius: 12px;
+  border: 1px solid #e2e2e2;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
 }
 
+/* ============================
+   POST HEADER
+============================ */
 .post-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 15px;
-}
-
-.user-image {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  margin-right: 10px;
-}
-
-.post-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.username {
-  font-weight: bold;
-  font-size: 14px;
-  color: #0079d3;
-}
-
-.timestamp {
-  font-size: 12px;
-  color: #888;
-}
-
-.post-body {
-  margin-bottom: 20px;
-}
-
-.post-title {
-  font-size: 24px;
-  font-weight: bold;
-  color: #333;
-}
-
-.post-content {
-  font-size: 16px;
-  color: #444;
-}
-
-.post-actions {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-top: 10px;
-}
-
-.vote-btn,
-.comment-btn,
-.share-btn,
-.bookmark-btn,
-.more-btn {
-  display: flex;
-  align-items: center;
-  background-color: transparent;
-  border: none;
-  color: #0079d3;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.vote-btn:hover,
-.comment-btn:hover,
-.share-btn:hover,
-.bookmark-btn:hover,
-.more-btn:hover {
-  color: #ff4500;
-}
-
-.vote-btn {
-  font-size: 16px;
-}
-
-.vote-btn svg {
-  margin-right: 5px;
-}
-
-.comments-section {
-  margin-top: 30px;
-}
-
-.comments-list {
-  border-top: 1px solid #ccc;
-  padding-top: 10px;
-}
-
-.comment {
-  padding: 10px 0;
+  padding-bottom: 18px;
   border-bottom: 1px solid #eee;
 }
 
-.comment-author {
-  font-weight: bold;
+.post-header h1 {
+  font-size: 30px;
+  margin-bottom: 12px;
+  color: #222;
+  font-weight: 700;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 5px;
+}
+
+.user-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 2px solid #d6e8ff;
+}
+
+.user-info span {
+  font-size: 15px;
+  font-weight: 600;
   color: #0079d3;
 }
 
-.comment-text {
-  margin-top: 5px;
+/* ============================
+   POST ACTIONS
+============================ */
+.post-actions {
+  margin-top: 15px;
+  font-size: 15px;
+  color: #444;
+  display: flex;
+  gap: 25px;
+}
+
+.post-actions span {
+  background: #f6f8fa;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+}
+
+/* ============================
+   VOTE BUTTONS (POST)
+============================ */
+.comment-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+}
+
+.comment-actions button {
+  border: 1px solid #e2e2e2;
+  background: #f7f9fb;
+  cursor: pointer;
+  color: #555;
   font-size: 14px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.comment-actions button:hover {
+  background: #e3f1ff;
+  border-color: #b5daff;
+  color: #0079d3;
+  transform: translateY(-1px);
+}
+
+/* ============================
+   POST CONTENT
+============================ */
+.post-content {
+  margin-top: 25px;
+  padding: 20px 0;
+}
+
+.post-content p {
+  font-size: 17px;
+  color: #333;
+  line-height: 1.6;
+}
+
+/* ============================
+   COMMENTS
+============================ */
+.comments {
+  margin-top: 35px;
+}
+
+.comments h2 {
+  font-size: 22px;
+  margin-bottom: 18px;
+  font-weight: 600;
+  color: #222;
+}
+
+.comment {
+  background: #fbfbfb;
+  padding: 15px 18px;
+  border-radius: 8px;
+  border: 1px solid #eaeaea;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+
+.comment-author {
+  font-weight: 600;
+  color: #0068b5;
+  font-size: 15px;
+}
+
+.comment p {
+  font-size: 15px;
+  margin: 6px 0;
   color: #333;
 }
 
-.back-to-home {
-  margin-top: 20px;
-}
-
-.back-to-home button {
-  padding: 10px 20px;
-  background-color: #0079d3;
-  border: none;
-  color: white;
+/* Vote info inside comments */
+.comment-votes {
+  display: flex;
+  gap: 10px;
+  margin-top: 5px;
   font-size: 14px;
-  cursor: pointer;
-  border-radius: 4px;
+  color: #666;
 }
 
-.back-to-home button:hover {
-  background-color: #005f8a;
+/* ============================
+   COMMENT ACTION BUTTONS
+============================ */
+.comment .comment-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 12px;
+}
+
+.comment .comment-actions button {
+  padding: 5px 12px;
+}
+
+/* ============================
+   ADD COMMENT FORM
+============================ */
+form {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+textarea {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #d0d0d0;
+  resize: vertical;
+  font-size: 15px;
+  background: #fafafa;
+  transition: 0.2s;
+}
+
+textarea:focus {
+  border-color: #0079d3;
+  background: #fff;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0,121,211,0.15);
+}
+
+button[type="submit"] {
+  width: 160px;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  background: #0079d3;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button[type="submit"]:hover {
+  background: #005fa8;
+  transform: translateY(-2px);
 }

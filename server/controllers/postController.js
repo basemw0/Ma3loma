@@ -114,7 +114,7 @@ const createPost = async (req, res) =>{
     try{
 
         const {title, content, mediaUrl, mediaType, communityID} = req.body;
-        const userID = "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
+        const uid = "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
 
         //cid = d17b1418-f818-4af8-b8cc-3202e5b43f93
 
@@ -138,7 +138,7 @@ const createPost = async (req, res) =>{
 const deletePost = async (req, res) =>{
     try {
         const { pid } = req.params;
-        const uid = req.user.id;
+        const uid = "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
 
         
         const post = await Post.findById(pid);
@@ -203,9 +203,10 @@ const editPost = async (req, res)=>{
 
 
 const upvotePost = async (req, res)=>{
+    console.log("YOOO")
     try{
         const {pid} = req.params;
-        const uid = req.user.id;
+        const uid = "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
 
         const userExists = await User.exists({_id:uid});
         if (!userExists) return res.status(404).json({ message: "User not found" });
@@ -232,7 +233,7 @@ const upvotePost = async (req, res)=>{
         }
 
         
-        const post_u = await Post.findByIdAndUpdate(pid, updateQuery, { new: true });
+        const post_u = await Post.findByIdAndUpdate(pid, updateQuery, { new: true }).populate("userID" , "username image");
 
         res.status(200).json(post_u);
 
@@ -244,9 +245,11 @@ const upvotePost = async (req, res)=>{
 
 
 const downvotePost = async (req, res)=>{
+    console.log("YOOO")
+
     try{
         const {pid} = req.params;
-        const uid = req.user.id;
+        const uid = "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
 
         const userExists = await User.exists({_id:uid});
         if (!userExists) return res.status(404).json({ message: "User not found" });
@@ -273,7 +276,7 @@ const downvotePost = async (req, res)=>{
         }
 
         
-        const post_u = await Post.findByIdAndUpdate(pid, updateQuery, { new: true });
+       const post_u = await Post.findByIdAndUpdate(pid, updateQuery, { new: true }).populate("userID" , "username image");
 
         res.status(200).json(post_u);
 
@@ -289,7 +292,7 @@ const awardPost = async (req, res)=>{
     try{
         const {pid, cid} = req.params;
         const {awardName} = req.body;
-        const uid = req.user.id;
+        const uid = "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
 
         const user = await User.findById(uid);
         if (!user) return res.status(404).json({ message: "User not found" });

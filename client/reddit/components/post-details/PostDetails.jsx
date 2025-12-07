@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import "./PostDetails.css"; // The CSS for styling (replicating Reddit's style)
-
+//Session
 export default function PostDetails() {
   //const { pid } = useParams(); // Get the post ID from URL
   const pid = '29fc53b4-8d22-4c3c-b27d-2a33702fb34c';
@@ -27,8 +27,27 @@ export default function PostDetails() {
     };
 
     fetchPostDetails();
-  }, [comments]);
+  }, []);
 
+  const handlevote = async(type , id , object)=>{
+    const route = object === "post"?"posts":"comments"
+    const action = type === 1?"upvote" : "downvote"
+    try{
+    const response = await axios.put(`http://localhost:3000/api/${route}/${id}/${action}`)
+        
+    if(object === "post"){
+      if(response.data) setPost(response.data)
+    }
+    else{
+         if(response.data) setComments(prev =>
+            prev.map(c => (c._id === response.data._id ? response.data : c))
+    );
+    }
+    }
+    catch(e){
+      alert("Error"+ e.message)
+    }
+  }
   // Handle comment submission
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
@@ -40,7 +59,7 @@ export default function PostDetails() {
       };
       const response = await axios.post(`http://localhost:3000/api/comments/create`, commentData);
       setComments([response.data, ...comments]);
-      setNewComment(""); // Clear the input after submission
+      setNewComment("");
     } catch (error) {
       alert('error: ', error.message);
       console.error("Error submitting comment:", error);
@@ -56,13 +75,17 @@ export default function PostDetails() {
       <div className="post-header">
         <h1>{post.title}</h1>
         <div className="user-info">
-          <img src={post.userID.image} alt="user" className="user-avatar" />
+         <img src={post.userID.image} alt="user" className="user-avatar" />
           <span>{post.userID.username}</span>
         </div>
         <div className="post-actions">
-          <span>{post.upvotes.length} Upvotes</span>
-          <span>{post.downvotes.length} Downvotes</span>
+          <span style={{marginLeft : 3}}>{post.upvotes.length } Upvotes</span>
+          <span style={{marginLeft : 3}}>{post.downvotes.length } Downvotes</span>
         </div>
+         <div className="comment-actions">
+              <button onClick={()=>handlevote(1 , post._id ,"post")}>Upvote</button>
+              <button onClick={()=>handlevote(2 , post._id , "post")}>Downvote</button>
+            </div>
       </div>
       <div className="post-content">
         <p>{post.content}</p>
@@ -75,9 +98,11 @@ export default function PostDetails() {
           <div key={comment._id} className="comment">
             <span className="comment-author">{comment.userID.username}:</span>
             <p>{comment.content}</p>
+             <p style={{marginLeft : 3}}>{comment.upvotes.length} Upvotes</p>
+            <p style={{marginLeft : 3}}>{comment.downvotes.length} Downvotes</p> {/*Show which one u are upvoted or downvotes using session*/}
             <div className="comment-actions">
-              <button onClick={handlevote()}>Upvote</button>
-              <button>Downvote</button>
+              <button onClick={()=>handlevote(1 , comment._id , "comment")}>Upvote</button>
+              <button onClick={()=>handlevote(2 , comment._id , "comment")}>Downvote</button>
             </div>
           </div>
         ))}
