@@ -3,25 +3,33 @@ import { Box, Button, IconButton, Avatar, Typography } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import axios from 'axios';
+import { Link } from "react-router-dom";
 
 export default function Header(props) {
     const {community , setJoined , joined} = props
     const handleJoinClick = async (status)=>{
+      try{
         if(status == 'Joined'){
-            setJoined('Not Joined')
+            alert(status)
             await axios.post(`http://localhost:3000/api/communities/${community._id}/join`, {
               action : 0
             } )
+            setJoined('Not Joined')
             alert("Unjoined")
         }
         else{
-            setJoined('Joined')
+            alert(status)
             //Axios request
             await axios.post("http://localhost:3000/api/communities/" + community._id + '/join', {
               action : 1
             } )
+            setJoined('Joined')
             alert("Joined")
         }
+      }
+      catch(e){
+        alert("Error" + e.message)
+      }
     }
   return (
     <Box sx={{ width: '100%', bgcolor: '#fff' }}>
@@ -92,6 +100,8 @@ export default function Header(props) {
           <Button
             variant="outlined"
             startIcon={<AddIcon />}
+            component = {Link}
+            to={`/api/posts/${community._id}/create`}
             sx={{
               borderColor: '#0079d3',
               color: '#0079d3',

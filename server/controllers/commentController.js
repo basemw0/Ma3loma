@@ -2,10 +2,8 @@ const Post = require('../models/Post.js');
 const User = require('../models/User.js');
 const Community = require('../models/Community.js')
 const Comment = require('../models/Comment.js');
-
-
-
 const getPostComments = async (req, res) =>{
+    //Button if comment is mine delete
     try{
         const {pid} = req.params;
         const page = parseInt(req.query.page) || 1;
@@ -53,17 +51,19 @@ const getCommentReplies = async (req, res) =>{
 
 const createComment = async (req, res) =>{
     try{
-        const{content, mediaUrl, mediaType, postID, parentID} = req.body; 
-        const userID = "48b2ab90-3eb7-4295-a2f4-cfde2bc3a2bb"
+        const{content, mediaUrl = "", mediaType = "none", postID, parentID} = req.body;
+         
+        const userID = "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
 
         const postExists = await Post.exists({_id:postID});
         if(!postExists) return res.status(404).json({message: 'Post Not Exist (CommentController)'});
 
-        
+        if(parentID != null){
+            const parentExists = await Comment.exists({_id:parentID});
+            if(!parentExists) return res.status(404).json({message: 'Post Not Exist (CommentController)'});
+        }
 
-        const parentExists = await Comment.exists({_id:parentID});
-        if(!parentExists) return res.status(404).json({message: 'Post Not Exist (CommentController)'});
-        
+
         
         const newComment = await Comment.create({
             content,
@@ -72,6 +72,11 @@ const createComment = async (req, res) =>{
             postID,
             userID,
             parentID: parentID || null
+        });
+        newComment.populate("userID" ,"username image")
+
+        await Post.findByIdAndUpdate(postID, { 
+            $inc: { commentCount: 1 } 
         });
 
         
@@ -86,10 +91,10 @@ const createComment = async (req, res) =>{
                 $push: { comments: newComment._id }
             });
         }
-
         res.status(201).json(newComment);
 
     }catch(error){
+        console.log('ahhhh', error.message);
         res.status(500).json({message: error.message});
     }
 }
@@ -98,7 +103,7 @@ const createComment = async (req, res) =>{
 const deleteComment = async (req, res) =>{
     try{
         const {coid} = req.params;
-        const uid = req.user.id;
+        const uid = "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
 
         const comment = await Comment.findById(coid);
         if(!comment) return res.status(404).json({message: 'Comment not found!'});
@@ -133,7 +138,7 @@ const deleteComment = async (req, res) =>{
 const upvoteComment = async (req, res) =>{
     try{
         const {coid} = req.params;
-        const uid = req.user.id;
+        const uid = "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
     
         const userExists = await User.exists({_id:uid});
         if (!userExists) return res.status(404).json({ message: "User not found" });
@@ -149,21 +154,22 @@ const upvoteComment = async (req, res) =>{
         let updateQuery = {};
     
         if (isUp) {
-                
-            updateQuery = { $pull: { upvotes: uid } };
-        } else {
-                
+            
+            updateQuery = { $pull: { upvotes: uid },
+                            $inc: {voteCount : -1}
+            };
+        }else {
+            
             updateQuery = { 
                 $addToSet: { upvotes: uid }, 
-                $pull: { downvotes: uid }    
+                $pull: { downvotes: uid },
+                $inc: { voteCount: 1 }    
             };
         }
-    
-            
-        const comment_u = await Comment.findByIdAndUpdate(coid, updateQuery, { new: true });
-    
+
+
+        const comment_u = await Comment.findByIdAndUpdate(coid, updateQuery, { new: true }).populate("userID" , "username")
         res.status(200).json(comment_u);
-    
     }catch(error){
         res.status(500).json({message:error.message});
     }
@@ -173,7 +179,7 @@ const editComment = async (req, res)=>{
     try{
         const {coid} = req.params
         const {content, mediaUrl, mediaType} = req.body;
-        const uid = req.user.id;
+        const uid = "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
 
         const userExists = await User.exists({_id:uid});
         if (!userExists) return res.status(404).json({ message: "User not found" });
@@ -209,7 +215,7 @@ const editComment = async (req, res)=>{
 const downvoteComment = async (req, res) =>{
     try{
         const {coid} = req.params;
-        const uid = req.user.id;
+        const uid = "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
     
         const userExists = await User.exists({_id:uid});
         if (!userExists) return res.status(404).json({ message: "User not found" });
@@ -225,18 +231,21 @@ const downvoteComment = async (req, res) =>{
         let updateQuery = {};
     
         if (isDown) {
-                
-            updateQuery = { $pull: { downvotes: uid } };
+            
+            updateQuery = { $pull: { downvotes: uid },
+                            $inc: { voteCount: 1 }                    
+            };
         } else {
-                
+            
             updateQuery = { 
                 $addToSet: { downvotes: uid }, 
-                $pull: { upvotes: uid }    
+                $pull: { upvotes: uid },
+                $inc: { voteCount: -1 }    
             };
         }
     
             
-        const comment_u = await Comment.findByIdAndUpdate(coid, updateQuery, { new: true });
+        const comment_u = await Comment.findByIdAndUpdate(coid, updateQuery, { new: true }).populate("userID","username");
     
         res.status(200).json(comment_u);
     
@@ -251,7 +260,7 @@ const awardComment = async (req, res)=>{
     try{
         const {coid} = req.params;
         const {awardName} = req.body;
-        const uid = req.user.id;
+        const uid = "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
 
         const user = await User.findById(uid);
         if (!user) return res.status(404).json({ message: "User not found" });

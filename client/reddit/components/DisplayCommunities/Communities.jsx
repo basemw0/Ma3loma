@@ -46,6 +46,7 @@ export default function Communities(props){
         numOfMembers={comm.numberOfMembers}
         imgUrl={comm.icon}
         color={cardColor}
+        communityId = {comm._id}
       />
     );
   })}

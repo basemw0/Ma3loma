@@ -6,9 +6,11 @@ import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
+import { Routes, Route, Link } from "react-router-dom";
+import CommunityPage from '../CommunityPage/CommunityPage';
 
 export default function Community(props){
-    const {communityName , communityDescription , numOfMembers , Cnum , imgUrl , color = ""}  = props
+    const {communityName , communityDescription , numOfMembers , Cnum , imgUrl , color = "" , communityId}  = props
 
     
   return (
@@ -23,7 +25,14 @@ export default function Community(props){
           <Stack direction="column" sx={{ ml: 0.5, alignItems: 'flex-start' }}>
             
             <Typography variant="caption" component="div" sx={{ mb: 0, fontWeight: 700, fontSize: '0.95rem', lineHeight: 1.2 }}>
+              <Link style={{
+              color: "inherit",
+              textDecoration: "none",
+              fontWeight: 700,
+              fontSize: "0.95rem"
+            }} to={"/api/communities/"+communityId}>
               {communityName}
+              </Link>
             </Typography>
 
             <Typography variant="caption" component="div" sx={{ mb: 0, whiteSpace : 'nowrap' , overflow : 'hidden' , textOverflow : 'ellipsis' , maxWidth : 212, fontSize: '0.8rem', color: 'text.secondary', lineHeight: 1.3}}> 
@@ -38,6 +47,7 @@ export default function Community(props){
 
         </Stack>
       </Box>
+     
     </Card>
   );
 }

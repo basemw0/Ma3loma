@@ -4,9 +4,9 @@ import Box from '@mui/material/Box';
 import { Divider } from '@mui/material';
 
 export default function CategoryList(props) {
-    const {cats , setCats  , retrieveCommunities}  = props
+    const {cats , setCats  , setSearchParams}  = props
     const handleClick = (category)=>{
-        retrieveCommunities(category.name)
+        setSearchParams({ q: category.name });
         setCats((prev)=>{
             return prev.map((cat)=>{
                 if(cat.name == category.name){

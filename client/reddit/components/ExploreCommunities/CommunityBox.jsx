@@ -6,18 +6,18 @@ export default function CommunityBox(props){
     const handleClick = async()=>{
         if(community.isMember == 1){
             await axios.post(`http://localhost:3000/api/communities/${community._id}/join`, {
-              action : 0
-            } )
+                    action: 0
+                });
             alert("Unjoined")
         }
         else{
             //Axios request
-            await axios.post("http://localhost:3000/api/communities/" + community._id + '/join', {
-              action : 1
-            } )
+            await axios.post(`http://localhost:3000/api/communities/${community._id}/join`, {
+                    action: 1
+                });
             alert("Joined")
         }
-        retrieveCommunities()
+        await retrieveCommunities()
     }
     return(
         <Stack direction='row' justifyContent= 'space-between' sx={{
@@ -28,7 +28,7 @@ export default function CommunityBox(props){
             backgroundColor: "#fff",
             boxShadow: "0 1px 2px rgba(0,0,0,0.05)",   // subtle lift
             }}>
-            <Community Cnum = 'no' communityName = {community.name}  communityDescription = {community.description} numOfMembers = {community.numberOfMembers} imgUrl = {community.icon} />
+            <Community Cnum = 'no' communityName = {community.name}  communityDescription = {community.description} numOfMembers = {community.numberOfMembers} imgUrl = {community.icon} communityId = {community._id} />
             <Button 
             onClick={()=>{handleClick()}}
             sx={{

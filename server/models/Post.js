@@ -14,6 +14,10 @@ const PostSchema = new mongoose.Schema({
     default: "none" 
   },
 
+
+  voteCount: { type: Number, default: 0 },      // Stores (Upvotes - Downvotes)
+  commentCount: { type: Number, default: 0 },
+
   // ✅ All references converted from ObjectId to String
   userID: { type: String, ref: "User", required: true },
   communityID: { type: String, ref: "Community" },
@@ -26,6 +30,8 @@ const PostSchema = new mongoose.Schema({
     givenBy: { type: String, ref: "User", required: true },
     givenAt: { type: Date, default: Date.now } 
   }]
+
+
 }, { timestamps: true });
 
 // ✅ AUTOMATIC CLEANUP HOOK

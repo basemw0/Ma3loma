@@ -5,9 +5,11 @@ import CategoryList from "./CategoryList"
 import DisplayCategories from "./DisplayCategories"
 import DisplayAll from "./DisplayAll"
 import axios from "axios"
+import { useSearchParams } from "react-router-dom";
 
 export default function ExploreCommunities(){
-    //Function to retrieve mn 3and 3am badra
+    const [searchParams , setSearchParams] =  useSearchParams();
+    const query =  searchParams.get("q") || "All"
     const cat = categoryNames.map((category , index)=>{
         let status = 0 
         if (index == 0 ) status = 1
@@ -20,23 +22,22 @@ export default function ExploreCommunities(){
     const [cats , setCats] = useState(cat)
     const retrieveCommunities = async (category)=>{
         //Ill get an array of objects , containing the topic and its subbreddits
-        let response = await axios.get("http://localhost:3000/api/communities/category?q=" + category)
+        let response = await axios.get("http://localhost:3000/api/communities/category?q=" + encodeURIComponent(category))
         let responeObject = response.data
         setCommunitiesArr(responeObject)
     }
     useEffect(() => {
         async function load() {
-            await retrieveCommunities("All"); 
+            await retrieveCommunities(query); 
         }
         load();
-        }, []);
+        }, [query]);
     const [communitiesArr , setCommunitiesArr] = useState([])
     return(
         <Box sx={{display : 'flex' , flexDirection : 'column' , padding:10 , width : '95%'}}>
         <h1>Explore Communities</h1>
-        <CategoryList cats = {cats} setCats = {setCats} retrieveCommunities = {retrieveCommunities}/>
-        <DisplayAll communitiesArr = {communitiesArr}  retrieveCommunities = {()=>retrieveCommunities(cats.find(c => c.status === 1)?.name)}/>
+        <CategoryList cats = {cats} setCats = {setCats} setSearchParams = {setSearchParams}/>
+        <DisplayAll communitiesArr = {communitiesArr}  retrieveCommunities = {()=>retrieveCommunities(query)}/>
         </Box>
     )
-
 }

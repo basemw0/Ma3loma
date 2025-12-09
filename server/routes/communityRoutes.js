@@ -14,7 +14,7 @@ router.get('/search', communityController.searchCommunity)
 router.get('/:id', communityController.getCommunityById);
 router.get('/best/:limit', communityController.getCommunities);
 
-router.use(checkAuth);
+//router.use(checkAuth);
 
 router.post(
   '/create', 
@@ -37,6 +37,7 @@ router.post(
   ],
   communityController.joinCommunity
 );
+
 
 router.put('/:id/update',communityController.updateCommunity)
 

@@ -8,7 +8,7 @@ const { validationResult } = require('express-validator');
 
 
 const getCommunities= async (req, res) => {
-  const userID = "48b2ab90-3eb7-4295-a2f4-cfde2bc3a2bb"
+  const userID = "a1a1f09d-9c38-4a55-8f65-16f8c6f4d374"
   const limit = req.params.limit;
 
 
@@ -79,20 +79,24 @@ const getCommunities= async (req, res) => {
 
 const getCommunitiesByCategory = async (req, res) => {
   // Hardcoded ID per your snippet
-  const userID = "48b2ab90-3eb7-4295-a2f4-cfde2bc3a2bb"; 
+  const userID = "a1a1f09d-9c38-4a55-8f65-16f8c6f4d374"; 
   const { q } = req.query; 
 
   try {
     let categoryData
-    if (q==="All"){ categoryData= ALLOWED_INTERESTS.find(cat => cat.name != undefined);}
+    if (q==="All"){ categoryData= ALLOWED_INTERESTS}
     else  categoryData = ALLOWED_INTERESTS.find(cat => cat.name === q);
 
     if (!categoryData) {
       return res.status(404).json({ message: "Category not found" });
     }
-
-    const targetTopics = categoryData.topics;
-
+    let targetTopics
+    if(q === "All"){
+      targetTopics = categoryData.flatMap(c => c.topics);
+    }
+    else{
+      targetTopics = categoryData.topics
+    }
     const groupedCommunities = await Community.aggregate([
       { 
         $match: { 
@@ -212,7 +216,7 @@ const userID = req.user.id;
 const updateCommunity = async (req, res) => {
   const communityID = req.params.id;
   const { name, description, interests,icon,banner,privacy } = req.body;
-  const userID = "48b2ab90-3eb7-4295-a2f4-cfde2bc3a2bb"
+  const userID = "a1a1f09d-9c38-4a55-8f65-16f8c6f4d374"
   if (!communityID || !userID) {
     return res.status(400).json({ message: "communityID and UserID are required" });
   }
@@ -262,11 +266,13 @@ const joinCommunity= async (req, res) => {
   const { action } = req.body; 
   console.log(communityID)
   const community = await Community.findById(communityID)
-  const userID = "48b2ab90-3eb7-4295-a2f4-cfde2bc3a2bb"
+  const userID = "a1a1f09d-9c38-4a55-8f65-16f8c6f4d374"
+  console.log("🔥 JOIN ROUTE HIT");
+
   try {
     let userUpdateResult;
 
-    if (action === 1) {
+    if (action == 1) {
       userUpdateResult = await User.updateOne(
         { _id: userID},
         { 
@@ -286,7 +292,7 @@ const joinCommunity= async (req, res) => {
         return res.status(400).json({ message: "failed  to join" });
       }
 
-    } else if (action === 0) {
+    } else if (action == 0) {
     
       userUpdateResult = await User.updateOne(
         { _id: userID },
@@ -314,7 +320,7 @@ const joinCommunity= async (req, res) => {
 // ✅ GET COMMUNITY BY ID (With "Am I a Member?" Check)
 const getCommunityById= async (req, res) => {
   const communityID = req.params.id;
-  const userID = "48b2ab90-3eb7-4295-a2f4-cfde2bc3a2bb"
+  const userID = "a1a1f09d-9c38-4a55-8f65-16f8c6f4d374"
   try {
     const community = await Community.findById(communityID).populate({
       path: "moderators.user",   
@@ -362,7 +368,7 @@ const getCommunityById= async (req, res) => {
 
 const searchCommunity = async (req, res) => {
   const { q } = req.query;
-  const userID = "48b2ab90-3eb7-4295-a2f4-cfde2bc3a2bb"
+  const userID = "a1a1f09d-9c38-4a55-8f65-16f8c6f4d374"
   console.log(q)
 
   try {

@@ -13,9 +13,12 @@ const CommentSchema = new mongoose.Schema({
     default: "none" 
   },
 
+  voteCount: { type: Number, default: 0 },
+
   // ✅ All references converted from ObjectId to String
   postID: { type: String, ref: "Post", required: true },
   userID: { type: String, ref: "User", required: true },
+
 
   
   parentID: { 

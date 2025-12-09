@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import CommunityBox from "./CommunityBox";
 
-export default function DisplayCategories({ communitiesArr, retrieveCommunities }) {
+export default function DisplayCategories({ communitiesArr, retrieveCommunities , }) {
     return (
         <Box 
             sx={{ 
