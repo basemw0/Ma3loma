@@ -8,7 +8,8 @@ const { validationResult } = require('express-validator');
 
 
 const getCommunities= async (req, res) => {
-  const userID = "a1a1f09d-9c38-4a55-8f65-16f8c6f4d374"
+  const cid =  "3934d4bf-f5d0-4ae6-b227-809022cd5628"
+  const userID =  "8dec6e7e-63e9-4cac-ad56-d9034068fb47"
   const limit = req.params.limit;
 
 
@@ -79,7 +80,8 @@ const getCommunities= async (req, res) => {
 
 const getCommunitiesByCategory = async (req, res) => {
   // Hardcoded ID per your snippet
-  const userID = "a1a1f09d-9c38-4a55-8f65-16f8c6f4d374"; 
+   const cid = "3934d4bf-f5d0-4ae6-b227-809022cd5628"
+   const userID = "8dec6e7e-63e9-4cac-ad56-d9034068fb47"
   const { q } = req.query; 
 
   try {
@@ -169,7 +171,8 @@ const getCommunitiesByCategory = async (req, res) => {
 // ✅ CREATE COMMUNITY ENDPOINT
 const createCommunity = async (req, res) => {
 const { name, description, interests,icon,banner,privacy } = req.body;
-const userID = req.user.id;
+ const cid = "3934d4bf-f5d0-4ae6-b227-809022cd5628"
+  const userID = "8dec6e7e-63e9-4cac-ad56-d9034068fb47"
   if (!name || !userID) {
     return res.status(400).json({ message: "Name and UserID are required" });
   }
@@ -214,9 +217,9 @@ const userID = req.user.id;
 }
 
 const updateCommunity = async (req, res) => {
-  const communityID = req.params.id;
   const { name, description, interests,icon,banner,privacy } = req.body;
-  const userID = "a1a1f09d-9c38-4a55-8f65-16f8c6f4d374"
+   const communityID ="3934d4bf-f5d0-4ae6-b227-809022cd5628"
+  const userID ="8dec6e7e-63e9-4cac-ad56-d9034068fb47"
   if (!communityID || !userID) {
     return res.status(400).json({ message: "communityID and UserID are required" });
   }
@@ -262,11 +265,11 @@ const updateCommunity = async (req, res) => {
 
 // ✅ JOIN / LEAVE COMMUNITY (Toggle)
 const joinCommunity= async (req, res) => {
-  const communityID = req.params.id;
+  const communityID = "3934d4bf-f5d0-4ae6-b227-809022cd5628"
+  const userID ="8dec6e7e-63e9-4cac-ad56-d9034068fb47"
   const { action } = req.body; 
   console.log(communityID)
   const community = await Community.findById(communityID)
-  const userID = "a1a1f09d-9c38-4a55-8f65-16f8c6f4d374"
   console.log("🔥 JOIN ROUTE HIT");
 
   try {
@@ -319,8 +322,8 @@ const joinCommunity= async (req, res) => {
 
 // ✅ GET COMMUNITY BY ID (With "Am I a Member?" Check)
 const getCommunityById= async (req, res) => {
-  const communityID = req.params.id;
-  const userID = "a1a1f09d-9c38-4a55-8f65-16f8c6f4d374"
+   const communityID = "3934d4bf-f5d0-4ae6-b227-809022cd5628"
+   const userID = "8dec6e7e-63e9-4cac-ad56-d9034068fb47"
   try {
     const community = await Community.findById(communityID).populate({
       path: "moderators.user",   
@@ -369,7 +372,8 @@ const getCommunityById= async (req, res) => {
 
 const searchCommunity = async (req, res) => {
   const { q } = req.query;
-  const userID = "a1a1f09d-9c38-4a55-8f65-16f8c6f4d374"
+  const communityID = "3934d4bf-f5d0-4ae6-b227-809022cd5628"
+  const userID = "8dec6e7e-63e9-4cac-ad56-d9034068fb47"
   console.log(q)
 
   try {

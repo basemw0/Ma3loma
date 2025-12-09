@@ -1,79 +1,60 @@
-import { Box, Divider } from "@mui/material"
+import { Box } from "@mui/material";
 import * as React from 'react';
-import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
+import ListSubheader from '@mui/material/ListSubheader'; // Import this
 
 export default function FilterBtn(props){
     const [filter, setFilter] = React.useState(1);
-    const {getPosts , communityId , setNum} = props
-    const handleChange = (value)=>{
-        switch (value){
-            case 1:
-                setNum(1)
-                getPosts(communityId , 1 , "best")
-                setFilter(1)
-                break
-            case 2:
-                setNum(1)
-                getPosts(communityId , 1 , "hot")
-                setFilter(2)
-                break
-            case 3:
-                setNum(1)
-                getPosts(communityId , 1 , "new")
-                setFilter(3)
-                break
-        }
-    }
+    const {getPosts, communityId, setNum, setCurrentFilter} = props;
+
+    const handleChange = (event) => {
+        const value = event.target.value;
+        setFilter(value);
+
+        let filterName = "new";
+        if (value === 1) filterName = "best";
+        if (value === 2) filterName = "hot";
+        if (value === 3) filterName = "new";
+
+        setCurrentFilter(filterName);
+        
+        // LOGIC FIX: When filtering, we fetch Page 1, 
+        // but we must set 'num' to 2 so the NEXT "Show More" click fetches Page 2.
+        setNum(2); 
+        getPosts(communityId, 1, filterName);
+    };
+
     return(
         <Box sx={{display : 'flex' , flexDirection : 'column'}}>
-            <div>
-  <FormControl sx={{ m: 1, minWidth: 40 }}>
-    <Select
-      value={filter}
-      onChange={(e)=>{handleChange(e.target.value)}}
-      displayEmpty
-      sx={{
-        backgroundColor: 'white',
-        border: 'none',
-        textAlign : 'center',
-        borderRadius: '24px',
-        fontSize: '1.1rem',
-        fontWeight: 500,
-        color: '#5f6368',
-        '& .MuiOutlinedInput-notchedOutline': {
-          border: 'none',
-        },
-        '&:hover': {
-          backgroundColor: 'lightgrey',
-        },
-        '&.Mui-focused': {
-          backgroundColor: 'white',
-        },
-        '& .MuiSelect-select': {
-          paddingLeft: '20px',
-          paddingRight: '40px',
-          paddingTop: '12px',
-          paddingBottom: '12px',
-        },
-        '& .MuiSelect-icon': {
-          color: '#5f6368',
-          right: '12px',
-        },
-      }}
-      
-    >
-      <span style={{marginLeft : 10}}>Sort by</span>
-      <Divider sx={{marginTop : 1 , marginBottom  :1}}/>
-      <MenuItem sx={{opacity : 0.6}} value={1}>Best</MenuItem>
-      <MenuItem sx={{opacity : 0.6}} value={2}>Hot</MenuItem>
-      <MenuItem sx={{opacity : 0.6}}value={3}>New</MenuItem>
-    </Select>
-  </FormControl>
-</div>
+            <FormControl sx={{ m: 1, minWidth: 120 }}>
+                <Select
+                    value={filter}
+                    onChange={handleChange}
+                    displayEmpty
+                    renderValue={(selected) => {
+                        // This makes the button say "Sort by Best"
+                        const labels = {1: "Best", 2: "Hot", 3: "New"};
+                        return <span style={{color: '#5f6368'}}>Sort by <b>{labels[selected]}</b></span>;
+                    }}
+                    sx={{
+                        backgroundColor: 'white',
+                        borderRadius: '24px',
+                        height: '45px',
+                        '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
+                        '&:hover': { backgroundColor: 'lightgrey' },
+                        '&.Mui-focused': { backgroundColor: 'white' },
+                    }}
+                >
+                    {/* Use ListSubheader for non-clickable headers */}
+                    <ListSubheader>Sort by</ListSubheader>
+                    
+                    <MenuItem value={1}>Best</MenuItem>
+                    <MenuItem value={2}>Hot</MenuItem>
+                    <MenuItem value={3}>New</MenuItem>
+                </Select>
+            </FormControl>
         </Box>
-    )
-
+    );
 }

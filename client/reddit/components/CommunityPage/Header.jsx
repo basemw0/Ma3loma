@@ -6,7 +6,7 @@ import axios from 'axios';
 import { Link } from "react-router-dom";
 
 export default function Header(props) {
-    const {community , setJoined , joined , getPosts , setNum} = props
+    const {community , setJoined , joined } = props
     const handleJoinClick = async (status)=>{
       try{
         if(status == 'Joined'){

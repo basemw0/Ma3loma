@@ -5,7 +5,7 @@ const Community = require('../models/Community.js')
 const getPostsHomePage = async (req, res) =>{
     try{
         
-        const uid = req.user ? req.user.id : null;
+        const uid = "8dec6e7e-63e9-4cac-ad56-d9034068fb47"
 
         const filter = req.query.filter || 'new'; 
         let sortOption = {};
@@ -64,8 +64,9 @@ const getPostsHomePage = async (req, res) =>{
 
 const getPostsCommunity = async (req, res) =>{
     try{
-        const {cid} = req.params;
-        const uid = req.user ? req.user.id : null; 
+        // const {cid} = req.params;
+        const cid = "3934d4bf-f5d0-4ae6-b227-809022cd5628"
+        const uid = "8dec6e7e-63e9-4cac-ad56-d9034068fb47"
 
         const filter = req.query.filter || 'new'; 
         let sortOption = {};
@@ -91,7 +92,7 @@ const getPostsCommunity = async (req, res) =>{
         const commExists = await Community.exists({_id:cid});
         if (!commExists) return res.status(404).json({ message: "Community not found" });
 
-        const posts = await Post.find({communityID: cid}).sort(sortOption).skip(skip).limit(limit).populate('userID', 'username image').populate('communityID', 'name');
+        const posts = await Post.find({communityID: cid}).sort(sortOption).skip(skip).limit(limit).populate('userID', 'username image').populate('communityID', 'name icon');
 
         res.status(200).send(posts);
         
@@ -135,7 +136,8 @@ const createPost = async (req, res) =>{
     try{
 
         const {title, content, mediaUrl, mediaType, communityID} = req.body;
-        const uid = "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
+        //  const cid = "c218e537-1901-470c-8dda-232bb52b434e"
+        const userID ="8dec6e7e-63e9-4cac-ad56-d9034068fb47"
 
         //cid = d17b1418-f818-4af8-b8cc-3202e5b43f93
 
@@ -159,7 +161,7 @@ const createPost = async (req, res) =>{
 const deletePost = async (req, res) =>{
     try {
         const { pid } = req.params;
-        const uid = "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
+        const uid ="8dec6e7e-63e9-4cac-ad56-d9034068fb47"
 
         
         const post = await Post.findById(pid);
@@ -189,7 +191,7 @@ const editPost = async (req, res)=>{
     try{
         const {pid} = req.params
         const {title, content, mediaUrl, mediaType} = req.body;
-        const uid = "607d1cab-cd65-4d5c-a8de-110965b4b2d9";
+        const uid = "8dec6e7e-63e9-4cac-ad56-d9034068fb47"
 
         const userExists = await User.exists({_id:uid});
         if (!userExists) return res.status(404).json({ message: "User not found" });
@@ -227,7 +229,7 @@ const upvotePost = async (req, res)=>{
     console.log("YOOO")
     try{
         const {pid} = req.params;
-        const uid = "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
+        const uid = "8dec6e7e-63e9-4cac-ad56-d9034068fb47"
 
         const userExists = await User.exists({_id:uid});
         if (!userExists) return res.status(404).json({ message: "User not found" });
@@ -273,7 +275,7 @@ const downvotePost = async (req, res)=>{
 
     try{
         const {pid} = req.params;
-        const uid = "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
+        const uid = "8dec6e7e-63e9-4cac-ad56-d9034068fb47"
 
         const userExists = await User.exists({_id:uid});
         if (!userExists) return res.status(404).json({ message: "User not found" });
@@ -317,9 +319,9 @@ const downvotePost = async (req, res)=>{
 
 const awardPost = async (req, res)=>{
     try{
-        const {pid, cid} = req.params;
+        const cid = "3934d4bf-f5d0-4ae6-b227-809022cd5628"
+        const uid = "8dec6e7e-63e9-4cac-ad56-d9034068fb47"
         const {awardName} = req.body;
-        const uid = "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
 
         const user = await User.findById(uid);
         if (!user) return res.status(404).json({ message: "User not found" });
