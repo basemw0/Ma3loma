@@ -6,6 +6,17 @@ const getPostsHomePage = async (req, res) =>{
     try{
         
         const uid = req.user ? req.user.id : null;
+
+        const filter = req.query.filter || 'new'; 
+        let sortOption = {};
+
+        if(filter === 'best'){
+            sortOption = {voteCount: -1};
+        }else if(filter === 'hot'){
+            sortOption = {commentCount: -1};
+        }else{
+            sortOption = {createdAt: -1};
+        }
         
         const page = pareseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
@@ -36,9 +47,8 @@ const getPostsHomePage = async (req, res) =>{
             
         }
 
-        
         const posts = await Post.find(query)
-            .sort({ createdAt: -1 })
+            .sort(sortOption) 
             .skip(skip)
             .limit(limit)
             .populate('userID', 'username image')
@@ -57,6 +67,17 @@ const getPostsCommunity = async (req, res) =>{
         const {cid} = req.params;
         const uid = req.user ? req.user.id : null; 
 
+        const filter = req.query.filter || 'new'; 
+        let sortOption = {};
+
+        if(filter === 'best'){
+            sortOption = {voteCount: -1};
+        }else if(filter === 'hot'){
+            sortOption = {commentCount: -1};
+        }else{
+            sortOption = {createdAt: -1};
+        }
+
         const page = pareseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
@@ -70,7 +91,7 @@ const getPostsCommunity = async (req, res) =>{
         const commExists = await Community.exists({_id:cid});
         if (!commExists) return res.status(404).json({ message: "Community not found" });
 
-        const posts = await Post.find({communityID: cid}).sort({createdAt: -1}).skip(skip).limit(limit).populate('userID', 'username image').populate('communityID', 'name');
+        const posts = await Post.find({communityID: cid}).sort(sortOption).skip(skip).limit(limit).populate('userID', 'username image').populate('communityID', 'name');
 
         res.status(200).send(posts);
         
@@ -223,12 +244,15 @@ const upvotePost = async (req, res)=>{
 
         if (isUp) {
             
-            updateQuery = { $pull: { upvotes: uid } };
-        } else {
+            updateQuery = { $pull: { upvotes: uid },
+                            $inc: {voteCount : -1}
+            };
+        }else {
             
             updateQuery = { 
                 $addToSet: { upvotes: uid }, 
-                $pull: { downvotes: uid }    
+                $pull: { downvotes: uid },
+                $inc: { voteCount: 1 }    
             };
         }
 
@@ -266,12 +290,15 @@ const downvotePost = async (req, res)=>{
 
         if (isDown) {
             
-            updateQuery = { $pull: { downvotes: uid } };
+            updateQuery = { $pull: { downvotes: uid },
+                            $inc: { voteCount: 1 }                    
+            };
         } else {
             
             updateQuery = { 
                 $addToSet: { downvotes: uid }, 
-                $pull: { upvotes: uid }    
+                $pull: { upvotes: uid },
+                $inc: { voteCount: -1 }    
             };
         }
 

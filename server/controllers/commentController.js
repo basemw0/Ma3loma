@@ -62,7 +62,7 @@ const createComment = async (req, res) =>{
             const parentExists = await Comment.exists({_id:parentID});
             if(!parentExists) return res.status(404).json({message: 'Post Not Exist (CommentController)'});
         }
-        
+
 
         
         const newComment = await Comment.create({
@@ -74,6 +74,10 @@ const createComment = async (req, res) =>{
             parentID: parentID || null
         });
         newComment.populate("userID" ,"username image")
+
+        await Post.findByIdAndUpdate(postID, { 
+            $inc: { commentCount: 1 } 
+        });
 
         
         if (parentID) {
@@ -150,15 +154,20 @@ const upvoteComment = async (req, res) =>{
         let updateQuery = {};
     
         if (isUp) {
-                
-            updateQuery = { $pull: { upvotes: uid } };
-        } else {
-                
+            
+            updateQuery = { $pull: { upvotes: uid },
+                            $inc: {voteCount : -1}
+            };
+        }else {
+            
             updateQuery = { 
                 $addToSet: { upvotes: uid }, 
-                $pull: { downvotes: uid }    
+                $pull: { downvotes: uid },
+                $inc: { voteCount: 1 }    
             };
         }
+
+
         const comment_u = await Comment.findByIdAndUpdate(coid, updateQuery, { new: true }).populate("userID" , "username")
         res.status(200).json(comment_u);
     }catch(error){
@@ -222,13 +231,16 @@ const downvoteComment = async (req, res) =>{
         let updateQuery = {};
     
         if (isDown) {
-                
-            updateQuery = { $pull: { downvotes: uid } };
+            
+            updateQuery = { $pull: { downvotes: uid },
+                            $inc: { voteCount: 1 }                    
+            };
         } else {
-                
+            
             updateQuery = { 
                 $addToSet: { downvotes: uid }, 
-                $pull: { upvotes: uid }    
+                $pull: { upvotes: uid },
+                $inc: { voteCount: -1 }    
             };
         }
     
