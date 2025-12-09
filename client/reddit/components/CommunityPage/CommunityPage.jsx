@@ -10,6 +10,7 @@ import { useParams } from "react-router-dom";
 export default function CommunityPage() {
     const {communityId} = useParams()
     const [posts, setPosts] = useState([]);
+    const [currentFilter , setCurrentFilter] = useState("new")
     const [num , setNum] = useState(1)
     const [community, setCommunity] = useState(null);
     const [joined, setJoined] = useState('');
@@ -26,11 +27,16 @@ export default function CommunityPage() {
         }
     };
 
-    const getPosts = async (id , num) => {
-        let response = await axios.get("http://localhost:3000/api/posts/community/" + id + "?page=" + num);
+    const getPosts = async (id , num , filter) => {
+        let response = await axios.get("http://localhost:3000/api/posts/community/" + id + "?page=" + num + "&filter=" + filter);
+        if(num ===1){
+            setPosts(response.data);
+        }
+        else{
         setPosts((prev)=>{
             return [...prev , ...response.data]
         });
+        }
         setNum((prev)=>{
             return prev+1
         })
@@ -38,7 +44,7 @@ export default function CommunityPage() {
 
     useEffect(() => {
         getCommunity(communityId);
-        getPosts(communityId , num);
+        getPosts(communityId , num , "new");
     }, []);
 
     if (!community) return <div>Loading...</div>;
@@ -48,7 +54,7 @@ export default function CommunityPage() {
             <Header community={community} setJoined={setJoined} joined={joined} />
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Box sx={{display : 'flex' , flexDirection :'column', alignItems : 'center', justifyContent:'center'}}>
-                <PostsSection posts={posts} />
+                <PostsSection posts={posts} getPosts = {getPosts} setNum = {setNum} communityId = {communityId}/>
                  <Button onClick={()=>{getPosts(communityId , num)}} variant="text">Show more</Button>
                 </Box>
                 <CommunityDetails community={community} />

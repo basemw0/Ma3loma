@@ -7,31 +7,25 @@ import Select from '@mui/material/Select';
 
 export default function FilterBtn(props){
     const [filter, setFilter] = React.useState(1);
-    const {getPosts} = props
+    const {getPosts , communityId , setNum} = props
     const handleChange = (value)=>{
         switch (value){
-            case 1: 
-                //Axios request to get only Best posts+ reRoute
+            case 1:
+                setNum(1)
+                getPosts(communityId , 1 , "best")
                 setFilter(1)
                 break
             case 2:
-                //Axios request to get only Hot posts+ reRoute
+                setNum(1)
+                getPosts(communityId , 1 , "hot")
                 setFilter(2)
                 break
             case 3:
-                //Axios request to get only New posts + reRoute
+                setNum(1)
+                getPosts(communityId , 1 , "new")
                 setFilter(3)
                 break
-            case 4:
-                //Axios request to get only Top posts + reRoute
-                setFilter(4)
-                break
-            case 5:
-                 //Axios request to get only Top posts + reRoute
-                setFilter(5)
-                break
         }
-
     }
     return(
         <Box sx={{display : 'flex' , flexDirection : 'column'}}>
@@ -76,8 +70,6 @@ export default function FilterBtn(props){
       <MenuItem sx={{opacity : 0.6}} value={1}>Best</MenuItem>
       <MenuItem sx={{opacity : 0.6}} value={2}>Hot</MenuItem>
       <MenuItem sx={{opacity : 0.6}}value={3}>New</MenuItem>
-      <MenuItem sx={{opacity : 0.6}}value={4}>Top</MenuItem>
-      <MenuItem sx={{opacity : 0.6}}value={5}>Rising</MenuItem>
     </Select>
   </FormControl>
 </div>

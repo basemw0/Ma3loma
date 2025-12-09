@@ -14,6 +14,16 @@ const ALLOWED_INTERESTS = require('./config/interests');
 // --- CONFIGURATION ---
 const MONGO_URI = "mongodb+srv://MohamedWBadra:2512006.m@redditclone.5d2hpqu.mongodb.net/?appName=redditClone";
 
+const connectDB = async () => {
+    try {
+        await mongoose.connect(MONGO_URI);
+        console.log("✅ MongoDB Connected Successfully");
+    } catch (error) {
+        console.error("❌ MongoDB Connection Failed:", error.message);
+        process.exit(1);
+    }
+};
+
 // ✅ UPDATED COUNTS
 const USER_COUNT = 10; 
 const TOTAL_COMMUNITIES = 50;
@@ -248,4 +258,6 @@ const seedData = async () => {
     process.exit(1);
   }
 };
-seedData();
+//seedData();
+
+module.exports = connectDB;

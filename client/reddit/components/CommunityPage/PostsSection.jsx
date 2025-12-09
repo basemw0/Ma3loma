@@ -3,10 +3,10 @@ import FilterBtn from "./FilterBtn";
 import { useState } from "react";
 import Posts from '../content/posts/Posts'
 export default function PostsSection(props){
-    const {posts , getPosts} = props
+    const {posts ,  getPosts ,setNum ,communityId } = props
     return(
         <Stack direction='column'>
-            <FilterBtn getPosts = {getPosts}/>
+            <FilterBtn getPosts = {getPosts} setNum = {setNum} communityId = {communityId}/>
             <Stack direction='column'>
                 <Posts posts = {posts}/>
             </Stack>

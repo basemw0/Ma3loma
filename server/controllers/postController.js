@@ -18,8 +18,8 @@ const getPostsHomePage = async (req, res) =>{
             sortOption = {createdAt: -1};
         }
         
-        const page = pareseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
+        const page = parseInt(req.query.page) || 1;
+        const limit = 20
         const skip = (page - 1) * limit;
 
         let query = {}; 
@@ -78,8 +78,8 @@ const getPostsCommunity = async (req, res) =>{
             sortOption = {createdAt: -1};
         }
 
-        const page = pareseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
+        const page = parseInt(req.query.page) || 1;
+        const limit = 20
         const skip = (page - 1) * limit;
 
         
