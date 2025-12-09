@@ -1,115 +1,127 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios"; // Importing Axios
-
+import React from "react";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
-import ModeCommentIcon from "@mui/icons-material/ModeComment";
-import ShareIcon from "@mui/icons-material/Share";
-import BookmarkIcon from "@mui/icons-material/Bookmark";
+import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
+import ShareOutlinedIcon from "@mui/icons-material/ShareOutlined";
+import BookmarkBorderOutlinedIcon from "@mui/icons-material/BookmarkBorderOutlined";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
-import Button from "../../button/Button";
-import Video from "../../video/Video"; // If you're displaying video
+import Video from "../../video/Video"; 
 
 import "./Posts.css";
 
-export default function Posts() {
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+export default function Posts({ posts }) {
+  if (!posts || posts.length === 0) {
+    return <div className="no-posts">No posts to display</div>;
+  }
 
-  useEffect(() => {
-    axios
-      .get("http://localhost:3000/api/posts/home")
-      .then((response) => {
-        setPosts(response.data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError("Error fetching posts.");
-        setLoading(false);
-      });
-  }, []);
 
   return (
-    <div className="posts-wrapper">
-      {loading ? (
-        <p>Loading posts...</p>
-      ) : error ? (
-        <p>{error}</p>
-      ) : (
-        posts.map((post, index) => (
-          <div className="post" key={post._id}>
+    <div className="feed-container">
+      {posts.map((post) => (
+        <div className="reddit-card modern" key={post._id}>
+          
+          {/* LEFT VOTE SIDEBAR */}
+          <div className="card-sidebar modern-sidebar">
+            <button className="vote-btn up">
+              <ArrowUpwardIcon fontSize="inherit" />
+            </button>
             
-            {/* LEFT VOTES */}
-            <div className="post-sidebar">
-              <ArrowUpwardIcon className="upvote" />
-              {/* Fixed: use post.votes */}
-              <span>{post.votes}</span>
-              <ArrowDownwardIcon className="downvote" />
-            </div>
+            <span className="vote-count modern-vote">
+              {formatNumber(post.upvotes?.length - post.downvotes?.length)}
+            </span>
 
-            <div className="post-title">
+            <button className="vote-btn down">
+              <ArrowDownwardIcon fontSize="inherit" />
+            </button>
+          </div>
 
-              {/* Fixed: use post.communityID.image (not image_src) */}
+          {/* RIGHT CONTENT */}
+          <div className="card-content">
+
+            {/* HEADER */}
+            <div className="card-header">
               <img 
-                src={post.communityID.image || "default_image.jpg"} 
-                alt={`Community ${post.communityID.name}`} 
+                src={post.communityID.icon}
+                alt="community"
+                className="subreddit-icon modern-icon"
               />
 
-              <span className="subreddit-name">r/{post.communityID.name}</span>
-              <span className="post-user">Posted by</span>
-              <span className="post-user underline">u/{post.userID.username}</span>
-              <span className="timestamp">• {post.createdAt}</span>
+              <div className="header-text">
+                <span className="subreddit-link">r/{post.communityID.name}</span>
+                <span className="meta-dot">•</span>
+                <span className="user-meta">u/{post.userID.username}</span>
+                <span className="time-meta">{formatTime(post.createdAt)}</span>
+              </div>
 
-              <div className="spacer"></div>
-              <Button label="+ JOIN" />
+              <button className="join-btn modern-join">Join</button>
             </div>
 
             {/* BODY */}
-            <div className="post-body">
-              <span className="title">{post.title}</span>
-
-              {/* Optional: handle media types if backend implements them */}
-             {
-                post.mediaType === "image" && post.mediaUrl && (
-                  <img src={post.mediaUrl} alt={post.title} />
-                )
-              }
-
-              {
-                post.mediaType === "video" && post.mediaUrl && (
-                  <Video src={post.mediaUrl} />
-                )
-              }
+            <div className="card-body">
+              <h3 className="post-title modern-title">{post.title}</h3>
 
               {post.content && (
-                <span className="description">{post.content}</span>
+                <p className="post-text modern-text">{post.content}</p>
               )}
+
+              <div className="media-wrapper modern-media">
+                {post.mediaType === "image" && post.mediaUrl && (
+                  <img src={post.mediaUrl} className="post-image" />
+                )}
+
+                {post.mediaType === "video" && post.mediaUrl && (
+                  <Video src={post.mediaUrl} className="post-video" />
+                )}
+              </div>
             </div>
 
             {/* FOOTER */}
-            <div className="post-footer">
-              <div className="comments footer-action">
-                <ModeCommentIcon className="comment-icon" />
-                <span>{post.comments?.length || 0} Comments</span>
+            <div className="card-footer modern-footer">
+
+              <div className="action-pill modern-pill">
+                <ChatBubbleOutlineIcon fontSize="small" />
+                <span>{formatNumber(post.comments?.length || 0)} Comments</span>
               </div>
 
-              <div className="share footer-action">
-                <ShareIcon />
+              <div className="action-pill modern-pill">
+                <ShareOutlinedIcon fontSize="small" />
                 <span>Share</span>
               </div>
 
-              <div className="save footer-action">
-                <BookmarkIcon />
+              <div className="action-pill modern-pill">
+                <BookmarkBorderOutlinedIcon fontSize="small" />
                 <span>Save</span>
               </div>
 
-              <MoreHorizIcon className="more-icon footer-action" />
+              <div className="action-pill icon-only modern-pill">
+                <MoreHorizIcon fontSize="small" />
+              </div>
+
             </div>
 
           </div>
-        ))
-      )}
+        </div>
+      ))}
     </div>
   );
+}
+
+
+// Helpers
+function formatNumber(num) {
+  if (!num) return "0";
+  if (num >= 1000) return (num / 1000).toFixed(1) + "k";
+  return num;
+}
+
+// Modern date formatting
+function formatTime(dateString) {
+  const date = new Date(dateString);
+  return date.toLocaleString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }

@@ -336,7 +336,6 @@ const getCommunityById= async (req, res) => {
 
     if (userID) {
       const user = await User.findById(userID).select("joinedCommunities");
-      console.log(user)
       
       if (user) {
         const membership = user.joinedCommunities.find(

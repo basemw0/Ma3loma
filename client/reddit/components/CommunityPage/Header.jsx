@@ -3,6 +3,7 @@ import { Box, Button, IconButton, Avatar, Typography } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import axios from 'axios';
+import { Link } from "react-router-dom";
 
 export default function Header(props) {
     const {community , setJoined , joined} = props
@@ -99,6 +100,8 @@ export default function Header(props) {
           <Button
             variant="outlined"
             startIcon={<AddIcon />}
+            component = {Link}
+            to={`/api/posts/${community._id}/create`}
             sx={{
               borderColor: '#0079d3',
               color: '#0079d3',

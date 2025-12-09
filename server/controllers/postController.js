@@ -5,21 +5,11 @@ const Community = require('../models/Community.js')
 const getPostsHomePage = async (req, res) =>{
     try{
         
-        const uid = req.user ? req.user.id : null;
-
-        const filter = req.query.filter || 'new'; 
-        let sortOption = {};
-
-        if(filter === 'best'){
-            sortOption = {voteCount: -1};
-        }else if(filter === 'hot'){
-            sortOption = {commentCount: -1};
-        }else{
-            sortOption = {createdAt: -1};
-        }
+        const uid =  "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
+        // const uid = req.user ? req.user.id : null;
         
-        const page = pareseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
+        const page = parseInt(req.query.page) || 1;
+        const limit = 20;
         const skip = (page - 1) * limit;
 
         let query = {}; 
@@ -52,7 +42,7 @@ const getPostsHomePage = async (req, res) =>{
             .skip(skip)
             .limit(limit)
             .populate('userID', 'username image')
-            .populate('communityID', 'name');
+            .populate('communityID', 'name icon');
 
         res.status(200).send(posts);
 
@@ -65,24 +55,13 @@ const getPostsHomePage = async (req, res) =>{
 const getPostsCommunity = async (req, res) =>{
     try{
         const {cid} = req.params;
-        const uid = req.user ? req.user.id : null; 
+        // const uid = req.user ? req.user.id : null; 
+        const uid =  "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
 
-        const filter = req.query.filter || 'new'; 
-        let sortOption = {};
-
-        if(filter === 'best'){
-            sortOption = {voteCount: -1};
-        }else if(filter === 'hot'){
-            sortOption = {commentCount: -1};
-        }else{
-            sortOption = {createdAt: -1};
-        }
-
-        const page = pareseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
+        const page = parseInt(req.query.page)
+        console.log(page)
+        const limit = 20;
         const skip = (page - 1) * limit;
-
-        
         if (uid) {
             const userExists = await User.exists({ _id: uid });
             if (!userExists) return res.status(404).json({ message: "User not found" });
@@ -134,8 +113,10 @@ const getPostDetails = async (req, res) =>{
 const createPost = async (req, res) =>{
     try{
 
-        const {title, content, mediaUrl, mediaType, communityID} = req.body;
-        const uid = "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
+        const {title, content, mediaUrl, mediaType} = req.body;
+        const {communityID} = req.params
+        console.log(communityID)
+        const userID = "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
 
         //cid = d17b1418-f818-4af8-b8cc-3202e5b43f93
 
@@ -150,7 +131,7 @@ const createPost = async (req, res) =>{
         res.status(201).json(newPost);
 
     }catch(error){
-        console.log('adasdasd', error.message);
+        console.log(error.message)
         res.status(500).json({message:error.message});
     }
 }
