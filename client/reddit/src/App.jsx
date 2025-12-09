@@ -1,23 +1,46 @@
 import './App.css';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useLocation, useNavigate, Routes, Route } from 'react-router-dom';
 import React from 'react';
-import CommunityDetails from '../components/CommunityCreation/CommunityDetails/CommunityDetails';
-import Login from '../components/Pages/Login';
-import CommunitiesPage from '../components/DisplayCommunities/CommunitiesPage'
-import Signup from "../components/Pages/Signup";
-import CommunityPage from '../components/CommunityPage/CommunityPage';
-import ExploreCommunities from '../components/ExploreCommunities/ExploreCommunities'
-import CreationWizard from '../components/CommunityCreation/CreationWizard';
+
+// Import Pages
+import Login from '../components/Pages/Login'; // Adjust path as needed
+import Signup from "../components/Pages/Signup"; // Adjust path as needed
+import ForgotPassword from "../components/Pages/ForgotPassword";
+import ResetPassword from "../components/Pages/ResetPassword"; // <--- NEW IMPORT
+
+// ... (Keep your other component imports like Landing, etc.) ...
 import Landing from "../components/Landing/Landing";
-import CreatePost from '../components/create-post/CreatePost';
-import EditPost from '../components/edit-post/EditPost';
-import PostDetails from '../components/post-details/PostDetails';
 
 function App() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Google Auth Logic
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const token = queryParams.get('token');
+    if (token) {
+      localStorage.setItem('token', token);
+      window.history.replaceState({}, document.title, "/");
+      navigate("/");
+    }
+  }, [location, navigate]);
+
   return (
-    <>
-      <Login />
-    </>
+    <div className="App">
+      <Routes>
+        {/* Auth Routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} /> {/* <--- NEW ROUTE */}
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
+        {/* Main Routes */}
+        <Route path="/" element={<Landing />} />
+        {/* ... keep your other routes ... */}
+      </Routes>
+    </div>
   );
 }
+
 export default App;
