@@ -52,7 +52,7 @@ const getPostsHomePage = async (req, res) =>{
             .skip(skip)
             .limit(limit)
             .populate('userID', 'username image')
-            .populate('communityID', 'name');
+            .populate('communityID', 'name icon');
 
         res.status(200).send(posts);
 
@@ -82,8 +82,6 @@ const getPostsCommunity = async (req, res) =>{
         const page = parseInt(req.query.page) || 1;
         const limit = 20
         const skip = (page - 1) * limit;
-
-        
         if (uid) {
             const userExists = await User.exists({ _id: uid });
             if (!userExists) return res.status(404).json({ message: "User not found" });
@@ -152,7 +150,7 @@ const createPost = async (req, res) =>{
         res.status(201).json(newPost);
 
     }catch(error){
-        console.log('adasdasd', error.message);
+        console.log(error.message)
         res.status(500).json({message:error.message});
     }
 }
