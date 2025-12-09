@@ -1,5 +1,9 @@
 .main-bar {
   flex: 0.65;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .main-bar .update-card {

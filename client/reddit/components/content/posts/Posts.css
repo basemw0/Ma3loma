@@ -1,170 +1,181 @@
-.posts-wrapper .post {
-  display: grid;
+:root {
+  --canvas-bg: #f6f7f8;
+  --card-bg: #ffffff;
+  --border-color: #e5e7eb;
+  --hover-border: #c8ccd1;
 
+  --title-color: #1a1a1b;
+  --meta-color: #818384;
+
+  --accent-orange: #ff4500;
+  --accent-blue: #4f8cff;
+
+  --gray-hover: #f3f3f3;
+  --pill-hover: #e9ebed;
+
+  --shadow: 0px 2px 10px rgba(0,0,0,0.05);
+}
+
+/* FEED CONTAINER */
+.feed-container {
+  background-color: var(--canvas-bg);
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+
+/* CARD */
+.reddit-card.modern {
   width: 100%;
-
-  grid-template-columns: 1fr 12fr;
-  grid-template-rows: 1fr auto 1fr;
-
-  margin: 10px 0px;
-
-  grid-template-areas:
-    "post-sidebar post-title"
-    "post-sidebar post-body"
-    "post-sidebar post-footer";
-
-  background-color: white;
+  max-width: 680px;
+  background: var(--card-bg);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  display: flex;
+  box-shadow: var(--shadow);
+  transition: 0.2s ease;
 }
 
-.posts-wrapper .post:hover {
-  cursor: pointer;
+.reddit-card.modern:hover {
+  border-color: var(--hover-border);
+  transform: translateY(-2px);
 }
 
-.posts-wrapper .post .post-sidebar {
-  grid-area: post-sidebar;
-
+/* LEFT SIDEBAR */
+.card-sidebar.modern-sidebar {
+  width: 48px;
+  background: #fafbfc;
+  border-radius: 10px 0 0 10px;
+  padding: 12px 4px;
   display: flex;
   flex-direction: column;
   align-items: center;
-
-  padding-top: 5px;
-
-  background-color: rgb(245, 245, 245);
+  gap: 6px;
 }
 
-.posts-wrapper .post .post-sidebar > svg {
-  color: rgb(130, 130, 130);
-}
-
-.posts-wrapper .post .post-sidebar > svg:hover {
-  border-radius: 2px;
-
-  background-color: rgb(220, 220, 220);
-}
-
-.posts-wrapper .post .post-sidebar > .upvote:hover {
-  color: rgb(200, 0, 0);
-}
-
-.posts-wrapper .post .post-sidebar > .downvote:hover {
-  color: var(--primary-color);
-}
-
-.posts-wrapper .post .post-sidebar > span {
-  font-weight: 600;
+.modern-vote {
   font-size: 13px;
+  font-weight: 600;
+  color: #373737;
 }
 
-.posts-wrapper .post .post-title {
-  grid-area: post-title;
+/* VOTE BUTTONS */
+.vote-btn {
+  color: #878a8c;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: 0.2s;
+}
 
+.vote-btn:hover {
+  background: var(--gray-hover);
+  color: var(--accent-orange);
+}
+
+.vote-btn.down:hover {
+  color: var(--accent-blue);
+}
+
+/* CARD CONTENT */
+.card-content {
+  padding: 12px;
+  flex: 1;
+}
+
+/* HEADER */
+.card-header {
   display: flex;
-
   align-items: center;
+  gap: 10px;
 }
 
-.posts-wrapper .post .post-body {
-  grid-area: post-body;
-}
-
-.posts-wrapper .post .post-footer {
-  grid-area: post-footer;
-  align-items: center;
-
-  display: flex;
-  padding-left: 5px;
-
-  color: rgb(130, 130, 130);
-}
-
-.posts-wrapper .post .post-title > img {
-  min-width: 16px;
-  min-height: 16px;
-  max-width: 16px;
-  max-height: 16px;
-
-  margin: 0px 5px;
+.modern-icon {
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
 }
 
-.posts-wrapper .post .post-title > .subreddit-name {
+.subreddit-link {
+  font-weight: 700;
+  margin-right: 6px;
+}
+
+.user-meta {
+  color: var(--meta-color);
+}
+
+.time-meta {
+  color: var(--meta-color);
+  margin-left: 4px;
+}
+
+/* JOIN BUTTON */
+.join-btn.modern-join {
+  margin-left: auto;
+  padding: 5px 14px;
+  background: var(--accent-blue);
+  border: none;
+  border-radius: 20px;
+  color: white;
   font-weight: 600;
-  font-size: 12px;
+  transition: 0.2s;
 }
 
-.posts-wrapper .post .post-title > .subreddit-name:hover {
-  text-decoration: underline;
+.join-btn.modern-join:hover {
+  background: #3a6ed8;
 }
 
-.posts-wrapper .post .post-title > .post-user {
-  padding-left: 5px;
-  font-size: 12px;
-
-  color: rgb(150, 150, 150);
-}
-
-.posts-wrapper .post .post-title > .underline:hover {
-  text-decoration: underline;
-}
-
-.posts-wrapper .post .post-title > .button {
-  margin: 8px;
-  padding: 4px 8px;
-
-  font-size: 11px;
-}
-
-.posts-wrapper .post .post-body > .title {
-  margin-left: 5px;
-
-  font-size: 18px;
+/* BODY */
+.modern-title {
+  font-size: 20px;
+  margin: 8px 0;
   font-weight: 600;
 }
 
-.posts-wrapper .post .post-body > img {
-  object-fit: cover;
-  object-position: center;
-
-  max-height: 500px;
-  width: 100%;
+.modern-text {
+  font-size: 15px;
+  margin-bottom: 10px;
+  line-height: 1.5;
+  color: #2f2f2f;
 }
 
-.posts-wrapper .post .post-body > .description {
+/* MEDIA */
+.media-wrapper.modern-media {
+  border-radius: 8px;
+  overflow: hidden;
+  background: black;
   margin-top: 10px;
-  margin-left: 5px;
-
-  display: block;
 }
 
-.posts-wrapper .post .post-footer .footer-action {
+/* FOOTER */
+.card-footer.modern-footer {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.action-pill.modern-pill {
   display: flex;
   align-items: center;
-  margin: 0px 5px;
-  padding: 3px;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
-.posts-wrapper .post .post-footer .footer-action:first-child {
-  margin-left: 0px;
+.action-pill.modern-pill:hover {
+  background: var(--pill-hover);
 }
 
-.posts-wrapper .post .post-footer .footer-action:last-child {
-  margin-right: 0px;
-}
-
-.posts-wrapper .post .post-footer .footer-action svg {
-  margin-right: 5px;
-}
-
-.posts-wrapper .post .post-footer span {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.posts-wrapper .post .post-footer svg {
-  font-size: 16px;
-}
-
-.posts-wrapper .post .post-footer .footer-action:hover {
-  border-radius: 5px;
-  background-color: rgb(230, 230, 230);
+/* NO POSTS */
+.no-posts {
+  font-size: 18px;
+  color: var(--meta-color);
+  padding: 40px;
 }

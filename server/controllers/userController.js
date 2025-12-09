@@ -1,8 +1,20 @@
+const env = require('dotenv').config();
 const User = require('../models/User');
+const Verification = require('../models/Verification');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 const { validationResult } = require('express-validator');
 
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail', // or your provider
+  auth: {
+    user: env.EMAIL_USER, // e.g., 'yourname@gmail.com'
+    pass: env.EMAIL_PASS 
+  }
+});
 // Get all users
 const getUsers = async (req, res) => {
   try {
@@ -47,7 +59,7 @@ const signup = async (req, res) => {
     let token;
      token = jwt.sign(
       { id: user._id },
-      'SecretMoot',{expiresIn: 3600},
+      env.JWT_SECRET,{expiresIn: 3600},
     )
     
     res.status(201).json({ 
@@ -89,7 +101,7 @@ const login = async (req, res) => {
      let token;
      token = jwt.sign(
       { id: user._id },
-      'SecretMoot',{expiresIn: 3600},
+      env.JWT_SECRET,{expiresIn: 3600},
     )
     // Return user data (without password)
     res.status(200).json({
@@ -111,8 +123,120 @@ const login = async (req, res) => {
   }
 };
 
+const sendVerificationCode = async (req, res) => {
+  const { email } = req.body;
+  try {
+    // Generate 6-digit code
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Store in DB (Update if exists, or create new)
+    await Verification.findOneAndUpdate(
+      { email },
+      { email, code },
+      { upsert: true, new: true }
+    );
+
+    // Send Email
+    await transporter.sendMail({
+      to: email,
+      subject: 'Your Reddit Verification Code',
+      text: `Your code is: ${code}`
+    });
+
+    res.status(200).json({ message: 'Verification code sent' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error sending code', error: err.message });
+  }
+};
+
+// ✅ 3. VERIFY CODE (Step 2 -> 3)
+const verifyEmail = async (req, res) => {
+  const { email, code } = req.body;
+  try {
+    const record = await Verification.findOne({ email, code });
+    if (!record) {
+      return res.status(400).json({ message: 'Invalid or expired code' });
+    }
+    // Code is valid
+    res.status(200).json({ message: 'Email verified successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Verification failed', error: err.message });
+  }
+};
+
+// ✅ 4. FORGOT PASSWORD (Request Link)
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Generate Token
+    const resetToken = crypto.randomBytes(20).toString('hex');
+
+    // Hash token and save to User
+    user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 Minutes
+    await user.save();
+
+    // Create Reset URL (Frontend URL)
+    const resetUrl = `http://localhost:5173/reset-password/${resetToken}`;
+
+    // Send Email
+    await transporter.sendMail({
+      to: email,
+      subject: 'Password Reset Request',
+      html: `
+        <h1>Password Reset</h1>
+        <p>Click this link to reset your password:</p>
+        <a href="${resetUrl}">${resetUrl}</a>
+      `
+    });
+
+    res.status(200).json({ message: 'Email sent' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error processing request', error: err.message });
+  }
+};
+
+// ✅ 5. RESET PASSWORD (Actual Change)
+const resetPassword = async (req, res) => {
+  try {
+    // Get token from URL params
+    const resetToken = crypto.createHash('sha256').update(req.params.resetToken).digest('hex');
+
+    const user = await User.findOne({
+      resetPasswordToken: resetToken,
+      resetPasswordExpire: { $gt: Date.now() } // Check if not expired
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired token' });
+    }
+
+    // Set new password
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(req.body.password, salt);
+    
+    // Clear reset fields
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+
+    res.status(200).json({ message: 'Password updated successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error resetting password', error: err.message });
+  }
+};
+
 module.exports = {
   getUsers,
   signup,
-  login
+  login,
+  sendVerificationCode,
+  verifyEmail,
+  forgotPassword,
+  resetPassword
 };

@@ -1,9 +1,8 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom"; // ✅ Uses Link for smooth navigation
-import { Box, Typography, InputAdornment, Fade } from "@mui/material";
+import { Box, Paper, Typography, TextField, Button, InputAdornment, Fade } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useForm } from "react-hook-form";
-import api from "../../src/api/axios"; 
+import api from "../../src/api/axios";
 import searchIcon from "./search.png";
 
 import {
@@ -16,30 +15,36 @@ import {
 } from "./Login.styles";
 
 export default function Login() {
-  const { register, handleSubmit, watch } = useForm();
+  const { register, handleSubmit, watch, setValue } = useForm();
   
   const username = watch("username");
   const password = watch("password");
   const isDisabled = !username || !password;
 
-  // Track touched fields for green border logic
+  // Track touched fields
   const [touched, setTouched] = useState({ username: false, password: false });
 
   const onSubmit = async (data) => {
     try {
-      // ✅ 1. Send Login Request to Backend
+      // 1. Send Post Request (Assuming your route is /login defined in server.js)
+      // If your backend routes are prefixed (e.g. app.use('/api', routes)), change this to "/api/login"
       const response = await api.post("/api/users/login", {
-        email: data.username, 
+        email: data.username, // Backend expects 'email', you captured 'username'
         password: data.password
       });
 
       console.log("Login Response:", response.data);
 
+      // 2. Extract Token based on your Backend structure
+      // Your backend returns: { user: { token: "..." } }
       const token = response.data.user?.token; 
 
       if (token) {
+        // 3. Store token
         localStorage.setItem("token", token);
-        // ✅ 2. Force a redirect to update the Navbar/Header
+        
+        // 4. Redirect
+        // (If using react-router-dom, navigate('/') is smoother than window.location)
         window.location.href = "/"; 
       } else {
         alert("Login successful but no token received.");
@@ -47,11 +52,13 @@ export default function Login() {
 
     } catch (error) {
       console.error("Login Error:", error);
+      // specific error message from backend
       const message = error.response?.data?.message || "Invalid email or password";
       alert(message);
     }
   };
 
+  // Helper to get border color
   const getBorderColor = (fieldValue, fieldTouched) => {
     if (!fieldValue && fieldTouched) return "#fb0808ff";
     if (fieldValue) return "green";
@@ -59,12 +66,21 @@ export default function Login() {
   };
 
   const continueWithGoogle = () => {
-    window.location.href = "http://localhost:3000/auth/google"; 
+    // If your backend is on the same origin or you have an API base proxy set, this will work:
+    window.location.href = "/auth/google";
+
+    // If your backend is on a different origin, use:
+    // window.location.href = `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/auth/google`;
   };
 
-  const GoogleIcon = () => (
-    <img src={searchIcon} alt="Google" style={{ width: 18, height: 18 }} />
-  );
+// Replace your GoogleIcon component with this:
+const GoogleIcon = () => (
+  <img
+    src={searchIcon}
+    alt="Google"
+    style={{ width: 18, height: 18 }}
+  />
+);
 
   return (
     <LoginWrapper>
@@ -73,7 +89,7 @@ export default function Login() {
 
         <form onSubmit={handleSubmit(onSubmit)}>
           
-          {/* Username Input */}
+          {/* Username */}
           <RoundedInput
             label={ <>Email or username <span style={{ color: "#ee0000" }}>*</span> </> }
             variant="outlined"
@@ -92,14 +108,20 @@ export default function Login() {
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: "25px",
-                "& fieldset": { borderColor: getBorderColor(username, touched.username) },
-                "&:hover fieldset": { borderColor: getBorderColor(username, touched.username) },
-                "&.Mui-focused fieldset": { borderColor: getBorderColor(username, touched.username) },
+                "& fieldset": {
+                  borderColor: getBorderColor(username, touched.username),
+                },
+                "&:hover fieldset": {
+                  borderColor: getBorderColor(username, touched.username),
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: getBorderColor(username, touched.username),
+                },
               },
             }}
           />
 
-          {/* Password Input */}
+          {/* Password */}
           <RoundedInput
             label={ <>Password <span style={{ color: "#ee0000" }}>*</span> </> }
             type="password"
@@ -119,45 +141,53 @@ export default function Login() {
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: "25px",
-                "& fieldset": { borderColor: getBorderColor(password, touched.password) },
-                "&:hover fieldset": { borderColor: getBorderColor(password, touched.password) },
-                "&.Mui-focused fieldset": { borderColor: getBorderColor(password, touched.password) },
+                "& fieldset": {
+                  borderColor: getBorderColor(password, touched.password),
+                },
+                "&:hover fieldset": {
+                  borderColor: getBorderColor(password, touched.password),
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: getBorderColor(password, touched.password),
+                },
               },
             }}
           />
 
           {/* Forgot password link */}
-          <Link
-            to="/forgot-password"
+          <a
+            href="/password/reset"
             style={{
               color: "#5495ff",
               textDecoration: "none",
-              fontSize: "15px", // Friend's specific styling
-              fontWeight: "bold",
-              display: "block",
-              marginBottom: "16px"
+              fontSize: "15px",
+              fontWeight : "bold",
             }}
+            //onMouseOver={(e) => (e.target.style.textDecoration = "underline")}
+            //onMouseOut={(e) => (e.target.style.textDecoration = "none")}
           >
             Forgot Password?
-          </Link>
+          </a>
 
-          {/* New to Reddit? Sign up */}
-          <p style={{ textAlign: "left", marginTop: "0", color: "#000" }}>
+          {/* Signup */}
+          <p style={{ textAlign: "left", marginTop: "16px", color: "#000" }}>
             New to Reddit?{" "}
-            <Link
-              to="/signup"
+            <a
+              href="/signup"
               style={{
                 color: "#5495ff",
                 textDecoration: "none",
-                fontSize: "15px", // Friend's specific styling
+                fontSize: "15px",
                 fontWeight: "bold",
               }}
+              //onMouseOver={(e) => (e.target.style.textDecoration = "underline")}
+              //onMouseOut={(e) => (e.target.style.textDecoration = "none")}
             >
               Sign up
-            </Link>
+            </a>
           </p>
 
-          {/* Submit Button */}
+          {/* Submit button */}
           <OrangeButton
             type="submit"
             fullWidth
@@ -173,14 +203,14 @@ export default function Login() {
             Log In
           </OrangeButton>
 
-          {/* OR Divider */}
+          {/* OR divider */}
           <Box sx={{ display: "flex", alignItems: "center", my: 2 }}>
             <Box sx={{ flex: 1, height: 1, background: "#e0e0e0" }} />
             <Typography sx={{ mx: 2, fontSize: 12, color: "#6b6b6b" }}>or</Typography>
             <Box sx={{ flex: 1, height: 1, background: "#e0e0e0" }} />
           </Box>
 
-          {/* Google Button */}
+          {/* Continue with Google */}
           <GoogleButton variant="outlined" fullWidth startIcon={<GoogleIcon />} onClick={continueWithGoogle}>
             Continue with Google
           </GoogleButton>

@@ -30,8 +30,13 @@ const UserSchema = new mongoose.Schema({
   },
   password: { 
     type: String, 
-    required: true, 
+    required: false, 
     minlength: [6, "Password must be at least 6 characters"] 
+  },
+  googleId: {
+    type: String,
+    unique: true,
+    sparse: true
   },
   image: {
     type: String,
@@ -57,7 +62,9 @@ const UserSchema = new mongoose.Schema({
     },
     joinedAt: { type: Date, default: Date.now }
   }],
-  savedPosts: [{ type: String, ref: "Post" }] // ✅ Ref converted to String
+  savedPosts: [{ type: String, ref: "Post" }], // ✅ Ref converted to String
+  resetPasswordToken: String,
+  resetPasswordExpire: Date
 }, { timestamps: true });
 
 UserSchema.plugin(uniqueValidator, { message: '{PATH} must be unique.' });
