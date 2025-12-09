@@ -240,21 +240,29 @@ const upvotePost = async (req, res)=>{
         }
 
 
-        const isUp = post.upvotes.includes(uid);
-        
+        const isUpvoted = post.upvotes.includes(uid);
+        const isDownvoted = post.downvotes.includes(uid);
+
         let updateQuery = {};
 
-        if (isUp) {
-            
-            updateQuery = { $pull: { upvotes: uid },
-                            $inc: {voteCount : -1}
-            };
-        }else {
-            
+        if (isUpvoted) {
+            // 1. Already Upvoted -> Remove it (Toggle OFF)
             updateQuery = { 
-                $addToSet: { upvotes: uid }, 
+                $pull: { upvotes: uid },
+                $inc: { voteCount: -1 } 
+            };
+        } else if (isDownvoted) {
+            // 2. Was Downvoted -> Switch to Upvote (Big Jump +2)
+            updateQuery = { 
                 $pull: { downvotes: uid },
-                $inc: { voteCount: 1 }    
+                $addToSet: { upvotes: uid },
+                $inc: { voteCount: 2 } // +1 to neutralize, +1 to go up
+            };
+        } else {
+            // 3. Neutral -> New Upvote (+1)
+            updateQuery = { 
+                $addToSet: { upvotes: uid },
+                $inc: { voteCount: 1 } 
             };
         }
 
@@ -264,6 +272,8 @@ const upvotePost = async (req, res)=>{
         res.status(200).json(post_u);
 
     }catch(error){
+        console.log('el upvote bt3t el post')
+        console.log(error.message);
         res.status(500).json({message:error.message});
     }
 }
@@ -286,21 +296,29 @@ const downvotePost = async (req, res)=>{
         }
 
 
-        const isDown = post.downvotes.includes(uid);
-        
+        const isUpvoted = post.upvotes.includes(uid);
+        const isDownvoted = post.downvotes.includes(uid);
+
         let updateQuery = {};
 
-        if (isDown) {
-            
-            updateQuery = { $pull: { downvotes: uid },
-                            $inc: { voteCount: 1 }                    
+        if (isDownvoted) {
+            // 1. Already Downvoted -> Remove it (Toggle OFF)
+            updateQuery = { 
+                $pull: { downvotes: uid },
+                $inc: { voteCount: 1 } 
+            };
+        } else if (isUpvoted) {
+            // 2. Was Upvoted -> Switch to Downvote (Big Drop -2)
+            updateQuery = { 
+                $pull: { upvotes: uid },
+                $addToSet: { downvotes: uid },
+                $inc: { voteCount: -2 } // -1 to neutralize, -1 to go down
             };
         } else {
-            
+            // 3. Neutral -> New Downvote (-1)
             updateQuery = { 
-                $addToSet: { downvotes: uid }, 
-                $pull: { upvotes: uid },
-                $inc: { voteCount: -1 }    
+                $addToSet: { downvotes: uid },
+                $inc: { voteCount: -1 } 
             };
         }
 
@@ -310,6 +328,8 @@ const downvotePost = async (req, res)=>{
         res.status(200).json(post_u);
 
     }catch(error){
+        console.log('el downvote bt3t el post')
+        console.log(error.message);
         res.status(500).json({message:error.message});
     }
 }

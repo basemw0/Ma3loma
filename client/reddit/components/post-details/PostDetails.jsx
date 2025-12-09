@@ -11,6 +11,8 @@ export default function PostDetails() {
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(true);
 
+  
+
   // Fetch post details and comments
   useEffect(() => {
     const fetchPostDetails = async () => {
