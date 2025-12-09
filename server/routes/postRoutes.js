@@ -21,7 +21,7 @@ router.get('/:pid', postController.getPostDetails);
 
 //router.use(checkAuth);
 
-router.post('/create', postController.createPost);
+router.post('/:communityID/create', postController.createPost);
 
 
 router.put('/edit/:pid', postController.editPost);

@@ -6,12 +6,29 @@ import TrendingUp from "@mui/icons-material/TrendingUp";
 import Menu from "@mui/icons-material/Menu";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import ArrowDropDown from "@mui/icons-material/ArrowDropDown";
-
-
+import { useEffect } from "react";
+import { useState } from "react";
 import "./MainBar.css";
 import Posts from "../posts/Posts";
+import axios from 'axios'
+import { Button } from "@mui/material";
 
 export default function MainBar() {
+  const [posts , setPosts] = useState([])
+  const [num , setNum] = useState(1)
+  const getPosts = async (num) => {
+        let response = await axios.get("http://localhost:3000/api/posts/home?page=" + num);
+        setPosts((prev)=>{
+            return [...prev , ...response.data]
+        });
+        setNum((prev)=>{
+            return prev+1
+        })
+    };
+  useEffect(() => {
+    getPosts(num)
+  }, []);
+  if (!posts) return <div>Loading...</div>;
   return (
     <div className="main-bar">
       <div className="update-card">
@@ -54,7 +71,8 @@ export default function MainBar() {
         </div>
       </div>
 
-      <Posts />
+      <Posts posts = {posts} />
+      <Button onClick={()=>{getPosts(num)}} variant="text">Show more</Button>
     </div>
   );
 }
