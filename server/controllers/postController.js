@@ -5,6 +5,7 @@ const Community = require('../models/Community.js')
 const getPostsHomePage = async (req, res) =>{
     try{
         
+<<<<<<< HEAD
         const uid = "8dec6e7e-63e9-4cac-ad56-d9034068fb47"
 
         const filter = req.query.filter || 'new'; 
@@ -20,6 +21,13 @@ const getPostsHomePage = async (req, res) =>{
         
         const page = parseInt(req.query.page) || 1;
         const limit = 20
+=======
+        const uid =  "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
+        // const uid = req.user ? req.user.id : null;
+        
+        const page = parseInt(req.query.page) || 1;
+        const limit = 20;
+>>>>>>> b4636e16ec177d640d52763fff8c97c47819a30d
         const skip = (page - 1) * limit;
 
         let query = {}; 
@@ -64,6 +72,7 @@ const getPostsHomePage = async (req, res) =>{
 
 const getPostsCommunity = async (req, res) =>{
     try{
+<<<<<<< HEAD
         // const {cid} = req.params;
         const cid = "3934d4bf-f5d0-4ae6-b227-809022cd5628"
         const uid = "8dec6e7e-63e9-4cac-ad56-d9034068fb47"
@@ -81,6 +90,15 @@ const getPostsCommunity = async (req, res) =>{
 
         const page = parseInt(req.query.page) || 1;
         const limit = 20
+=======
+        const {cid} = req.params;
+        // const uid = req.user ? req.user.id : null; 
+        const uid =  "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
+
+        const page = parseInt(req.query.page)
+        console.log(page)
+        const limit = 20;
+>>>>>>> b4636e16ec177d640d52763fff8c97c47819a30d
         const skip = (page - 1) * limit;
         if (uid) {
             const userExists = await User.exists({ _id: uid });
@@ -133,9 +151,16 @@ const getPostDetails = async (req, res) =>{
 const createPost = async (req, res) =>{
     try{
 
+<<<<<<< HEAD
         const {title, content, mediaUrl, mediaType, communityID} = req.body;
         //  const cid = "c218e537-1901-470c-8dda-232bb52b434e"
         const userID ="8dec6e7e-63e9-4cac-ad56-d9034068fb47"
+=======
+        const {title, content, mediaUrl, mediaType} = req.body;
+        const {communityID} = req.params
+        console.log(communityID)
+        const userID = "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
+>>>>>>> b4636e16ec177d640d52763fff8c97c47819a30d
 
         //cid = d17b1418-f818-4af8-b8cc-3202e5b43f93
 

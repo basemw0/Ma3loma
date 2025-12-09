@@ -2,6 +2,18 @@ import './App.css';
 import { useEffect } from 'react';
 import { useLocation, useNavigate, Routes, Route } from 'react-router-dom';
 import React from 'react';
+<<<<<<< HEAD
+=======
+
+// Import Pages
+import Login from '../components/Pages/Login'; // Adjust path as needed
+import Signup from "../components/Pages/Signup"; // Adjust path as needed
+import ForgotPassword from "../components/Pages/ForgotPassword";
+import ResetPassword from "../components/Pages/ResetPassword"; // <--- NEW IMPORT
+
+// ... (Keep your other component imports like Landing, etc.) ...
+import Landing from "../components/Landing/Landing";
+>>>>>>> b4636e16ec177d640d52763fff8c97c47819a30d
 import CommunitiesPage from '../components/DisplayCommunities/CommunitiesPage'
 import CommunityPage from '../components/CommunityPage/CommunityPage';
 import ExploreCommunities from '../components/ExploreCommunities/ExploreCommunities'
@@ -38,7 +50,12 @@ function App() {
       </Route>
       </Routes>
     </>
+<<<<<<< HEAD
   ); d
+=======
+  );
+    
+>>>>>>> b4636e16ec177d640d52763fff8c97c47819a30d
 }
 
 export default App;

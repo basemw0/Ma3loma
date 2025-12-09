@@ -26,9 +26,11 @@ app.use(passport.initialize());
 app.use('/api/users', userRoutes);
 app.use('/api/communities', communityRoutes);
 app.use('/api/posts', postRoutes);
+app.use('/auth', authRoutes); // <--- Use Auth Routes
 app.use('/api/comments', commentRoutes);
 app.use('/auth', authRoutes); // <--- Use Auth Routes
 
+connectDB()
 
 connectDB()
 

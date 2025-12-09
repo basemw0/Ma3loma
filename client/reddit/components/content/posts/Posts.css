@@ -28,6 +28,7 @@
 
 /* CARD */
 .reddit-card.modern {
+<<<<<<< HEAD
 :root {
   --canvas-bg: #f6f7f8;
   --card-bg: #ffffff;
@@ -58,6 +59,8 @@
 
 /* CARD */
 .reddit-card.modern {
+=======
+>>>>>>> b4636e16ec177d640d52763fff8c97c47819a30d
   width: 100%;
   max-width: 680px;
   background: var(--card-bg);
@@ -71,6 +74,7 @@
 .reddit-card.modern:hover {
   border-color: var(--hover-border);
   transform: translateY(-2px);
+<<<<<<< HEAD
   max-width: 680px;
   background: var(--card-bg);
   border-radius: 10px;
@@ -91,6 +95,10 @@
   background: #fafbfc;
   border-radius: 10px 0 0 10px;
   padding: 12px 4px;
+=======
+}
+
+>>>>>>> b4636e16ec177d640d52763fff8c97c47819a30d
 /* LEFT SIDEBAR */
 .card-sidebar.modern-sidebar {
   width: 48px;
@@ -107,6 +115,7 @@
   font-size: 13px;
   font-weight: 600;
   color: #373737;
+<<<<<<< HEAD
   gap: 6px;
 }
 
@@ -139,6 +148,21 @@
 .vote-btn:hover {
   background: var(--gray-hover);
   color: var(--accent-orange);
+=======
+}
+
+/* VOTE BUTTONS */
+.vote-btn {
+  color: #878a8c;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: 0.2s;
+}
+
+>>>>>>> b4636e16ec177d640d52763fff8c97c47819a30d
 .vote-btn:hover {
   background: var(--gray-hover);
   color: var(--accent-orange);
@@ -146,45 +170,63 @@
 
 .vote-btn.down:hover {
   color: var(--accent-blue);
+<<<<<<< HEAD
 .vote-btn.down:hover {
   color: var(--accent-blue);
+=======
+>>>>>>> b4636e16ec177d640d52763fff8c97c47819a30d
 }
 
 /* CARD CONTENT */
 .card-content {
   padding: 12px;
   flex: 1;
+<<<<<<< HEAD
 /* CARD CONTENT */
 .card-content {
   padding: 12px;
   flex: 1;
+=======
+>>>>>>> b4636e16ec177d640d52763fff8c97c47819a30d
 }
 
 /* HEADER */
 .card-header {
+<<<<<<< HEAD
 /* HEADER */
 .card-header {
   display: flex;
   align-items: center;
   gap: 10px;
   gap: 10px;
+=======
+  display: flex;
+  align-items: center;
+  gap: 10px;
+>>>>>>> b4636e16ec177d640d52763fff8c97c47819a30d
 }
 
 .modern-icon {
   width: 28px;
   height: 28px;
+<<<<<<< HEAD
 .modern-icon {
   width: 28px;
   height: 28px;
+=======
+>>>>>>> b4636e16ec177d640d52763fff8c97c47819a30d
   border-radius: 50%;
 }
 
 .subreddit-link {
   font-weight: 700;
   margin-right: 6px;
+<<<<<<< HEAD
 .subreddit-link {
   font-weight: 700;
   margin-right: 6px;
+=======
+>>>>>>> b4636e16ec177d640d52763fff8c97c47819a30d
 }
 
 .user-meta {
@@ -194,6 +236,7 @@
 .time-meta {
   color: var(--meta-color);
   margin-left: 4px;
+<<<<<<< HEAD
 .user-meta {
   color: var(--meta-color);
 }
@@ -201,6 +244,8 @@
 .time-meta {
   color: var(--meta-color);
   margin-left: 4px;
+=======
+>>>>>>> b4636e16ec177d640d52763fff8c97c47819a30d
 }
 
 /* JOIN BUTTON */
@@ -213,6 +258,7 @@
   color: white;
   font-weight: 600;
   transition: 0.2s;
+<<<<<<< HEAD
 /* JOIN BUTTON */
 .join-btn.modern-join {
   margin-left: auto;
@@ -223,6 +269,8 @@
   color: white;
   font-weight: 600;
   transition: 0.2s;
+=======
+>>>>>>> b4636e16ec177d640d52763fff8c97c47819a30d
 }
 
 .join-btn.modern-join:hover {
@@ -233,6 +281,7 @@
 .modern-title {
   font-size: 20px;
   margin: 8px 0;
+<<<<<<< HEAD
 .join-btn.modern-join:hover {
   background: #3a6ed8;
 }
@@ -241,6 +290,8 @@
 .modern-title {
   font-size: 20px;
   margin: 8px 0;
+=======
+>>>>>>> b4636e16ec177d640d52763fff8c97c47819a30d
   font-weight: 600;
 }
 
@@ -249,11 +300,14 @@
   margin-bottom: 10px;
   line-height: 1.5;
   color: #2f2f2f;
+<<<<<<< HEAD
 .modern-text {
   font-size: 15px;
   margin-bottom: 10px;
   line-height: 1.5;
   color: #2f2f2f;
+=======
+>>>>>>> b4636e16ec177d640d52763fff8c97c47819a30d
 }
 
 /* MEDIA */
@@ -261,11 +315,14 @@
   border-radius: 8px;
   overflow: hidden;
   background: black;
+<<<<<<< HEAD
 /* MEDIA */
 .media-wrapper.modern-media {
   border-radius: 8px;
   overflow: hidden;
   background: black;
+=======
+>>>>>>> b4636e16ec177d640d52763fff8c97c47819a30d
   margin-top: 10px;
 }
 
@@ -276,6 +333,7 @@
   margin-top: 12px;
 }
 
+<<<<<<< HEAD
 /* FOOTER */
 .card-footer.modern-footer {
   display: flex;
@@ -284,6 +342,8 @@
 }
 
 .action-pill.modern-pill {
+=======
+>>>>>>> b4636e16ec177d640d52763fff8c97c47819a30d
 .action-pill.modern-pill {
   display: flex;
   align-items: center;
@@ -292,11 +352,14 @@
   border-radius: 6px;
   cursor: pointer;
   transition: 0.2s;
+<<<<<<< HEAD
   gap: 6px;
   padding: 8px 12px;
   border-radius: 6px;
   cursor: pointer;
   transition: 0.2s;
+=======
+>>>>>>> b4636e16ec177d640d52763fff8c97c47819a30d
 }
 
 .action-pill.modern-pill:hover {
