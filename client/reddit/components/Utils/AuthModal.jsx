@@ -7,8 +7,7 @@ import { useForm } from "react-hook-form";
 import { useAuthModal } from '../../src/context/AuthModalContext'; // Import the hook
 import api from '../../src/api/axios';
 import googleIcon from '../Pages/search.png'; // Make sure path is correct relative to this file
-require('dotenv').config();
-  const serverUrl = process.env.CLIENT_URL || "http://localhost:3000";
+  const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
 export default function AuthModal() {
   const { isOpen, closeModal, view, setView } = useAuthModal();
   const { register, handleSubmit, reset } = useForm();

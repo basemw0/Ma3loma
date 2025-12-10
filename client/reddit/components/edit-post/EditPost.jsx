@@ -4,8 +4,6 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import { useNavigate, useParams } from "react-router-dom"; // Import useNavigate instead of useHistory
 import api from "../../src/api/axios";
-require('dotenv').config();
-  const serverUrl = process.env.CLIENT_URL || "http://localhost:3000";
 const EditPost = () => {
   //const { postId } = useParams();
   const postId = useParams();
@@ -24,7 +22,7 @@ const EditPost = () => {
       // Fetching post data based on `postId`
       // For now, we're just using mock data
       alert('hamada')
-      const response = await api.get(`${serverUrl}/api/posts/${postId}`);
+      const response = await api.get(`/api/posts/${postId}`);
       if(response.data){
         const post = response.data;
         setPost({
@@ -45,7 +43,7 @@ const EditPost = () => {
     e.preventDefault();
     // Submit the post update logic
     //alert('hoba tito mambo',post);
-    await api.put(`${serverUrl}/api/posts/edit/${postId}`, post);
+    await api.put(`/api/posts/edit/${postId}`, post);
     // Redirect back to the post detail page (or homepage)
     //navigate(`/post/${postId}`); // Use navigate to redirect
   };

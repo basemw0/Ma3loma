@@ -3,7 +3,6 @@ import api from "../../src/api/axios";
 import { useParams } from "react-router-dom";
 import "./PostDetails.css"; // The CSS for styling (replicating Reddit's style)
 //Session
-require('dotenv').config();
 export default function PostDetails() {
   //const { postId } = useParams(); // Get the post ID from URL
   const {postId} = useParams();;
@@ -14,7 +13,7 @@ export default function PostDetails() {
   const [summary, setSummary] = useState("");
   const [isSummarizing, setIsSummarizing] = useState(false);
 
-  const serverUrl = process.env.CLIENT_URL || "http://localhost:3000";
+  const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
     
 
   // Fetch post details and comments

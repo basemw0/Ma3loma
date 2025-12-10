@@ -6,7 +6,6 @@ import api from '../../src/api/axios';
 import { Link } from "react-router-dom";
 
 
-const serverUrl = process.env.REACT_APP_URL || "http://localhost:3000";
 
 export default function Header(props) {
     const {community , setJoined , joined } = props
@@ -14,7 +13,7 @@ export default function Header(props) {
       try{
         if(status == 'Joined'){
             alert(status)
-            await api.post(`${serverUrl}/api/communities/${community._id}/join`, {
+            await api.post(`/api/communities/${community._id}/join`, {
               action : 0
             } )
             setJoined('Not Joined')
@@ -23,7 +22,7 @@ export default function Header(props) {
         else{
             alert(status)
             //Axios request
-            await api.post("${serverUrl}/api/communities/" + community._id + '/join', {
+            await api.post("/api/communities/" + community._id + '/join', {
               action : 1
             } )
             setJoined('Joined')
