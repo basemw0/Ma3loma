@@ -38,7 +38,7 @@ export default function CreationWizard(){
             interests :selectedTopics
         }
         try{
-        await api.post("https://domelike-delaney-cauline.ngrok-free.dev/api/communities/create",communityObject)
+        await api.post("/api/communities/create", communityObject);
         alert("Community created succesfully")
         }
         catch(e){
