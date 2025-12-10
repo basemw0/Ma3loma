@@ -168,7 +168,7 @@ const getCommunitiesByCategory = async (req, res) => {
 // ✅ CREATE COMMUNITY ENDPOINT
 const createCommunity = async (req, res) => {
 const { name, description, interests,icon,banner,privacy } = req.body;
- const cid = "3934d4bf-f5d0-4ae6-b227-809022cd5628"
+ const cid = req.params.id
   const userID = req.userData.id
   if (!name || !userID) {
     return res.status(400).json({ message: "Name and UserID are required" });

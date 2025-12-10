@@ -15,7 +15,7 @@ const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 app.use(cors({
-  origin: "http://localhost:5173", // The URL of your frontend (from your screenshot)
+  origin: process.env.CLIENT_URL || "http://localhost:5173", // The URL of your frontend (from your screenshot)
   credentials: true                // Allow cookies/tokens
 }));app.use(express.json());
 app.use(passport.initialize());
