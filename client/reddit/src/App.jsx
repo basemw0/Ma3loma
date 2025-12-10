@@ -18,7 +18,34 @@ import Landing from '../components/Landing/Landing';
 import EditPost from '../components/edit-post/EditPost';
 import PostDetails from '../components/post-details/PostDetails';
 import CreationWizard from '../components/CommunityCreation/CreationWizard';
+import { AuthModalProvider, useAuthModal } from './context/AuthModalContext'; //
+import AuthModal from '../components/Utils/AuthModal';   
+import api from '../src/api/axios';
 
+const AxiosInterceptor = ({ children }) => {
+  const { openLogin } = useAuthModal();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Add a response interceptor
+    const interceptor = api.interceptors.response.use(
+      (response) => response, // Return successful responses as is
+      (error) => {
+        // 2. CHECK: Did the server say "401 Unauthorized"?
+        if (error.response && error.response.status === 401) {
+          // 3. TRIGGER: Open the login popup automatically
+          openLogin();
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    // Cleanup listener when app unmounts
+    return () => api.interceptors.response.eject(interceptor);
+  }, [openLogin, navigate]);
+
+  return children;
+};
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -35,6 +62,9 @@ function App() {
   }, [location, navigate]);
   return (
     <>
+    <AuthModalProvider>
+      <AxiosInterceptor>
+      <AuthModal />
      <Routes>
       {/* Auth Routes */}
       <Route path="/login" element={<Login />} />
@@ -55,6 +85,8 @@ function App() {
         <Route path="api/communities/create" element={<CreationWizard />} />
       </Route>
       </Routes>
+      </AxiosInterceptor>
+      </AuthModalProvider>
     </>
   ); 
 }

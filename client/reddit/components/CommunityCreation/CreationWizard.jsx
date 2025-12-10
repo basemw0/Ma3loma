@@ -10,7 +10,7 @@ import Button from '@mui/material/Button';
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import { Box } from "@mui/material"
-import axios from 'axios'
+import api from "../../src/api/axios";
 
 export default function CreationWizard(){
     const [allCategories , setAllCategories] = useState(mockCategories)
@@ -38,7 +38,7 @@ export default function CreationWizard(){
             interests :selectedTopics
         }
         try{
-        await axios.post("https://domelike-delaney-cauline.ngrok-free.dev/api/communities/create",communityObject)
+        await api.post("https://domelike-delaney-cauline.ngrok-free.dev/api/communities/create",communityObject)
         alert("Community created succesfully")
         }
         catch(e){
