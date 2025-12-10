@@ -33,7 +33,7 @@ router.delete('/delete/:pid', postController.deletePost);
 router.put('/:pid/upvote', postController.upvotePost);
 router.put('/:pid/downvote', postController.downvotePost);
 
-
+router.get('/:pid/summarize', checkAuth, postController.summarizePost);
 router.post('/:pid/award/:cid', postController.awardPost);
 
 

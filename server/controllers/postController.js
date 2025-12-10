@@ -1,7 +1,46 @@
 const Post = require('../models/Post.js');
 const User = require('../models/User.js');
 const Community = require('../models/Community.js')
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+require('dotenv').config();
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const summarizePost = async (req, res) => {
+    try {
+        const { pid } = req.params;
 
+        // 1. Fetch the post
+        const post = await Post.findById(pid);
+        if (!post) {
+            return res.status(404).json({ message: 'Post Not Found' });
+        }
+
+        // 2. Validate content exists
+        if (!post.content || post.content.length < 50) {
+            return res.status(400).json({ message: 'Post content is too short to summarize.' });
+        }
+
+        // 3. specific model (Gemini 1.5 Flash is fast and cheap)
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+        // 4. Construct the prompt
+        const prompt = `Summarize the following Reddit post in a concise, bulleted format (maximum 3 bullet points). 
+        
+        Title: ${post.title}
+        Content: ${post.content}`;
+
+        // 5. Generate Content
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const summaryText = response.text();
+
+        // 6. Return result
+        res.status(200).json({ summary: summaryText });
+
+    } catch (error) {
+        console.error("AI Error:", error);
+        res.status(500).json({ message: "Failed to generate summary. " + error.message });
+    }
+};
 const getPostsHomePage = async (req, res) =>{
     try{
         
@@ -404,5 +443,6 @@ module.exports = {
     editPost,
     upvotePost,
     downvotePost,
-    awardPost
+    awardPost,
+    summarizePost
 };

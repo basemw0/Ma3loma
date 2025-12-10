@@ -1,5 +1,5 @@
-
-import React, { useState, useEffect } from "react"; // ✅ Import useState
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // ✅ 1. Import useNavigate
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
@@ -11,21 +11,21 @@ import api from "../../../src/api/axios";
 import "./Posts.css";
 
 export default function Posts({ posts }) {
-  // ✅ 1. Initialize State with the props
-  // We need state because props cannot be changed, but state can.
   const [postList, setPostList] = useState(posts || []);
+  const navigate = useNavigate(); // ✅ 2. Initialize navigation
 
-  // ✅ 2. Sync state if props change (e.g. sorting filter changes)
   useEffect(() => {
     setPostList(posts || []);
   }, [posts]);
 
-  if (!postList || postList.length === 0) {
-    return <div className="no-posts">No posts to display</div>;
-  }
+  // ✅ 3. Navigation Handler
+  const openPost = (id) => {
+    // Matches the route in App.jsx: path="api/posts/:postId"
+    navigate(`/api/posts/${id}`);
+  };
 
-  // ✅ 3. The Vote Handler (Immediate Update Logic)
-  const handlevote = async (type, id) => {
+  const handlevote = async (type, id, e) => {
+    e.stopPropagation(); // ✅ Stop click from triggering openPost
     const action = type === 1 ? "upvote" : "downvote";
 
     try {
@@ -33,12 +33,10 @@ export default function Posts({ posts }) {
         `http://localhost:3000/api/posts/${id}/${action}`
       );
 
-      // This is the magic part:
       if (response.data && response.data._id) {
         setPostList((prevList) => 
           prevList.map((post) => {
             if (post._id === id) {
-              console.log("Updating Post ID:", id); // ✅ Confirm match
               return response.data;
             }
             return post;
@@ -51,30 +49,36 @@ export default function Posts({ posts }) {
     }
   };
 
+  // Helper function to stop propagation on buttons (like Share/Save)
+  const stopProp = (e) => {
+    e.stopPropagation();
+  };
+
+  if (!postList || postList.length === 0) {
+    return <div className="no-posts">No posts to display</div>;
+  }
+
   return (
     <div className="feed-container">
-      {/* ✅ Use 'postList' here, NOT 'posts' */}
       {postList.map((post) => (
         <div className="reddit-card modern" key={post._id}>
           
           <div className="card-sidebar modern-sidebar">
-            <button className="vote-btn up">
-              <ArrowUpwardIcon onClick={() => handlevote(1, post._id)} fontSize="inherit" />
+            <button className="vote-btn up" onClick={(e) => handlevote(1, post._id, e)}>
+              <ArrowUpwardIcon fontSize="inherit" />
             </button>
             
-            {/* ✅ Show the live vote count from state */}
             <span className="vote-count modern-vote">
               {formatNumber(post.voteCount)}
             </span>
 
-            <button className="vote-btn down">
-              <ArrowDownwardIcon onClick={() => handlevote(2, post._id)} fontSize="inherit" />
+            <button className="vote-btn down" onClick={(e) => handlevote(2, post._id, e)}>
+              <ArrowDownwardIcon fontSize="inherit" />
             </button>
           </div>
 
           <div className="card-content">
             <div className="card-header">
-              {/* Optional chaining ?. prevents crash if data is missing */}
               <img 
                 src={post.userID?.image} 
                 alt="community"
@@ -88,10 +92,15 @@ export default function Posts({ posts }) {
                 <span className="time-meta">{formatTime(post.createdAt)}</span>
               </div>
 
-              <button className="join-btn modern-join">Join</button>
+              <button className="join-btn modern-join" onClick={stopProp}>Join</button>
             </div>
 
-            <div className="card-body">
+            {/* ✅ 4. Make Body Clickable */}
+            <div 
+                className="card-body" 
+                onClick={() => openPost(post._id)}
+                style={{ cursor: "pointer" }}
+            >
               <h3 className="post-title modern-title">{post.title}</h3>
 
               {post.content && (
@@ -110,19 +119,25 @@ export default function Posts({ posts }) {
             </div>
 
             <div className="card-footer modern-footer">
-              <div className="action-pill modern-pill">
+              {/* ✅ 5. Make Comments Clickable */}
+              <div 
+                className="action-pill modern-pill" 
+                onClick={() => openPost(post._id)}
+                style={{ cursor: "pointer" }}
+              >
                 <ChatBubbleOutlineIcon fontSize="small" />
                 <span>{formatNumber(post.commentCount || 0)} Comments</span>
               </div>
-              <div className="action-pill modern-pill">
+
+              <div className="action-pill modern-pill" onClick={stopProp}>
                 <ShareOutlinedIcon fontSize="small" />
                 <span>Share</span>
               </div>
-              <div className="action-pill modern-pill">
+              <div className="action-pill modern-pill" onClick={stopProp}>
                 <BookmarkBorderOutlinedIcon fontSize="small" />
                 <span>Save</span>
               </div>
-              <div className="action-pill icon-only modern-pill">
+              <div className="action-pill icon-only modern-pill" onClick={stopProp}>
                 <MoreHorizIcon fontSize="small" />
               </div>
             </div>
@@ -134,9 +149,9 @@ export default function Posts({ posts }) {
   );
 }
 
-// Helpers
+// Helpers (No changes here)
 function formatNumber(num) {
-  if (!num && num !== 0) return "0"; // Handle undefined/null
+  if (!num && num !== 0) return "0"; 
   if (num >= 1000) return (num / 1000).toFixed(1) + "k";
   return num;
 }

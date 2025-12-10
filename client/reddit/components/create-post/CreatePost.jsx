@@ -14,7 +14,8 @@ const CreatePost = () => {
   useEffect(() => {
     const getCommunity = async (id) => {
         try {
-            let response = await api.get("/api/communities/" + id); // baseURL is already set!            let data = response.data;
+            let response = await api.get("/api/communities/" + id); // baseURL is already set!            
+            let data = response.data;
             setSelectedCommunity(data);
         } 
         catch (e) {

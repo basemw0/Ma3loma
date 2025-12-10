@@ -1,24 +1,25 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../src/api/axios";
 import { useParams } from "react-router-dom";
 import "./PostDetails.css"; // The CSS for styling (replicating Reddit's style)
 //Session
 export default function PostDetails() {
-  //const { pid } = useParams(); // Get the post ID from URL
-  const pid = '29fc53b4-8d22-4c3c-b27d-2a33702fb34c';
+  //const { postId } = useParams(); // Get the post ID from URL
+  const {postId} = useParams();;
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(true);
-
+  const [summary, setSummary] = useState("");
+  const [isSummarizing, setIsSummarizing] = useState(false);
   
 
   // Fetch post details and comments
   useEffect(() => {
     const fetchPostDetails = async () => {
       try {
-        const postResponse = await axios.get(`http://localhost:3000/api/posts/${pid}`);
-        const commentsResponse = await axios.get(`http://localhost:3000/api/comments/post/${pid}`);
+        const postResponse = await api.get(`http://localhost:3000/api/posts/${postId}`);
+        const commentsResponse = await api.get(`http://localhost:3000/api/comments/post/${postId}`);
 
         setPost(postResponse.data);
         setComments(commentsResponse.data);
@@ -35,7 +36,7 @@ export default function PostDetails() {
     const route = object === "post"?"posts":"comments"
     const action = type === 1?"upvote" : "downvote"
     try{
-    const response = await axios.put(`http://localhost:3000/api/${route}/${id}/${action}`)
+    const response = await api.put(`http://localhost:3000/api/${route}/${id}/${action}`)
         
     if(object === "post"){
       if(response.data) setPost(response.data)
@@ -50,16 +51,17 @@ export default function PostDetails() {
       alert("Error"+ e.message)
     }
   }
+  
   // Handle comment submission
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     try {
       const commentData = {
         content: newComment,
-        postID: pid,
+        postID: postId,
         parentID: null
       };
-      const response = await axios.post(`http://localhost:3000/api/comments/create`, commentData);
+      const response = await api.post(`http://localhost:3000/api/comments/create`, commentData);
       setComments([response.data, ...comments]);
       setNewComment("");
     } catch (error) {
@@ -68,10 +70,22 @@ export default function PostDetails() {
     }
   };
 
-  if (loading) {
-    return <div>Loading...</div>; // Show loading state while fetching data
-  }
+  const handleSummarize = async () => {
+    setIsSummarizing(true);
+    try {
+      // Assuming user is logged in and token is handled by axios interceptors or withCredentials
+      const response = await api.get(`http://localhost:3000/api/posts/${post._id}/summarize`);
+      setSummary(response.data.summary);
+    } catch (error) {
+      alert("Could not summarize: " + (error.response?.data?.message || error.message));
+    } finally {
+      setIsSummarizing(false);
+    }
+  };
 
+  if (loading) return <div>Loading...</div>;
+
+  
   return (
     <div className="post-details">
       <div className="post-header">
@@ -79,6 +93,39 @@ export default function PostDetails() {
         <div className="user-info">
          <img src={post.userID.image} alt="user" className="user-avatar" />
           <span>{post.userID.username}</span>
+        </div>
+        {/* AI SUMMARIZE BUTTON SECTION */}
+        <div style={{ margin: "10px 0" }}>
+            {!summary && (
+                <button 
+                    onClick={handleSummarize} 
+                    disabled={isSummarizing}
+                    style={{ 
+                        backgroundColor: "#6200EA", 
+                        color: "white", 
+                        padding: "8px 12px", 
+                        border: "none", 
+                        borderRadius: "20px",
+                        cursor: "pointer"
+                    }}
+                >
+                    {isSummarizing ? "✨ Summarizing..." : "✨ Summarize with AI"}
+                </button>
+            )}
+            
+            {/* DISPLAY SUMMARY */}
+            {summary && (
+                <div style={{ 
+                    backgroundColor: "#f0f0f0", 
+                    padding: "15px", 
+                    borderRadius: "8px", 
+                    marginTop: "10px",
+                    borderLeft: "4px solid #6200EA"
+                }}>
+                    <h4 style={{ margin: "0 0 10px 0" }}>✨ AI Summary</h4>
+                    <div style={{ whiteSpace: "pre-line" }}>{summary}</div>
+                </div>
+            )}
         </div>
         <div className="post-actions">
           <span style={{marginLeft : 3}}>{post.upvotes.length } Upvotes</span>
@@ -92,7 +139,9 @@ export default function PostDetails() {
       <div className="post-content">
         <p>{post.content}</p>
       </div>
-
+      <div className="post-content">
+        <p>{post.content}</p>
+      </div>
       {/* Comments Section */}
       <div className="comments">
         <h2>Comments</h2>
