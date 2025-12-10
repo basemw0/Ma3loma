@@ -133,9 +133,9 @@ const getPostDetails = async (req, res) =>{
 const createPost = async (req, res) =>{
     try{
 
-        const {title, content, mediaUrl, mediaType, communityID} = req.body;
-        //  const cid = "c218e537-1901-470c-8dda-232bb52b434e"
-        const userID =userData.id;
+        const {title, content, mediaUrl, mediaType} = req.body;
+        const {communityID} = req.params; 
+        const userID =req.userData.id;
 
         //cid = d17b1418-f818-4af8-b8cc-3202e5b43f93
 
@@ -147,6 +147,7 @@ const createPost = async (req, res) =>{
             userID,
             communityID
         })
+        await newPost.populate('userID', 'username image');
         res.status(201).json(newPost);
 
     }catch(error){
@@ -159,7 +160,7 @@ const createPost = async (req, res) =>{
 const deletePost = async (req, res) =>{
     try {
         const { pid } = req.params;
-        const uid =userData.id;
+        const uid =req.userData.id;
 
         
         const post = await Post.findById(pid);
@@ -189,7 +190,7 @@ const editPost = async (req, res)=>{
     try{
         const {pid} = req.params
         const {title, content, mediaUrl, mediaType} = req.body;
-        const uid = userData.id;
+        const uid = req.userData.id;
 
         const userExists = await User.exists({_id:uid});
         if (!userExists) return res.status(404).json({ message: "User not found" });
@@ -227,7 +228,7 @@ const upvotePost = async (req, res)=>{
     console.log("YOOO")
     try{
         const {pid} = req.params;
-        const uid = userData.id;
+        const uid = req.userData.id;
 
         const userExists = await User.exists({_id:uid});
         if (!userExists) return res.status(404).json({ message: "User not found" });
@@ -284,7 +285,7 @@ const downvotePost = async (req, res)=>{
 
     try{
         const {pid} = req.params;
-        const uid = userData.id;
+        const uid = req.userData.id;
 
         const userExists = await User.exists({_id:uid});
         if (!userExists) return res.status(404).json({ message: "User not found" });
@@ -341,7 +342,7 @@ const downvotePost = async (req, res)=>{
 const awardPost = async (req, res)=>{
     try{
         const cid = "3934d4bf-f5d0-4ae6-b227-809022cd5628"
-        const uid = userData.id;
+        const uid = req.userData.id;
         const {awardName} = req.body;
 
         const user = await User.findById(uid);

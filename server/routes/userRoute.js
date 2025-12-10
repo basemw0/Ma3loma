@@ -1,12 +1,12 @@
 const express = require('express');
 const { check } = require('express-validator');
-
+const checkAuth = require('../middleware/check-auth');
 const usersController = require('../controllers/userController');
 
 const router = express.Router();
 
 router.get('/', usersController.getUsers);
-
+router.get('/me', checkAuth, usersController.getMe);
 router.post(
   '/signup',
   [

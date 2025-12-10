@@ -169,7 +169,7 @@ const getCommunitiesByCategory = async (req, res) => {
 const createCommunity = async (req, res) => {
 const { name, description, interests,icon,banner,privacy } = req.body;
  const cid = "3934d4bf-f5d0-4ae6-b227-809022cd5628"
-  const userID = "8dec6e7e-63e9-4cac-ad56-d9034068fb47"
+  const userID = req.userData.id
   if (!name || !userID) {
     return res.status(400).json({ message: "Name and UserID are required" });
   }
@@ -215,8 +215,8 @@ const { name, description, interests,icon,banner,privacy } = req.body;
 
 const updateCommunity = async (req, res) => {
   const { name, description, interests,icon,banner,privacy } = req.body;
-   const communityID ="3934d4bf-f5d0-4ae6-b227-809022cd5628"
-  const userID ="8dec6e7e-63e9-4cac-ad56-d9034068fb47"
+   const communityID =req.params.id
+  const userID =req.userData.id
   if (!communityID || !userID) {
     return res.status(400).json({ message: "communityID and UserID are required" });
   }
@@ -262,8 +262,8 @@ const updateCommunity = async (req, res) => {
 
 // ✅ JOIN / LEAVE COMMUNITY (Toggle)
 const joinCommunity= async (req, res) => {
-  const communityID = "3934d4bf-f5d0-4ae6-b227-809022cd5628"
-  const userID ="8dec6e7e-63e9-4cac-ad56-d9034068fb47"
+  const communityID = req.params.id
+  const userID =req.userData.id
   const { action } = req.body; 
   console.log(communityID)
   const community = await Community.findById(communityID)
@@ -319,8 +319,8 @@ const joinCommunity= async (req, res) => {
 
 // ✅ GET COMMUNITY BY ID (With "Am I a Member?" Check)
 const getCommunityById= async (req, res) => {
-   const communityID = "3934d4bf-f5d0-4ae6-b227-809022cd5628"
-   const userID = "8dec6e7e-63e9-4cac-ad56-d9034068fb47"
+   const communityID = req.params.id
+   const userID = req.userData.id
   try {
     const community = await Community.findById(communityID).populate({
       path: "moderators.user",   
@@ -369,7 +369,7 @@ const getCommunityById= async (req, res) => {
 const searchCommunity = async (req, res) => {
   const { q } = req.query;
   const communityID = "3934d4bf-f5d0-4ae6-b227-809022cd5628"
-  const userID = "8dec6e7e-63e9-4cac-ad56-d9034068fb47"
+  const userID = req.userData.id
   console.log(q)
 
   try {

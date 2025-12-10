@@ -79,42 +79,45 @@ const signup = async (req, res) => {
 // User Login
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    // 1. Accept "loginInput" instead of just "email"
+    const { loginInput, password } = req.body; 
 
-    // Validate input
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password are required' });
+    if (!loginInput || !password) {
+      return res.status(400).json({ message: 'Email/Username and password are required' });
     }
 
-    // Find user by email
-    const user = await User.findOne({ email });
+    // 2. Check if input matches EITHER email OR username
+    const user = await User.findOne({
+        $or: [
+            { email: loginInput },
+            { username: loginInput }
+        ]
+    });
+
     if (!user) {
-      return res.status(400).json({ message: 'Invalid email or password' });
+      return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // Compare passwords
+    // 3. Compare passwords
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid email or password' });
+      return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-     let token;
-     token = jwt.sign(
+    // 4. Generate Token
+    const token = jwt.sign(
       { id: user._id },
-      process.env.JWT_SECRET,{expiresIn: 3600},
-    )
-    // Return user data (without password)
+      process.env.JWT_SECRET,
+      { expiresIn: 3600 }
+    );
+
     res.status(200).json({
       message: 'Login successful',
       user: {
         id: user._id,
         username: user.username,
         email: user.email,
-        goldBalance: user.goldBalance,
-        interests: user.interests,
-        joinedCommunities: user.joinedCommunities,
-        savedPosts: user.savedPosts,
-        image: "https://www.redditstatic.com/avatars/avatar_default_02_FF4500.png",
+        image: user.image,
         token: token
       }
     });
@@ -230,7 +233,18 @@ const resetPassword = async (req, res) => {
     res.status(500).json({ message: 'Error resetting password', error: err.message });
   }
 };
-
+const getMe = async (req, res) => {
+  try {
+    // req.userData is set by the check-auth middleware
+    const user = await User.findById(req.userData.id).select("-password"); 
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json(user);
+  } catch (err) {
+    res.status(500).json({ message: "Server Error", error: err.message });
+  }
+};
 module.exports = {
   getUsers,
   signup,
@@ -238,5 +252,6 @@ module.exports = {
   sendVerificationCode,
   verifyEmail,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  getMe
 };

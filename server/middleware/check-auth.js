@@ -26,7 +26,7 @@ const requireAuth = (req, res, next) => {
         if (!token) {
             throw new Error('No token found');
         }
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'SecretMoot');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.userData = { id: decoded.id };
         next();
     } catch (err) {
