@@ -432,6 +432,72 @@ const awardPost = async (req, res)=>{
     }
 }
 
+const savePost = async (req, res)=>{
+    try {
+        const { pid } = req.params; 
+        const uid = req.user.id; 
+
+        const user = await User.findById(uid);
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        const postExists = await Post.exists({ _id: pid });
+        if (!postExists) {
+            return res.status(404).json({ message: "Post not found" });
+        }
+
+        const isSaved = user.savedPosts.includes(pid);
+        let updateQuery = {};
+        let msg = "";
+
+        if (isSaved) {
+            
+            updateQuery = { $pull: { savedPosts: pid } };
+            msg = "Post unsaved successfully";
+        } else {
+            updateQuery = { $addToSet: { savedPosts: pid } };
+            msg = "Post saved successfully";
+        }
+
+        await User.findByIdAndUpdate(uid, updateQuery);
+
+        res.status(200).json({ message: msg});
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+
+const getSavedPosts = async (req, res)=>{
+    try{
+        const uid = req.user.id; 
+
+        
+        const user = await User.findById(uid).populate({
+            path: 'savedPosts',
+            populate: [
+                { path: 'userID', select: 'username image' },
+                { path: 'communityID', select: 'name icon' }
+            ]
+        });
+
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        
+        const page = parseInt(req.query.page) || 1;
+        const limit = 20;
+        const skip = (page - 1) * limit;
+        
+       
+        const savedPosts = user.savedPosts.reverse().slice(skip, skip + limit);
+
+        res.status(200).json(savedPosts);
+        
+    }catch(error){
+        res.status(500).json({message: error.message});
+    }
+}
+
 
 
 module.exports = {
@@ -444,5 +510,7 @@ module.exports = {
     upvotePost,
     downvotePost,
     awardPost,
-    summarizePost
+    summarizePost,
+    savePost,
+    getSavedPosts
 };

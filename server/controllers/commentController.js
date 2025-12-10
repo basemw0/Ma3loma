@@ -313,7 +313,7 @@ const awardComment = async (req, res)=>{
         res.status(200).send(comment_u);
 
     }catch(error){
-        res.status(500).json({error:error.message});
+        res.status(500).json({message:error.message});
     }
 }
 

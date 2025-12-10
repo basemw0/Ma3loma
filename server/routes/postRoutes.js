@@ -16,6 +16,8 @@ router.get('/home', checkAuth.optionalAuth, postController.getPostsHomePage);
 
 router.get('/community/:cid', checkAuth.optionalAuth, postController.getPostsCommunity);
 
+router.get('/saved', checkAuth, postController.getSavedPosts);
+
 
 router.get('/:pid', postController.getPostDetails);
 
@@ -36,6 +38,6 @@ router.put('/:pid/downvote', postController.downvotePost);
 router.get('/:pid/summarize', checkAuth, postController.summarizePost);
 router.post('/:pid/award/:cid', postController.awardPost);
 
-
+router.post('/:pid/save', postController.savePost);
 
 module.exports = router;
