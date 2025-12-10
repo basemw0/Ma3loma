@@ -7,13 +7,16 @@ import Box from '@mui/material/Box';
 import api from '../../src/api/axios';
 import { useParams , useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
+require('dotenv').config();
+const serverUrl = process.env.CLIENT_URL || "http://localhost:3000";
+
 export default function CommunitiesPage(){
     const [nCommunities , setNcommunities] = useState(0)
     const {number} = useParams();
     let navPage = Number(number)
     const navigate = useNavigate();
     const fetchCommunities = async (number)=>{
-        let response = await api.get(`http://localhost:3000/api/communities/best/${number}`)
+        let response = await api.get(`${serverUrl}/api/communities/best/${number}`)
         let responseObject = response.data
         setNcommunities(responseObject.total)
         setCommunitiesArr(responseObject.communities)

@@ -4,9 +4,10 @@ import { Box } from "@mui/material"
 import CategoryList from "./CategoryList"
 import DisplayCategories from "./DisplayCategories"
 import DisplayAll from "./DisplayAll"
-import axios from "axios"
+import api from "../../src/api/axios"
 import { useSearchParams } from "react-router-dom";
-
+require('dotenv').config();
+  const serverUrl = process.env.CLIENT_URL || "http://localhost:3000";
 export default function ExploreCommunities(){
     const [searchParams , setSearchParams] =  useSearchParams();
     const query =  searchParams.get("q") || "All"
@@ -22,7 +23,7 @@ export default function ExploreCommunities(){
     const [cats , setCats] = useState(cat)
     const retrieveCommunities = async (category)=>{
         //Ill get an array of objects , containing the topic and its subbreddits
-        let response = await axios.get("http://localhost:3000/api/communities/category?q=" + encodeURIComponent(category))
+        let response = await api.get("${serverUrl}/api/communities/category?q=" + encodeURIComponent(category))
         let responeObject = response.data
         setCommunitiesArr(responeObject)
     }

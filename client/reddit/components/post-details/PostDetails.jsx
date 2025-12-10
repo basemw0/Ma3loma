@@ -3,6 +3,7 @@ import api from "../../src/api/axios";
 import { useParams } from "react-router-dom";
 import "./PostDetails.css"; // The CSS for styling (replicating Reddit's style)
 //Session
+require('dotenv').config();
 export default function PostDetails() {
   //const { postId } = useParams(); // Get the post ID from URL
   const {postId} = useParams();;
@@ -12,14 +13,16 @@ export default function PostDetails() {
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState("");
   const [isSummarizing, setIsSummarizing] = useState(false);
-  
+
+  const serverUrl = process.env.CLIENT_URL || "http://localhost:3000";
+    
 
   // Fetch post details and comments
   useEffect(() => {
     const fetchPostDetails = async () => {
       try {
-        const postResponse = await api.get(`http://localhost:3000/api/posts/${postId}`);
-        const commentsResponse = await api.get(`http://localhost:3000/api/comments/post/${postId}`);
+        const postResponse = await api.get(`${serverUrl}/api/posts/${postId}`);
+        const commentsResponse = await api.get(`${serverUrl}/api/comments/post/${postId}`);
 
         setPost(postResponse.data);
         setComments(commentsResponse.data);
@@ -36,7 +39,7 @@ export default function PostDetails() {
     const route = object === "post"?"posts":"comments"
     const action = type === 1?"upvote" : "downvote"
     try{
-    const response = await api.put(`http://localhost:3000/api/${route}/${id}/${action}`)
+    const response = await api.put(`${serverUrl}/api/${route}/${id}/${action}`)
         
     if(object === "post"){
       if(response.data) setPost(response.data)
@@ -61,7 +64,7 @@ export default function PostDetails() {
         postID: postId,
         parentID: null
       };
-      const response = await api.post(`http://localhost:3000/api/comments/create`, commentData);
+      const response = await api.post(`${serverUrl}/api/comments/create`, commentData);
       setComments([response.data, ...comments]);
       setNewComment("");
     } catch (error) {
@@ -74,7 +77,7 @@ export default function PostDetails() {
     setIsSummarizing(true);
     try {
       // Assuming user is logged in and token is handled by axios interceptors or withCredentials
-      const response = await api.get(`http://localhost:3000/api/posts/${post._id}/summarize`);
+      const response = await api.get(`${serverUrl}/api/posts/${post._id}/summarize`);
       setSummary(response.data.summary);
     } catch (error) {
       alert("Could not summarize: " + (error.response?.data?.message || error.message));

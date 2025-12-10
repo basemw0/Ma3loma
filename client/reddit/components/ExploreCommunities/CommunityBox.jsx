@@ -1,18 +1,21 @@
 import { Button, Stack } from "@mui/material";
 import Community from "../DisplayCommunities/Community";
 import api from "../../src/api/axios";
+require('dotenv').config();
+  const serverUrl = process.env.CLIENT_URL || "http://localhost:3000";
+
 export default function CommunityBox(props){
     const {community , retrieveCommunities}  = props
     const handleClick = async()=>{
         if(community.isMember == 1){
-            await api.post(`http://localhost:3000/api/communities/${community._id}/join`, {
+            await api.post(`${serverUrl}/api/communities/${community._id}/join`, {
                     action: 0
                 });
             alert("Unjoined")
         }
         else{
             //Axios request
-            await api.post(`http://localhost:3000/api/communities/${community._id}/join`, {
+            await api.post(`${serverUrl}/api/communities/${community._id}/join`, {
                     action: 1
                 });
             alert("Joined")

@@ -12,12 +12,14 @@ import "./MainBar.css";
 import Posts from "../posts/Posts";
 import axios from 'axios'
 import { Button } from "@mui/material";
+require('dotenv').config();
+  const serverUrl = process.env.CLIENT_URL || "http://localhost:3000";
 
 export default function MainBar() {
   const [posts , setPosts] = useState([])
   const [num , setNum] = useState(1)
   const getPosts = async (num) => {
-        let response = await axios.get("http://localhost:3000/api/posts/home?page=" + num);
+        let response = await axios.get("${serverUrl}/api/posts/home?page=" + num);
         setPosts((prev)=>{
             return [...prev , ...response.data]
         });

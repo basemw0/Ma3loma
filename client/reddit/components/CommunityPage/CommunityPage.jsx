@@ -6,6 +6,7 @@ import PostsSection from "./PostsSection";
 import api from "../../src/api/axios";
 import {Button} from "@mui/material";
 import { useParams } from "react-router-dom";
+  const serverUrl = process.env.CLIENT_URL || "http://localhost:3000";
 
 export default function CommunityPage() {
     const {communityId} = useParams()
@@ -17,7 +18,7 @@ export default function CommunityPage() {
 
     const getCommunity = async (id) => {
         try {
-            let response = await api.get("http://localhost:3000/api/communities/" + id);
+            let response = await api.get("${serverUrl}/api/communities/" + id);
             let data = response.data;
             setCommunity(data); 
             setJoined(data.isMember? "Joined" : "Not Joined");
@@ -28,7 +29,7 @@ export default function CommunityPage() {
     };
 
     const getPosts = async (id , num , filter) => {
-        let response = await api.get("http://localhost:3000/api/posts/community/" + id + "?page=" + num + "&filter=" + filter);
+        let response = await api.get("${serverUrl}/api/posts/community/" + id + "?page=" + num + "&filter=" + filter);
         console.log(response.data)
         if(num ===1){
             setPosts(response.data);
