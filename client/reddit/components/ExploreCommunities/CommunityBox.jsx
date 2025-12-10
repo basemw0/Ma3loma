@@ -1,18 +1,18 @@
 import { Button, Stack } from "@mui/material";
 import Community from "../DisplayCommunities/Community";
-import axios from "axios";
+import api from "../../src/api/axios";
 export default function CommunityBox(props){
     const {community , retrieveCommunities}  = props
     const handleClick = async()=>{
         if(community.isMember == 1){
-            await axios.post(`http://localhost:3000/api/communities/${community._id}/join`, {
+            await api.post(`http://localhost:3000/api/communities/${community._id}/join`, {
                     action: 0
                 });
             alert("Unjoined")
         }
         else{
             //Axios request
-            await axios.post(`http://localhost:3000/api/communities/${community._id}/join`, {
+            await api.post(`http://localhost:3000/api/communities/${community._id}/join`, {
                     action: 1
                 });
             alert("Joined")

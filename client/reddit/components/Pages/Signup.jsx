@@ -77,9 +77,11 @@ export default function Signup() {
 
       console.log("Signup Success:", response.data);
       
-      if (response.data.user?.token) {
+     if (response.data.user?.token) {
         localStorage.setItem("token", response.data.user.token);
-        navigate("/"); // Use navigate instead of window.location for smoother feel
+        // ✅ NEW: Save user details
+        localStorage.setItem("user", JSON.stringify(response.data.user)); 
+        navigate("/");
       }
     } catch (error) {
       console.error("Signup failed:", error.response?.data);

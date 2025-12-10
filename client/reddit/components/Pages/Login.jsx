@@ -1,11 +1,10 @@
-import React, { useState } from "react";
 import { Link } from "react-router-dom"; // ✅ Uses Link for smooth navigation
 import { Box, Typography, InputAdornment, Fade } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useForm } from "react-hook-form";
 import api from "../../src/api/axios"; 
 import searchIcon from "./search.png";
-
+import React, { useState, useEffect } from "react";
 import {
   LoginWrapper,
   LoginCard,
@@ -24,22 +23,51 @@ export default function Login() {
 
   // Track touched fields for green border logic
   const [touched, setTouched] = useState({ username: false, password: false });
+  useEffect(() => {
+    const handleGoogleLogin = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get("token");
 
+      if (token) {
+        // 1. Save Token
+        localStorage.setItem("token", token);
+
+        try {
+          // 2. Fetch User Details using the new endpoint
+          // We must manually set the header here since 'api' interceptor 
+          // might not have picked up the localStorage change yet.
+          const response = await api.get("/api/users/me", {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+
+          // 3. Save User Data
+          localStorage.setItem("user", JSON.stringify(response.data));
+
+          // 4. Redirect Home
+          window.location.href = "/";
+          
+        } catch (error) {
+          console.error("Failed to fetch user details:", error);
+          alert("Google Login failed to retrieve user data.");
+        }
+      }
+    };
+
+    handleGoogleLogin();
+  }, []);
   const onSubmit = async (data) => {
     try {
-      // ✅ 1. Send Login Request to Backend
       const response = await api.post("/api/users/login", {
-        email: data.username, 
+        loginInput: data.username, 
         password: data.password
       });
 
-      console.log("Login Response:", response.data);
-
-      const token = response.data.user?.token; 
+      const { token, ...userData } = response.data.user;
 
       if (token) {
         localStorage.setItem("token", token);
-        // ✅ 2. Force a redirect to update the Navbar/Header
+        // ✅ NEW: Save user details so Navbar can show the avatar
+        localStorage.setItem("user", JSON.stringify(userData)); 
         window.location.href = "/"; 
       } else {
         alert("Login successful but no token received.");

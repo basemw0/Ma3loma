@@ -3,11 +3,11 @@ import "./EditPost.css";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import { useNavigate, useParams } from "react-router-dom"; // Import useNavigate instead of useHistory
-import axios from 'axios'
+import api from "../../src/api/axios";
 
 const EditPost = () => {
   //const { pid } = useParams();
-  const pid = 'fb99718a-5a36-444c-a796-95612a4ee38a';
+  const pid = req.params.postId;
   //const navigate = useNavigate(); // Use useNavigate hook
   const [post, setPost] = useState({
     title: "",
@@ -23,7 +23,7 @@ const EditPost = () => {
       // Fetching post data based on `pid`
       // For now, we're just using mock data
       alert('hamada')
-      const response = await axios.get(`http://localhost:3000/api/posts/${pid}`);
+      const response = await api.get(`http://localhost:3000/api/posts/${pid}`);
       if(response.data){
         const post = response.data;
         setPost({
@@ -44,7 +44,7 @@ const EditPost = () => {
     e.preventDefault();
     // Submit the post update logic
     //alert('hoba tito mambo',post);
-    await axios.put(`http://localhost:3000/api/posts/edit/${pid}`, post);
+    await api.put(`http://localhost:3000/api/posts/edit/${pid}`, post);
     // Redirect back to the post detail page (or homepage)
     //navigate(`/post/${pid}`); // Use navigate to redirect
   };

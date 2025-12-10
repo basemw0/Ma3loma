@@ -7,7 +7,7 @@ import ShareOutlinedIcon from "@mui/icons-material/ShareOutlined";
 import BookmarkBorderOutlinedIcon from "@mui/icons-material/BookmarkBorderOutlined";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import Video from "../../video/Video"; 
-import axios from 'axios';
+import api from "../../../src/api/axios";
 import "./Posts.css";
 
 export default function Posts({ posts }) {
@@ -29,7 +29,7 @@ export default function Posts({ posts }) {
     const action = type === 1 ? "upvote" : "downvote";
 
     try {
-      const response = await axios.put(
+      const response = await api.put(
         `http://localhost:3000/api/posts/${id}/${action}`
       );
 

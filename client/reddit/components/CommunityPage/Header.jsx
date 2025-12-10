@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Button, IconButton, Avatar, Typography } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import axios from 'axios';
+import api from '../../src/api/axios';
 import { Link } from "react-router-dom";
 
 export default function Header(props) {
@@ -11,7 +11,7 @@ export default function Header(props) {
       try{
         if(status == 'Joined'){
             alert(status)
-            await axios.post(`http://localhost:3000/api/communities/${community._id}/join`, {
+            await api.post(`http://localhost:3000/api/communities/${community._id}/join`, {
               action : 0
             } )
             setJoined('Not Joined')
@@ -20,7 +20,7 @@ export default function Header(props) {
         else{
             alert(status)
             //Axios request
-            await axios.post("http://localhost:3000/api/communities/" + community._id + '/join', {
+            await api.post("http://localhost:3000/api/communities/" + community._id + '/join', {
               action : 1
             } )
             setJoined('Joined')

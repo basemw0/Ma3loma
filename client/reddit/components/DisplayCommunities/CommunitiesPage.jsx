@@ -4,7 +4,7 @@ import Communities from './Communities';
 import SearchBar from './SearchBar';
 import PageNav from './PageNav';
 import Box from '@mui/material/Box';
-import axios from 'axios';
+import api from '../../src/api/axios';
 import { useParams , useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 export default function CommunitiesPage(){
@@ -13,7 +13,7 @@ export default function CommunitiesPage(){
     let navPage = Number(number)
     const navigate = useNavigate();
     const fetchCommunities = async (number)=>{
-        let response = await axios.get(`http://localhost:3000/api/communities/best/${number}`)
+        let response = await api.get(`http://localhost:3000/api/communities/best/${number}`)
         let responseObject = response.data
         setNcommunities(responseObject.total)
         setCommunitiesArr(responseObject.communities)

@@ -3,7 +3,7 @@ import { Box } from "@mui/material";
 import Header from "./Header";
 import CommunityDetails from "../CommunityPage/CommunityDetails";
 import PostsSection from "./PostsSection";
-import axios from "axios";
+import api from "../../src/api/axios";
 import {Button} from "@mui/material";
 import { useParams } from "react-router-dom";
 
@@ -17,18 +17,18 @@ export default function CommunityPage() {
 
     const getCommunity = async (id) => {
         try {
-            let response = await axios.get("http://localhost:3000/api/communities/" + id);
+            let response = await api.get("http://localhost:3000/api/communities/" + id);
             let data = response.data;
             setCommunity(data); 
             setJoined(data.isMember? "Joined" : "Not Joined");
         } 
         catch (e) {
-            alert("Error: " + e.message);x
+            alert("Error: " + e.message);
         }
     };
 
     const getPosts = async (id , num , filter) => {
-        let response = await axios.get("http://localhost:3000/api/posts/community/" + id + "?page=" + num + "&filter=" + filter);
+        let response = await api.get("http://localhost:3000/api/posts/community/" + id + "?page=" + num + "&filter=" + filter);
         console.log(response.data)
         if(num ===1){
             setPosts(response.data);
