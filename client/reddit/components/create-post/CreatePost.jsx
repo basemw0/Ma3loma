@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import axios from "axios";  // Add Axios import
-import "./CreatePost.css";
-import { useEffect } from "react";
+import React, { useState, useEffect } from "react";
+// ✅ CORRECT: Import your configured instance
+import api from "../../src/api/axios"; 
+import "./CreatePost.css";import "./CreatePost.css";
 import { useParams } from "react-router-dom";
 const CreatePost = () => {
   const [title, setTitle] = useState("");
@@ -14,8 +14,7 @@ const CreatePost = () => {
   useEffect(() => {
     const getCommunity = async (id) => {
         try {
-            let response = await axios.get("http://localhost:3000/api/communities/" + id);
-            let data = response.data;
+            let response = await api.get("/api/communities/" + id); // baseURL is already set!            let data = response.data;
             setSelectedCommunity(data);
         } 
         catch (e) {
@@ -38,7 +37,7 @@ const CreatePost = () => {
     };
     try {
       // Make Axios POST request to your backend
-      const response = await axios.post(`http://localhost:3000/api/posts/${communityID}/create`, newPost);
+      const response = await api.post(`/api/posts/${communityID}/create`, newPost);
       console.log("Post Created: ", response.data);
       
       // Reset form after successful post
