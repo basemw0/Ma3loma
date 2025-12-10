@@ -2,6 +2,8 @@ const Post = require('../models/Post.js');
 const User = require('../models/User.js');
 const Community = require('../models/Community.js')
 const Comment = require('../models/Comment.js');
+const userData = require('../middleware/check-auth.js');
+
 const getPostComments = async (req, res) =>{
     //Button if comment is mine delete
     try{
@@ -53,7 +55,7 @@ const createComment = async (req, res) =>{
     try{
         const{content, mediaUrl = "", mediaType = "none", postID, parentID} = req.body;
          
-        const userID = "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
+        const userID = userData.id;
 
         const postExists = await Post.exists({_id:postID});
         if(!postExists) return res.status(404).json({message: 'Post Not Exist (CommentController)'});
@@ -103,7 +105,7 @@ const createComment = async (req, res) =>{
 const deleteComment = async (req, res) =>{
     try{
         const {coid} = req.params;
-        const uid = "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
+        const uid = userData.id;
 
         const comment = await Comment.findById(coid);
         if(!comment) return res.status(404).json({message: 'Comment not found!'});
@@ -138,7 +140,7 @@ const deleteComment = async (req, res) =>{
 const upvoteComment = async (req, res) =>{
     try{
         const {coid} = req.params;
-        const uid = "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
+        const uid = userData.id;
     
         const userExists = await User.exists({_id:uid});
         if (!userExists) return res.status(404).json({ message: "User not found" });
@@ -179,7 +181,7 @@ const editComment = async (req, res)=>{
     try{
         const {coid} = req.params
         const {content, mediaUrl, mediaType} = req.body;
-        const uid = "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
+        const uid = userData.id;
 
         const userExists = await User.exists({_id:uid});
         if (!userExists) return res.status(404).json({ message: "User not found" });
@@ -215,7 +217,7 @@ const editComment = async (req, res)=>{
 const downvoteComment = async (req, res) =>{
     try{
         const {coid} = req.params;
-        const uid = "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
+        const uid = userData.id;
     
         const userExists = await User.exists({_id:uid});
         if (!userExists) return res.status(404).json({ message: "User not found" });
@@ -260,7 +262,7 @@ const awardComment = async (req, res)=>{
     try{
         const {coid} = req.params;
         const {awardName} = req.body;
-        const uid = "607d1cab-cd65-4d5c-a8de-110965b4b2d9"
+        const uid = userData.id;
 
         const user = await User.findById(uid);
         if (!user) return res.status(404).json({ message: "User not found" });

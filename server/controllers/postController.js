@@ -5,7 +5,7 @@ const Community = require('../models/Community.js')
 const getPostsHomePage = async (req, res) =>{
     try{
         
-        const uid = "8dec6e7e-63e9-4cac-ad56-d9034068fb47"
+        const uid = req.userData?.id; // Optional - may be undefined if not logged in
 
         const filter = req.query.filter || 'new'; 
         let sortOption = {};
@@ -46,6 +46,7 @@ const getPostsHomePage = async (req, res) =>{
             }
             
         }
+        // If no user logged in, show all public posts (query is empty {})
 
         const posts = await Post.find(query)
             .sort(sortOption) 
@@ -64,9 +65,8 @@ const getPostsHomePage = async (req, res) =>{
 
 const getPostsCommunity = async (req, res) =>{
     try{
-        // const {cid} = req.params;
-        const cid = "3934d4bf-f5d0-4ae6-b227-809022cd5628"
-        const uid = "8dec6e7e-63e9-4cac-ad56-d9034068fb47"
+        const {cid} = req.params;
+        const uid = req.userData?.id; // Optional - may be undefined if not logged in
 
         const filter = req.query.filter || 'new'; 
         let sortOption = {};
@@ -135,7 +135,7 @@ const createPost = async (req, res) =>{
 
         const {title, content, mediaUrl, mediaType, communityID} = req.body;
         //  const cid = "c218e537-1901-470c-8dda-232bb52b434e"
-        const userID ="8dec6e7e-63e9-4cac-ad56-d9034068fb47"
+        const userID =userData.id;
 
         //cid = d17b1418-f818-4af8-b8cc-3202e5b43f93
 
@@ -159,7 +159,7 @@ const createPost = async (req, res) =>{
 const deletePost = async (req, res) =>{
     try {
         const { pid } = req.params;
-        const uid ="8dec6e7e-63e9-4cac-ad56-d9034068fb47"
+        const uid =userData.id;
 
         
         const post = await Post.findById(pid);
@@ -189,7 +189,7 @@ const editPost = async (req, res)=>{
     try{
         const {pid} = req.params
         const {title, content, mediaUrl, mediaType} = req.body;
-        const uid = "8dec6e7e-63e9-4cac-ad56-d9034068fb47"
+        const uid = userData.id;
 
         const userExists = await User.exists({_id:uid});
         if (!userExists) return res.status(404).json({ message: "User not found" });
@@ -227,7 +227,7 @@ const upvotePost = async (req, res)=>{
     console.log("YOOO")
     try{
         const {pid} = req.params;
-        const uid = "8dec6e7e-63e9-4cac-ad56-d9034068fb47"
+        const uid = userData.id;
 
         const userExists = await User.exists({_id:uid});
         if (!userExists) return res.status(404).json({ message: "User not found" });
@@ -284,7 +284,7 @@ const downvotePost = async (req, res)=>{
 
     try{
         const {pid} = req.params;
-        const uid = "8dec6e7e-63e9-4cac-ad56-d9034068fb47"
+        const uid = userData.id;
 
         const userExists = await User.exists({_id:uid});
         if (!userExists) return res.status(404).json({ message: "User not found" });
@@ -341,7 +341,7 @@ const downvotePost = async (req, res)=>{
 const awardPost = async (req, res)=>{
     try{
         const cid = "3934d4bf-f5d0-4ae6-b227-809022cd5628"
-        const uid = "8dec6e7e-63e9-4cac-ad56-d9034068fb47"
+        const uid = userData.id;
         const {awardName} = req.body;
 
         const user = await User.findById(uid);

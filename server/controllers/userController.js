@@ -1,4 +1,4 @@
-const env = require('dotenv').config();
+require('dotenv').config();
 const User = require('../models/User');
 const Verification = require('../models/Verification');
 const bcrypt = require('bcryptjs');
@@ -11,8 +11,8 @@ const { validationResult } = require('express-validator');
 const transporter = nodemailer.createTransport({
   service: 'gmail', // or your provider
   auth: {
-    user: env.EMAIL_USER, // e.g., 'yourname@gmail.com'
-    pass: env.EMAIL_PASS 
+    user: process.env.EMAIL_USER, // e.g., 'yourname@gmail.com'
+    pass: process.env.EMAIL_PASS 
   }
 });
 // Get all users
@@ -59,7 +59,7 @@ const signup = async (req, res) => {
     let token;
      token = jwt.sign(
       { id: user._id },
-      env.JWT_SECRET,{expiresIn: 3600},
+      process.env.JWT_SECRET,{expiresIn: 3600},
     )
     
     res.status(201).json({ 
@@ -101,7 +101,7 @@ const login = async (req, res) => {
      let token;
      token = jwt.sign(
       { id: user._id },
-      env.JWT_SECRET,{expiresIn: 3600},
+      process.env.JWT_SECRET,{expiresIn: 3600},
     )
     // Return user data (without password)
     res.status(200).json({

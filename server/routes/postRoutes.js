@@ -11,15 +11,15 @@ const postController = require('../controllers/postController');
 const router = express.Router();
 
 
-router.get('/home', postController.getPostsHomePage);
+router.get('/home', checkAuth.optionalAuth, postController.getPostsHomePage);
 
 
-router.get('/community/:cid',postController.getPostsCommunity);
+router.get('/community/:cid', checkAuth.optionalAuth, postController.getPostsCommunity);
 
 
 router.get('/:pid', postController.getPostDetails);
 
-//router.use(checkAuth);
+router.use(checkAuth);
 
 router.post('/:communityID/create', postController.createPost);
 

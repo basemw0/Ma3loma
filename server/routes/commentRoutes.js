@@ -12,7 +12,7 @@ router.get('/post/:pid', commentController.getPostComments);
 router.get('/replies/:coid', commentController.getCommentReplies);
 
 
-//router.use(checkAuth);
+router.use(checkAuth);
 
 router.post('/create',  commentController.createComment);
 

@@ -8,8 +8,7 @@ const { validationResult } = require('express-validator');
 
 
 const getCommunities= async (req, res) => {
-  const cid =  "3934d4bf-f5d0-4ae6-b227-809022cd5628"
-  const userID =  "8dec6e7e-63e9-4cac-ad56-d9034068fb47"
+  const userID = req.userData?.id; // Get from check-auth middleware (optional, used for personalization)
   const limit = req.params.limit;
 
 
@@ -79,9 +78,7 @@ const getCommunities= async (req, res) => {
 
 
 const getCommunitiesByCategory = async (req, res) => {
-  // Hardcoded ID per your snippet
-   const cid = "3934d4bf-f5d0-4ae6-b227-809022cd5628"
-   const userID = "8dec6e7e-63e9-4cac-ad56-d9034068fb47"
+  const userID = req.userData?.id; // Get from check-auth middleware (optional)
   const { q } = req.query; 
 
   try {

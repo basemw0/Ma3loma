@@ -7,14 +7,14 @@ const communityController = require('../controllers/communityController');
 const router = express.Router();
 
 
-router.get('/Category', communityController.getCommunitiesByCategory)
+router.get('/Category', checkAuth.optionalAuth, communityController.getCommunitiesByCategory)
 
-router.get('/search', communityController.searchCommunity)
+router.get('/search', checkAuth.optionalAuth, communityController.searchCommunity)
 
-router.get('/:id', communityController.getCommunityById);
-router.get('/best/:limit', communityController.getCommunities);
+router.get('/:id', checkAuth.optionalAuth, communityController.getCommunityById);
+router.get('/best/:limit', checkAuth.optionalAuth, communityController.getCommunities);
 
-//router.use(checkAuth);
+router.use(checkAuth);
 
 router.post(
   '/create', 
