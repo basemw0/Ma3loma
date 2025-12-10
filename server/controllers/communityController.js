@@ -320,7 +320,7 @@ const joinCommunity= async (req, res) => {
 // ✅ GET COMMUNITY BY ID (With "Am I a Member?" Check)
 const getCommunityById= async (req, res) => {
    const communityID = req.params.id
-   const userID = req.userData.id
+   const userID = req.userData?.id;
   try {
     const community = await Community.findById(communityID).populate({
       path: "moderators.user",   
