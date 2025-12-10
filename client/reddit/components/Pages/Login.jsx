@@ -87,7 +87,8 @@ export default function Login() {
   };
 
   const continueWithGoogle = () => {
-    window.location.href = "http://localhost:3000/auth/google"; 
+    const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
+    window.location.href = `${serverUrl}/auth/google`; 
   };
 
   const GoogleIcon = () => (

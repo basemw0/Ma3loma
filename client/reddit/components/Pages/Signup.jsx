@@ -58,7 +58,8 @@ export default function Signup() {
   };
 
   const continueWithGoogle = () => {
-    window.location.href = "http://localhost:3000/auth/google"; // [cite: 14] Point to Backend
+    const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
+    window.location.href = `${serverUrl}/auth/google`; // [cite: 14] Point to Backend
   };
 
   const GoogleIcon = () => (

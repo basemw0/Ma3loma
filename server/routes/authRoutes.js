@@ -15,13 +15,14 @@ router.get('/google/callback',
     // Create Token
     const token = jwt.sign(
       { id: req.user._id },
-      'SecretMoot',
+      process.env.JWT_SECRET,
       { expiresIn: 3600 }
     );
 
     // 3. Redirect to Frontend with Token
     // We pass the token in the URL so the frontend can grab it
-   res.redirect(`http://localhost:5173/login?token=${token}`);
+   const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+   res.redirect(`${clientUrl}/login?token=${token}`);
   }
 );
 
