@@ -57,7 +57,7 @@ export default function CommunityPage() {
             <Header community={community} setJoined={setJoined} joined={joined} />
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Box sx={{display : 'flex' , flexDirection :'column', alignItems : 'center', justifyContent:'center'}}>
-                <PostsSection posts={posts} getPosts = {getPosts} setNum = {setNum} communityId = {communityId} setCurrentFilter = {setCurrentFilter}/>
+                <PostsSection posts={posts} getPosts = {getPosts} setNum = {setNum} communityId = {communityId} setCurrentFilter = {setCurrentFilter} community = "yes"/>
                  <Button onClick={handleShowMore} variant="text">Show more</Button>
                 </Box>
                 <CommunityDetails community={community} />

@@ -12,21 +12,21 @@ export default function Header(props) {
     const handleJoinClick = async (status)=>{
       try{
         if(status == 'Joined'){
-            alert(status)
+           
             await api.post(`/api/communities/${community._id}/join`, {
               action : 0
             } )
             setJoined('Not Joined')
-            alert("Unjoined")
+         
         }
         else{
-            alert(status)
+            
             //Axios request
             await api.post("/api/communities/" + community._id + '/join', {
               action : 1
             } )
             setJoined('Joined')
-            alert("Joined")
+            
         }
       }
       catch(e){
@@ -100,6 +100,7 @@ export default function Header(props) {
         {/* Right side - Action Buttons */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <Button
+            disabled = {joined !== "Joined"}
             variant="outlined"
             startIcon={<AddIcon />}
             component = {Link}

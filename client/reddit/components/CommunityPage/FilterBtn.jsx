@@ -7,7 +7,7 @@ import ListSubheader from '@mui/material/ListSubheader'; // Import this
 
 export default function FilterBtn(props){
     const [filter, setFilter] = React.useState(1);
-    const {getPosts, communityId, setNum, setCurrentFilter} = props;
+    const {getPosts, setNum, setCurrentFilter , communityId , community} = props;
 
     const handleChange = (event) => {
         const value = event.target.value;
@@ -22,8 +22,14 @@ export default function FilterBtn(props){
         
         // LOGIC FIX: When filtering, we fetch Page 1, 
         // but we must set 'num' to 2 so the NEXT "Show More" click fetches Page 2.
+       
         setNum(2); 
-        getPosts(communityId, 1, filterName);
+         if(community === "yes"){
+            getPosts(communityId,1, filterName);
+        }
+        else{
+             getPosts(1, filterName);
+        }
     };
 
     return(

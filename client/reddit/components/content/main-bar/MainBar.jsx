@@ -12,67 +12,39 @@ import "./MainBar.css";
 import Posts from "../posts/Posts";
 import api from "../../../src/api/axios";
 import { Button } from "@mui/material";
+import FilterBtn from '../../CommunityPage/FilterBtn'
 
 export default function MainBar() {
   const [posts , setPosts] = useState([])
+  const [currentFilter , setCurrentFilter] = useState("best")
   const [num , setNum] = useState(1)
-  const getPosts = async (num) => {
-        let response = await api.get("/api/posts/home?page=" + num);
+  const getPosts = async (num , filter) => {
+        let response = await api.get("/api/posts/home?page=" + num + "&filter=" + filter);
+        console.log(response.data)
+        if(num ===1){
+            setPosts(response.data);
+        }
+        else{
         setPosts((prev)=>{
             return [...prev , ...response.data]
         });
-        setNum((prev)=>{
-            return prev+1
-        })
+        }
     };
-  useEffect(() => {
-    getPosts(num)
-  }, []);
+    const handleShowMore = () => {
+        getPosts(num, currentFilter);
+        setNum(prev => prev + 1); 
+    };
+
+    useEffect(() => {
+        getPosts(num , currentFilter);
+        setNum(2)
+    }, []);
   if (!posts) return <div>Loading...</div>;
   return (
     <div className="main-bar">
-      <div className="update-card">
-        <div className="top-section">
-          <span>UPDATES FROM REDDIT</span>
-
-        </div>
-        <div className="body hoverable">
-          <div className="context">
-            <span className="title">Keep yourself safe and informed</span>
-            <br />
-            <span className="description">Visit r/Coronavirus to talk about COVID-19, and visit www.who.int for more information.</span>
-          </div>
-          <img src="./assets/images/pin.jpg" />
-        </div>
-      </div>
-
-      <div className="filter-container">
-        <div className="filter-element hoverable">
-          <Whatshot />
-          <span>Hot</span>
-        </div>
-        <div className="filter-element hoverable">
-          <span>Everywhere</span>
-          <ArrowDropDown />
-        </div>
-        <div className="filter-element-secondary hoverable">
-          <NewReleases />
-          <span>New</span>
-        </div>
-        <div className="filter-element-secondary hoverable">
-          <TrendingUp />
-          <span>Top</span>
-        </div>
-        <MoreHoriz className="filter-element-tertiary hoverable" />
-        <div className="spacer"></div>
-        <div className="filter-element-menu hoverable">
-          <Menu />
-          <ArrowDropDown />
-        </div>
-      </div>
-
+      <FilterBtn getPosts = {getPosts} setNum = {setNum} setCurrentFilter = {setCurrentFilter} community = "no"/>
       <Posts posts = {posts} />
-      <Button onClick={()=>{getPosts(num)}} variant="text">Show more</Button>
+      <Button onClick={handleShowMore} variant="text">Show more</Button>
     </div>
   );
 }

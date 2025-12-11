@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { Link } from "react-router-dom";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
@@ -45,7 +45,7 @@ export default function Posts({ posts }) {
       const initialSaveState = {};
       posts.forEach((p) => {
         if (p.communityID) {
-          initialJoinState[p.communityID._id] = p.communityID.isMember || false;
+          initialJoinState[p.communityID._id] = p.isMember || false;
         }
         initialSaveState[p._id] = p.isSaved || false;
       });
@@ -226,13 +226,22 @@ export default function Posts({ posts }) {
                 />
 
                 <div className="header-text">
-                  <span className="subreddit-link">
+                  <Link style={{
+                    color: "inherit",
+                      textDecoration: "none",
+                      fontWeight: 700,
+                      fontSize: "0.95rem"}}
+                      to={"/api/communities/"+post.communityID._id}>
+                  
                     r/{post.communityID?.name}
-                  </span>
+                  
+                  </Link>
                   <span className="meta-dot">•</span>
+                  
                   <span className="user-meta">
                     u/{post.userID?.username}
                   </span>
+                  
                   <span className="time-meta">
                     {formatTime(post.createdAt)}
                   </span>

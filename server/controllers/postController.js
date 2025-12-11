@@ -30,7 +30,7 @@ const summarizePost = async (req, res) => {
 
         // 5. Generate Content
         const result = await model.generateContent(prompt);
-        const response = await result.response;
+        const response = result.response;
         const summaryText = response.text();
 
         // 6. Return result
@@ -46,7 +46,7 @@ const getPostsHomePage = async (req, res) =>{
         
         const uid = req.userData?.id; // Optional - may be undefined if not logged in
 
-        const filter = req.query.filter || 'new'; 
+        const filter = req.query.filter || 'best'; 
         let sortOption = {};
 
         if(filter === 'best'){
@@ -92,10 +92,22 @@ const getPostsHomePage = async (req, res) =>{
             .skip(skip)
             .limit(limit)
             .populate('userID', 'username image')
-            .populate('communityID', 'name icon');
-
-        res.status(200).send(posts);
-
+            .populate('communityID', 'name icon').lean()
+        const user = await User.findById(uid)
+        const buffedPosts = []
+        posts.forEach(post => {
+            const communityId = post.communityID._id
+            if(user.joinedCommunities.find(com=> com.community === communityId)){
+                buffedPosts.push({...post , isMember :  true})
+            }
+            else{
+                 buffedPosts.push({...post , isMember :  false})
+            }
+                
+            
+        });
+        res.status(200).send(buffedPosts);
+        
     }catch(error){
         res.status(500).json({message:error.message});
     }
@@ -129,11 +141,21 @@ const getPostsCommunity = async (req, res) =>{
         const commExists = await Community.exists({_id:cid});
         if (!commExists) return res.status(404).json({ message: "Community not found" });
 
-        const posts = await Post.find({communityID: cid}).sort(sortOption).skip(skip).limit(limit).populate('userID', 'username image').populate('communityID', 'name icon');
-
-        res.status(200).send(posts);
-        
-        
+        const posts = await Post.find({communityID: cid}).sort(sortOption).skip(skip).limit(limit).populate('userID', 'username image').populate('communityID', 'name icon').lean();
+        const user = await User.findById(uid)
+        const buffedPosts = []
+        posts.forEach(post => {
+            const communityId = post.communityID._id
+            if(user.joinedCommunities.find(com=> com.community === communityId)){
+                buffedPosts.push({...post , isMember :  true})
+            }
+            else{
+                 buffedPosts.push({...post , isMember :  false})
+            }
+                
+            
+        });
+        res.status(200).send(buffedPosts);
     }catch(error){
         res.status(500).json({message:error.message});
     }
@@ -146,7 +168,7 @@ const getPostDetails = async (req, res) =>{
 
         const post = await Post.findById(pid)
             .populate('userID', 'username image')
-            .populate('communityID', 'name')
+            .populate('communityID', 'name moderators')
             .populate({
                 path: 'comments',
                 
