@@ -49,136 +49,138 @@ const summarizePost = async (req, res) => {
 
 
 const getPostsHomePage = async (req, res) => {
-  try {
-    const uid = req.userData?.id;
+    try {
+        const uid = req.userData?.id;
 
-    const filter = req.query.filter || "best";
-    let sortOption = {};
+        const filter = req.query.filter || "best";
+        let sortOption = {};
 
-    if (filter === "best") sortOption = { voteCount: -1 };
-    else if (filter === "hot") sortOption = { commentCount: -1 };
-    else sortOption = { createdAt: -1 };
+        if (filter === "best") sortOption = { voteCount: -1 };
+        else if (filter === "hot") sortOption = { commentCount: -1 };
+        else sortOption = { createdAt: -1 };
 
-    const page = parseInt(req.query.page) || 1;
-    const limit = 20;
-    const skip = (page - 1) * limit;
+        const page = parseInt(req.query.page) || 1;
+        const limit = 20;
+        const skip = (page - 1) * limit;
 
-    
-    if (!uid) {
-      const posts = await Post.find({})
-        .sort(sortOption)
-        .skip(skip)
-        .limit(limit)
-        .populate("userID", "username image")
-        .populate("communityID", "name icon")
-        .lean();
 
-      return res.status(200).json(
-        posts.map(p => ({
-          ...p,
-          isMember: false,
-          isSaved: false
-        }))
-      );
-    }
+        if (!uid) {
+            const posts = await Post.find({})
+                .sort(sortOption)
+                .skip(skip)
+                .limit(limit)
+                .populate("userID", "username image")
+                .populate("communityID", "name icon")
+                .lean();
 
-    
-    const user = await User.findById(uid).select(
-      "joinedCommunities interests savedPosts"
-    );
-
-    if (!user)
-      return res.status(404).json({ message: "User not found" });
-
-    const joinedIds = user.joinedCommunities.map(jc =>
-      jc.community.toString()
-    );
-
-    let interestIds = [];
-    if (user.interests?.length) {
-      const ids = await Community.distinct("_id", {
-        interests: { $in: user.interests }
-      });
-      interestIds = ids.map(id => id.toString());
-    }
-
-    const priorityIds = Array.from(
-      new Set([...joinedIds])
-    );
-
-    // =============================
-    // SINGLE AGGREGATION QUERY
-    // =============================
-    const posts = await Post.aggregate([
-      {
-        $addFields: {
-          priority: {
-            $cond: [
-              { $in: ["$communityID", priorityIds] },
-              1,
-              0
-            ]
-          }
+            return res.status(200).json(
+                posts.map(p => ({
+                    ...p,
+                    isMember: false,
+                    isSaved: false
+                }))
+            );
         }
-      },
-      {
-        $sort: {
-          priority: -1,
-          ...sortOption
+
+
+        const user = await User.findById(uid).select(
+            "joinedCommunities interests savedPosts"
+        );
+
+        if (!user)
+            return res.status(404).json({ message: "User not found" });
+
+        const joinedIds = user.joinedCommunities.map(jc =>
+            jc.community.toString()
+        );
+
+        let interestIds = [];
+        if (user.interests?.length) {
+            const ids = await Community.distinct("_id", {
+                interests: { $in: user.interests }
+            });
+            interestIds = ids.map(id => id.toString());
         }
-      },
-      { $skip: skip },
-      { $limit: limit }
-    ]);
 
-    
-    await Post.populate(posts, [
-      { path: "userID", select: "username image" },
-      { path: "communityID", select: "name icon" }
-    ]);
+        const priorityIds = Array.from(
+            new Set([...joinedIds, ...interestIds])
+        );
 
-    const finalPosts = posts.map(post => ({
-      ...post,
-      isMember: joinedIds.includes(post.communityID._id.toString()),
-      isSaved: user.savedPosts.includes(post._id.toString())
-    }));
+        // =============================
+        // SINGLE AGGREGATION QUERY
+        // =============================
+        const posts = await Post.aggregate([
+            {
+                $addFields: {
+                    priority: {
+                        $switch: {
+                            branches: [
+                                { case: { $in: ["$communityID", joinedIds] }, then: 2 },
+                                { case: { $in: ["$communityID", interestIds] }, then: 1 }
+                            ],
+                            default: 0
+                        }
+                    }
+                }
+            },
+            {
+                $sort: {
+                    priority: -1,
+                    ...sortOption
+                }
+            },
+            { $skip: skip },
+            { $limit: limit }
+        ]);
 
-    res.status(200).json(finalPosts);
-  } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ message: error.message });
-  }
+
+        await Post.populate(posts, [
+            { path: "userID", select: "username image" },
+            { path: "communityID", select: "name icon" }
+        ]);
+
+        const finalPosts = posts.map(post => ({
+            ...post,
+            isMember: joinedIds.includes(post.communityID._id.toString()),
+            isSaved: user.savedPosts.includes(post._id.toString())
+        }));
+
+        res.status(200).json(finalPosts);
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ message: error.message });
+    }
 };
 
 
-const getPostsCommunity = async (req, res) =>{
-    try{
-        const {cid} = req.params;
+const getPostsCommunity = async (req, res) => {
+    try {
+        const { cid } = req.params;
         const uid = req.userData?.id; // Optional - may be undefined if not logged in
 
-        const filter = req.query.filter || 'new'; 
+        const filter = req.query.filter || 'new';
         let sortOption = {};
 
-        if(filter === 'best'){
-            sortOption = {voteCount: -1};
-        }else if(filter === 'hot'){
-            sortOption = {commentCount: -1};
-        }else{
-            sortOption = {createdAt: -1};
+        if (filter === 'best') {
+            sortOption = { voteCount: -1 };
+        } else if (filter === 'hot') {
+            sortOption = { commentCount: -1 };
+        } else {
+            sortOption = { createdAt: -1 };
         }
 
         const page = parseInt(req.query.page) || 1;
         const limit = 20
         const skip = (page - 1) * limit;
-        
 
-        const commExists = await Community.exists({_id:cid});
+
+        const commExists = await Community.exists({ _id: cid });
         if (!commExists) return res.status(404).json({ message: "Community not found" });
 
         let posts = [];
         const buffedPosts = [];
 
-        
+
         posts = await Post.find({ communityID: cid })
             .sort(sortOption)
             .skip(skip)
@@ -189,31 +191,31 @@ const getPostsCommunity = async (req, res) =>{
 
         if (uid) {
             const user = await User.findById(uid).select('joinedCommunities savedPosts');
-            if(!user) return res.status(404).json({ message: "User not found" });
+            if (!user) return res.status(404).json({ message: "User not found" });
 
             let userCommsIds = user.joinedCommunities.map(jc => jc.community.toString());
 
-            
+
             posts.forEach(post => {
-            buffedPosts.push({...post , isMember :  userCommsIds.includes(post.communityID._id.toString()), isSaved : user.savedPosts.includes(post._id.toString())});
+                buffedPosts.push({ ...post, isMember: userCommsIds.includes(post.communityID._id.toString()), isSaved: user.savedPosts.includes(post._id.toString()) });
             });
 
-            
+
         } else {
-           
+
             posts.forEach(post => {
                 buffedPosts.push({ ...post, isMember: false, isSaved: false });
             });
         }
 
         res.status(200).send(buffedPosts);
-    }catch(error){
-        res.status(500).json({message:error.message});
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
 }
 
 
-const getPostDetails = async (req, res) =>{
+const getPostDetails = async (req, res) => {
     try {
         const { pid } = req.params;
 
@@ -222,32 +224,32 @@ const getPostDetails = async (req, res) =>{
             .populate('communityID', 'name moderators')
             .populate({
                 path: 'comments',
-                
-                options: { sort: { createdAt: -1 }, limit: 10 }, 
+
+                options: { sort: { createdAt: -1 }, limit: 10 },
                 populate: [
-                    
+
                     { path: 'userID', select: 'username image' },
-                    
-                    { 
-                        path: 'replies', 
-                        populate: { path: 'userID', select: 'username image' } 
+
+                    {
+                        path: 'replies',
+                        populate: { path: 'userID', select: 'username image' }
                     }
                 ]
             });
 
         res.status(200).json(post);
     } catch (error) {
-        res.status(500).json({message: error.message});
+        res.status(500).json({ message: error.message });
     }
 }
 
 
-const createPost = async (req, res) =>{
-    try{
+const createPost = async (req, res) => {
+    try {
 
-        const {title, content, mediaUrl, mediaType} = req.body;
-        const {communityID} = req.params; 
-        const userID =req.userData.id;
+        const { title, content, mediaUrl, mediaType } = req.body;
+        const { communityID } = req.params;
+        const userID = req.userData.id;
 
         //cid = d17b1418-f818-4af8-b8cc-3202e5b43f93
 
@@ -262,31 +264,31 @@ const createPost = async (req, res) =>{
         await newPost.populate('userID', 'username image');
         res.status(201).json(newPost);
 
-    }catch(error){
+    } catch (error) {
         console.log(error.message)
-        res.status(500).json({message:error.message});
+        res.status(500).json({ message: error.message });
     }
 }
 
 
-const deletePost = async (req, res) =>{
+const deletePost = async (req, res) => {
     try {
         const { pid } = req.params;
-        const uid =req.userData.id;
+        const uid = req.userData.id;
 
-        
+
         const post = await Post.findById(pid);
 
         if (!post) {
             return res.status(404).json({ message: 'Post Not Found' });
         }
 
-        
+
         if (post.userID.toString() !== uid) {
             return res.status(403).json({ message: "You are not authorized to delete this post" });
         }
 
-        
+
         const p = await Post.findByIdAndDelete(pid);
 
         res.status(200).json({ message: 'Post deleted successfully!' });
@@ -298,18 +300,18 @@ const deletePost = async (req, res) =>{
 
 
 
-const editPost = async (req, res)=>{
-    try{
-        const {pid} = req.params
-        const {title, content, mediaUrl, mediaType} = req.body;
+const editPost = async (req, res) => {
+    try {
+        const { pid } = req.params
+        const { title, content, mediaUrl, mediaType } = req.body;
         const uid = req.userData.id;
 
-        const userExists = await User.exists({_id:uid});
+        const userExists = await User.exists({ _id: uid });
         if (!userExists) return res.status(404).json({ message: "User not found" });
-        
+
         const post = await Post.findById(pid);
-        if(!post){
-            return res.status(404).json({message: "Post not found"});
+        if (!post) {
+            return res.status(404).json({ message: "Post not found" });
         }
 
         if (post.userID.toString() !== uid) {
@@ -318,37 +320,37 @@ const editPost = async (req, res)=>{
 
         const post_u = await Post.findByIdAndUpdate(pid,
             {
-                
-                title, 
-                content, 
-                mediaUrl, 
+
+                title,
+                content,
+                mediaUrl,
                 mediaType
             },
-            {new:true}
+            { new: true }
         );
 
         res.status(200).json(post_u);
 
-    }catch(error){
-        res.status(500).json({message: error.message});
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
 }
 
 
 
-const upvotePost = async (req, res)=>{
+const upvotePost = async (req, res) => {
     console.log("YOOO")
-    try{
-        const {pid} = req.params;
+    try {
+        const { pid } = req.params;
         const uid = req.userData.id;
-        
 
-        const userExists = await User.exists({_id:uid});
+
+        const userExists = await User.exists({ _id: uid });
         if (!userExists) return res.status(404).json({ message: "User not found" });
-        
+
         const post = await Post.findById(pid);
-        if(!post){
-            return res.status(404).json({message: "Post not found"});
+        if (!post) {
+            return res.status(404).json({ message: "Post not found" });
         }
 
 
@@ -359,53 +361,53 @@ const upvotePost = async (req, res)=>{
 
         if (isUpvoted) {
             // 1. Already Upvoted -> Remove it (Toggle OFF)
-            updateQuery = { 
+            updateQuery = {
                 $pull: { upvotes: uid },
-                $inc: { voteCount: -1 } 
+                $inc: { voteCount: -1 }
             };
         } else if (isDownvoted) {
             // 2. Was Downvoted -> Switch to Upvote (Big Jump +2)
-            updateQuery = { 
+            updateQuery = {
                 $pull: { downvotes: uid },
                 $addToSet: { upvotes: uid },
                 $inc: { voteCount: 2 } // +1 to neutralize, +1 to go up
             };
         } else {
             // 3. Neutral -> New Upvote (+1)
-            updateQuery = { 
+            updateQuery = {
                 $addToSet: { upvotes: uid },
-                $inc: { voteCount: 1 } 
+                $inc: { voteCount: 1 }
             };
         }
 
-        
-        const post_u = await Post.findByIdAndUpdate(pid, updateQuery, { new: true }).populate("userID" , "username image")
-        .populate("communityID" , "name")
+
+        const post_u = await Post.findByIdAndUpdate(pid, updateQuery, { new: true }).populate("userID", "username image")
+            .populate("communityID", "name")
 
         res.status(200).json(post_u);
 
-    }catch(error){
+    } catch (error) {
         console.log('el upvote bt3t el post')
         console.log(error.message);
-        res.status(500).json({message:error.message});
+        res.status(500).json({ message: error.message });
     }
 }
 
 
 
-const downvotePost = async (req, res)=>{
+const downvotePost = async (req, res) => {
     console.log("YOOO")
 
-    try{
-        const {pid} = req.params;
+    try {
+        const { pid } = req.params;
         const uid = req.userData.id;
 
-        const userExists = await User.exists({_id:uid});
+        const userExists = await User.exists({ _id: uid });
         if (!userExists) return res.status(404).json({ message: "User not found" });
-        
+
         const post = await Post.findById(pid);
-        if(!post){
-            return res.status(404).json({message: "Post not found"});
+        if (!post) {
+            return res.status(404).json({ message: "Post not found" });
         }
 
 
@@ -416,79 +418,79 @@ const downvotePost = async (req, res)=>{
 
         if (isDownvoted) {
             // 1. Already Downvoted -> Remove it (Toggle OFF)
-            updateQuery = { 
+            updateQuery = {
                 $pull: { downvotes: uid },
-                $inc: { voteCount: 1 } 
+                $inc: { voteCount: 1 }
             };
         } else if (isUpvoted) {
             // 2. Was Upvoted -> Switch to Downvote (Big Drop -2)
-            updateQuery = { 
+            updateQuery = {
                 $pull: { upvotes: uid },
                 $addToSet: { downvotes: uid },
                 $inc: { voteCount: -2 } // -1 to neutralize, -1 to go down
             };
         } else {
             // 3. Neutral -> New Downvote (-1)
-            updateQuery = { 
+            updateQuery = {
                 $addToSet: { downvotes: uid },
-                $inc: { voteCount: -1 } 
+                $inc: { voteCount: -1 }
             };
         }
 
-        
-       const post_u = await Post.findByIdAndUpdate(pid, updateQuery, { new: true }).populate("userID" , "username image")
-        .populate("communityID" , "name")
+
+        const post_u = await Post.findByIdAndUpdate(pid, updateQuery, { new: true }).populate("userID", "username image")
+            .populate("communityID", "name")
 
 
         res.status(200).json(post_u);
 
-    }catch(error){
+    } catch (error) {
         console.log('el downvote bt3t el post')
         console.log(error.message);
-        res.status(500).json({message:error.message});
+        res.status(500).json({ message: error.message });
     }
 }
 
 
 
 
-const awardPost = async (req, res)=>{
-    try{
+const awardPost = async (req, res) => {
+    try {
         const cid = "3934d4bf-f5d0-4ae6-b227-809022cd5628"
         const uid = req.userData.id;
-        const {awardName} = req.body;
+        const { awardName } = req.body;
 
         const user = await User.findById(uid);
         if (!user) return res.status(404).json({ message: "User not found" });
 
         const comm = await Community.findById(cid);
-        if(!comm){
-            return res.status(404).json({message: "Community not found"});
+        if (!comm) {
+            return res.status(404).json({ message: "Community not found" });
         }
 
         const post = await Post.findById(pid);
-        if(!post){
-            return res.status(404).json({message: "Post not found"});
+        if (!post) {
+            return res.status(404).json({ message: "Post not found" });
         }
 
-        const award = comm.Awards.find(a=> a.name === awardName);
-        if(!award){
-            return res.status(404).json({message: "Award not found"});
+        const award = comm.Awards.find(a => a.name === awardName);
+        if (!award) {
+            return res.status(404).json({ message: "Award not found" });
         }
 
-        if(user.goldBalance < award.cost){
-            return res.status(404).json({message: "Not Enough Gold"});
+        if (user.goldBalance < award.cost) {
+            return res.status(404).json({ message: "Not Enough Gold" });
         }
 
-        await User.findByIdAndUpdate(uid, 
+        await User.findByIdAndUpdate(uid,
             {
-                $inc: {goldBalance: -award.cost}
+                $inc: { goldBalance: -award.cost }
             }
         );
 
         const post_u = await Post.findByIdAndUpdate(pid,
             {
-                $push:{
+                $push: {
                     awardsReceived: {
                         awardName: award.name,
                         givenBy: uid,
@@ -496,20 +498,20 @@ const awardPost = async (req, res)=>{
                     }
                 }
             },
-            {new: true} 
+            { new: true }
         ).populate('awardsReceived.givenBy', 'username');
 
         res.status(200).send(post_u);
 
-    }catch(error){
-        res.status(500).json({error:error.message});
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 }
 
-const savePost = async (req, res)=>{
+const savePost = async (req, res) => {
     try {
-        const { pid } = req.params; 
-        const uid = req.userData.id; 
+        const { pid } = req.params;
+        const uid = req.userData.id;
 
         const user = await User.findById(uid);
         if (!user) return res.status(404).json({ message: "User not found" });
@@ -526,7 +528,7 @@ const savePost = async (req, res)=>{
         let msg = "";
 
         if (isSaved) {
-            
+
             updateQuery = { $pull: { savedPosts: pid } };
             msg = "Post unsaved successfully";
         } else {
@@ -538,7 +540,7 @@ const savePost = async (req, res)=>{
 
         console.log('hena aho');
 
-        res.status(200).json({ message: msg});
+        res.status(200).json({ message: msg });
 
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -546,11 +548,11 @@ const savePost = async (req, res)=>{
 }
 
 
-const getSavedPosts = async (req, res)=>{
-    try{
-        const uid = req.userData.id; 
+const getSavedPosts = async (req, res) => {
+    try {
+        const uid = req.userData.id;
 
-        
+
         const user = await User.findById(uid).populate({
             path: 'savedPosts',
             populate: [
@@ -561,18 +563,18 @@ const getSavedPosts = async (req, res)=>{
 
         if (!user) return res.status(404).json({ message: "User not found" });
 
-        
+
         const page = parseInt(req.query.page) || 1;
         const limit = 20;
         const skip = (page - 1) * limit;
-        
-       
+
+
         const savedPosts = user.savedPosts.reverse().slice(skip, skip + limit);
 
         res.status(200).json(savedPosts);
-        
-    }catch(error){
-        res.status(500).json({message: error.message});
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
 }
 

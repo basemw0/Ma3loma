@@ -2,6 +2,7 @@ const Post = require('../models/Post.js');
 const User = require('../models/User.js');
 const Community = require('../models/Community.js')
 const Comment = require('../models/Comment.js');
+const { CommentBank } = require('@mui/icons-material');
 
 const getPostComments = async (req, res) =>{
     //Button if comment is mine delete
@@ -150,23 +151,32 @@ const upvoteComment = async (req, res) =>{
         }
     
     
-        const isUp = comment.upvotes.includes(uid);
+        const isUpvoted = comment.upvotes.includes(uid);
+        const isDownvoted = comment.downvotes.includes(uid);
             
         let updateQuery = {};
-    
-        if (isUp) {
-            
-            updateQuery = { $pull: { upvotes: uid },
-                            $inc: {voteCount : -1}
+
+        if (isUpvoted) {
+            // 1. Already Upvoted -> Remove it (Toggle OFF)
+            updateQuery = {
+                $pull: { upvotes: uid },
+                $inc: { voteCount: -1 }
             };
-        }else {
-            
-            updateQuery = { 
-                $addToSet: { upvotes: uid }, 
+        } else if (isDownvoted) {
+            // 2. Was Downvoted -> Switch to Upvote (Big Jump +2)
+            updateQuery = {
                 $pull: { downvotes: uid },
-                $inc: { voteCount: 1 }    
+                $addToSet: { upvotes: uid },
+                $inc: { voteCount: 2 } // +1 to neutralize, +1 to go up
+            };
+        } else {
+            // 3. Neutral -> New Upvote (+1)
+            updateQuery = {
+                $addToSet: { upvotes: uid },
+                $inc: { voteCount: 1 }
             };
         }
+
 
 
         const comment_u = await Comment.findByIdAndUpdate(coid, updateQuery, { new: true }).populate("userID" , "username")
@@ -227,21 +237,29 @@ const downvoteComment = async (req, res) =>{
         }
     
     
-        const isDown = comment.downvotes.includes(uid);
-            
+        const isUpvoted = comment.upvotes.includes(uid);
+        const isDownvoted = comment.downvotes.includes(uid);
+
         let updateQuery = {};
-    
-        if (isDown) {
-            
-            updateQuery = { $pull: { downvotes: uid },
-                            $inc: { voteCount: 1 }                    
+
+        if (isDownvoted) {
+            // 1. Already Downvoted -> Remove it (Toggle OFF)
+            updateQuery = {
+                $pull: { downvotes: uid },
+                $inc: { voteCount: 1 }
+            };
+        } else if (isUpvoted) {
+            // 2. Was Upvoted -> Switch to Downvote (Big Drop -2)
+            updateQuery = {
+                $pull: { upvotes: uid },
+                $addToSet: { downvotes: uid },
+                $inc: { voteCount: -2 } // -1 to neutralize, -1 to go down
             };
         } else {
-            
-            updateQuery = { 
-                $addToSet: { downvotes: uid }, 
-                $pull: { upvotes: uid },
-                $inc: { voteCount: -1 }    
+            // 3. Neutral -> New Downvote (-1)
+            updateQuery = {
+                $addToSet: { downvotes: uid },
+                $inc: { voteCount: -1 }
             };
         }
     
