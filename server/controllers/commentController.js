@@ -85,12 +85,14 @@ const createComment = async (req, res) =>{
         if (parentID) {
             
             await Comment.findByIdAndUpdate(parentID, {
-                $push: { replies: newComment._id }
+                $push: { replies: newComment._id },
+                
             });
         } else {
             
             await Post.findByIdAndUpdate(postID, {
-                $push: { comments: newComment._id }
+                $push: { comments: newComment._id },
+                
             });
         }
         res.status(201).json(newComment);
@@ -117,12 +119,14 @@ const deleteComment = async (req, res) =>{
         if (comment.parentID) {
             
             await Comment.findByIdAndUpdate(comment.parentID, {
-                $pull: { replies: coid }
+                $pull: { replies: coid },
+                $inc: {commentCount: -1}
             });
         } else {
             
             await Post.findByIdAndUpdate(comment.postID, {
-                $pull: { comments: coid }
+                $pull: { comments: coid },
+                $inc: {commentCount: -1}
             });
         }
 
