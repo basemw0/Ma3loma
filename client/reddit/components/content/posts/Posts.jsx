@@ -10,6 +10,7 @@ import BookmarkBorderOutlinedIcon from "@mui/icons-material/BookmarkBorderOutlin
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import CardGiftcardIcon from "@mui/icons-material/CardGiftcard";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 
 import Video from "../../video/Video";
 import api from "../../../src/api/axios";
@@ -328,6 +329,21 @@ export default function Posts({ posts }) {
                 <div className="action-pill icon-only modern-pill">
                   <MoreHorizIcon fontSize="small" />
                 </div>
+
+                {/* Edit button for post owner */}
+                {post.userID?._id === currentUserId && (
+                  <div
+                    className="action-pill modern-pill"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/api/posts/${post._id}/edit`);
+                    }}
+                    style={{ color: "#0079d3" }}
+                  >
+                    <EditOutlinedIcon fontSize="small" />
+                    <span>Edit</span>
+                  </div>
+                )}
 
                 {/* Delete button for post owner */}
                 {post.userID?._id === currentUserId && (

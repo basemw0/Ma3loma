@@ -1,3 +1,97 @@
+// import './App.css';
+// import React from 'react';
+// import { useLocation, useNavigate } from 'react-router-dom';
+// import { useEffect } from 'react';
+// import CommunitiesPage from '../components/DisplayCommunities/CommunitiesPage'
+// import CommunityPage from '../components/CommunityPage/CommunityPage';
+// import ExploreCommunities from '../components/ExploreCommunities/ExploreCommunities'
+// import EditPost from "./pages/EditPost";
+// import { Routes } from 'react-router-dom';
+// import { Route } from 'react-router-dom';
+// import Layout from '../components/Utils/Layout';
+// import CreatePost from '../components/create-post/CreatePost'
+// import Content from '../components/content/Content';
+// import Login from '../components/Pages/Login';
+// import Signup from '../components/Pages/Signup';
+// import ForgotPassword from '../components/Pages/ForgotPassword';
+// import ResetPassword from '../components/Pages/ResetPassword';
+// import Landing from '../components/Landing/Landing';
+// import EditPost from '../components/edit-post/EditPost';
+// import PostDetails from '../components/post-details/PostDetails';
+// import CreationWizard from '../components/CommunityCreation/CreationWizard';
+// import { AuthModalProvider, useAuthModal } from './context/AuthModalContext'; //
+// import AuthModal from '../components/Utils/AuthModal';   
+// import api from '../src/api/axios';
+
+// const AxiosInterceptor = ({ children }) => {
+//   const { openLogin } = useAuthModal();
+//   const navigate = useNavigate();
+
+//   useEffect(() => {
+//     // Add a response interceptor
+//     const interceptor = api.interceptors.response.use(
+//       (response) => response, // Return successful responses as is
+//       (error) => {
+//         // 2. CHECK: Did the server say "401 Unauthorized"?
+//         if (error.response && error.response.status === 401) {
+//           // 3. TRIGGER: Open the login popup automatically
+//           openLogin();
+//         }
+//         return Promise.reject(error);
+//       }
+//     );
+
+//     // Cleanup listener when app unmounts
+//     return () => api.interceptors.response.eject(interceptor);
+//   }, [openLogin, navigate]);
+
+//   return children;
+// };
+// function App() {
+//   const location = useLocation();
+//   const navigate = useNavigate();
+
+//   // Google Auth Logic
+//   useEffect(() => {
+//     const queryParams = new URLSearchParams(location.search);
+//     const token = queryParams.get('token');
+//     if (token) {
+//       localStorage.setItem('token', token);
+//       window.history.replaceState({}, document.title, "/");
+//       navigate("/");
+//     }
+//   }, [location, navigate]);
+//   return (
+//     <>
+//     <AuthModalProvider>
+//       <AxiosInterceptor>
+//       <AuthModal />
+//      <Routes>
+//       {/* Auth Routes */}
+//       <Route path="/login" element={<Login />} />
+//       <Route path="/signup" element={<Signup />} />
+//       <Route path="/forgot-password" element={<ForgotPassword />} />
+//       <Route path="/reset-password/:token" element={<ResetPassword />} />
+      
+//       {/* Protected Routes with Layout */}
+//       <Route path="/" element={<Layout/>}>
+//         <Route index element={<Content />} />
+//         <Route path="api/home" element={<Content />} />
+//         <Route path="api/communities/:communityId" element={<CommunityPage />} />
+//         <Route path="api/communities/best/:number" element={<CommunitiesPage />} />
+//         <Route path="api/communities/category" element={<ExploreCommunities />} />
+//         <Route path="api/posts/:communityID/create" element={<CreatePost />} />
+//         <Route path="api/posts/:postId/edit" element={<EditPost />} />
+//         <Route path="api/posts/:postId" element={<PostDetails />} />
+//         <Route path="api/communities/create" element={<CreationWizard />} />
+//       </Route>
+//       </Routes>
+//       </AxiosInterceptor>
+//       </AuthModalProvider>
+//     </>
+//   ); 
+// }
+// export default App;
 import './App.css';
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -5,8 +99,8 @@ import { useEffect } from 'react';
 import CommunitiesPage from '../components/DisplayCommunities/CommunitiesPage'
 import CommunityPage from '../components/CommunityPage/CommunityPage';
 import ExploreCommunities from '../components/ExploreCommunities/ExploreCommunities'
-import { Routes } from 'react-router-dom';
-import { Route } from 'react-router-dom';
+import EditPost from '../components/edit-post/EditPost'; // keep only this one
+import { Routes, Route } from 'react-router-dom';
 import Layout from '../components/Utils/Layout';
 import CreatePost from '../components/create-post/CreatePost'
 import Content from '../components/content/Content';
@@ -15,10 +109,9 @@ import Signup from '../components/Pages/Signup';
 import ForgotPassword from '../components/Pages/ForgotPassword';
 import ResetPassword from '../components/Pages/ResetPassword';
 import Landing from '../components/Landing/Landing';
-import EditPost from '../components/edit-post/EditPost';
 import PostDetails from '../components/post-details/PostDetails';
 import CreationWizard from '../components/CommunityCreation/CreationWizard';
-import { AuthModalProvider, useAuthModal } from './context/AuthModalContext'; //
+import { AuthModalProvider, useAuthModal } from './context/AuthModalContext';
 import AuthModal from '../components/Utils/AuthModal';   
 import api from '../src/api/axios';
 
@@ -27,30 +120,25 @@ const AxiosInterceptor = ({ children }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Add a response interceptor
     const interceptor = api.interceptors.response.use(
-      (response) => response, // Return successful responses as is
+      (response) => response,
       (error) => {
-        // 2. CHECK: Did the server say "401 Unauthorized"?
         if (error.response && error.response.status === 401) {
-          // 3. TRIGGER: Open the login popup automatically
           openLogin();
         }
         return Promise.reject(error);
       }
     );
-
-    // Cleanup listener when app unmounts
     return () => api.interceptors.response.eject(interceptor);
   }, [openLogin, navigate]);
 
   return children;
 };
+
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Google Auth Logic
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     const token = queryParams.get('token');
@@ -60,34 +148,36 @@ function App() {
       navigate("/");
     }
   }, [location, navigate]);
+
   return (
     <>
-    <AuthModalProvider>
-      <AxiosInterceptor>
-      <AuthModal />
-     <Routes>
-      {/* Auth Routes */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password/:token" element={<ResetPassword />} />
-      
-      {/* Protected Routes with Layout */}
-      <Route path="/" element={<Layout/>}>
-        <Route index element={<Content />} />
-        <Route path="api/home" element={<Content />} />
-        <Route path="api/communities/:communityId" element={<CommunityPage />} />
-        <Route path="api/communities/best/:number" element={<CommunitiesPage />} />
-        <Route path="api/communities/category" element={<ExploreCommunities />} />
-        <Route path="api/posts/:communityID/create" element={<CreatePost />} />
-        <Route path="api/posts/:postId/edit" element={<EditPost />} />
-        <Route path="api/posts/:postId" element={<PostDetails />} />
-        <Route path="api/communities/create" element={<CreationWizard />} />
-      </Route>
-      </Routes>
-      </AxiosInterceptor>
+      <AuthModalProvider>
+        <AxiosInterceptor>
+          <AuthModal />
+          <Routes>
+            {/* Auth Routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
+
+            {/* Protected Routes with Layout */}
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Content />} />
+              <Route path="api/home" element={<Content />} />
+              <Route path="api/communities/:communityId" element={<CommunityPage />} />
+              <Route path="api/communities/best/:number" element={<CommunitiesPage />} />
+              <Route path="api/communities/category" element={<ExploreCommunities />} />
+              <Route path="api/posts/:communityID/create" element={<CreatePost />} />
+              <Route path="api/posts/:postId/edit" element={<EditPost />} /> {/* EDIT POST */}
+              <Route path="api/posts/:postId" element={<PostDetails />} />
+              <Route path="api/communities/create" element={<CreationWizard />} />
+            </Route>
+          </Routes>
+        </AxiosInterceptor>
       </AuthModalProvider>
     </>
-  ); 
+  );
 }
+
 export default App;

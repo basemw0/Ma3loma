@@ -1,13 +1,19 @@
+
 import React, { useState, useEffect } from "react";
 import "./EditPost.css";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import { useNavigate, useParams } from "react-router-dom"; // Import useNavigate instead of useHistory
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import api from "../../src/api/axios";
+import UploadFileIcon from "@mui/icons-material/UploadFile";
+
 const EditPost = () => {
-  //const { postId } = useParams();
-  const postId = useParams();
-  //const navigate = useNavigate(); // Use useNavigate hook
+  const { postId } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = location.state?.from || "/"; // Previous page or default to home
+
   const [post, setPost] = useState({
     title: "",
     content: "",
@@ -15,42 +21,62 @@ const EditPost = () => {
     mediaType: "none",
     communityID: "",
   });
+  const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    // Simulate API call to fetch post data
     const fetchPost = async () => {
-      // Fetching post data based on `postId`
-      // For now, we're just using mock data
-      alert('hamada')
-      const response = await api.get(`/api/posts/${postId}`);
-      if(response.data){
-        const post = response.data;
-        setPost({
-        title: post.title,
-        content: post.content,
-        mediaUrl: post.mediaUrl,
-        mediaType: post.mediaType,
-        communityID: post.communityID,
-        });
+      try {
+        const response = await api.get(`/api/posts/${postId}`);
+        if (response.data) {
+          const post = response.data;
+          setPost({
+            title: post.title || "",
+            content: post.content || "",
+            mediaUrl: post.mediaUrl || "",
+            mediaType: post.mediaType || "none",
+            communityID: post.communityID?._id || "",
+          });
+        }
+      } catch (err) {
+        setError("Failed to fetch post.");
+      } finally {
+        setLoading(false);
       }
-      
     };
 
     fetchPost();
-  }, []);
+  }, [postId]);
+
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (!selectedFile) return;
+    setFile(selectedFile);
+    const url = URL.createObjectURL(selectedFile);
+    setPost({
+      ...post,
+      mediaUrl: url,
+      mediaType: selectedFile.type.startsWith("image") ? "image" : "video",
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Submit the post update logic
-    //alert('hoba tito mambo',post);
-    await api.put(`/api/posts/edit/${postId}`, post);
-    // Redirect back to the post detail page (or homepage)
-    //navigate(`/post/${postId}`); // Use navigate to redirect
+    try {
+      await api.put(`/api/posts/edit/${postId}`, post);
+      navigate(from); // Go back to previous page
+    } catch (err) {
+      alert("Failed to save changes: " + err.message);
+    }
   };
 
   const handleChange = (e) => {
     setPost({ ...post, [e.target.name]: e.target.value });
   };
+
+  if (loading) return <div>Loading post...</div>;
+  if (error) return <div>{error}</div>;
 
   return (
     <div className="edit-post-container">
@@ -66,9 +92,9 @@ const EditPost = () => {
           name="title"
           value={post.title}
           onChange={handleChange}
-          className="edit-post-input"
+          required
         />
-        
+
         <TextField
           fullWidth
           label="Content"
@@ -78,42 +104,70 @@ const EditPost = () => {
           rows={5}
           value={post.content}
           onChange={handleChange}
-          className="edit-post-input"
         />
-        
-        <TextField
-          fullWidth
-          label="Media URL"
-          variant="outlined"
-          name="mediaUrl"
-          value={post.mediaUrl}
-          onChange={handleChange}
-          className="edit-post-input"
-        />
-        
-        <div className="edit-post-options">
-          <label>Media Type:</label>
-          <select
-            name="mediaType"
-            value={post.mediaType}
-            onChange={handleChange}
-            className="edit-post-select"
-          >
-            <option value="none">None</option>
-            <option value="image">Image</option>
-            <option value="video">Video</option>
-          </select>
+
+        <div className="edit-post-media">
+          <input
+            type="file"
+            accept="image/*,video/*"
+            style={{ display: "none" }}
+            id="file-upload"
+            onChange={handleFileChange}
+          />
+          <label htmlFor="file-upload">
+            <Button
+              variant="contained"
+              component="span"
+              startIcon={<UploadFileIcon />}
+            >
+              {file ? "Change File" : "Upload Media"}
+            </Button>
+          </label>
+
+          {file && (
+            <Button
+              variant="outlined"
+              color="error"
+              style={{ marginLeft: "10px" }}
+              onClick={() => {
+                setFile(null);
+                setPost({ ...post, mediaUrl: "", mediaType: "none" });
+              }}
+            >
+              Remove Media
+            </Button>
+          )}
+
+          {post.mediaUrl && (
+            <div className="media-preview">
+              {post.mediaType === "image" ? (
+                <img src={post.mediaUrl} alt="preview" />
+              ) : (
+                <video src={post.mediaUrl} controls />
+              )}
+            </div>
+          )}
         </div>
 
+        <TextField
+          select
+          SelectProps={{ native: true }}
+          label="Media Type"
+          name="mediaType"
+          value={post.mediaType}
+          onChange={handleChange}
+          fullWidth
+        >
+          <option value="none">None</option>
+          <option value="image">Image</option>
+          <option value="video">Video</option>
+        </TextField>
+
         <div className="edit-post-actions">
-          <Button variant="contained" color="primary" type="submit">
+          <Button type="submit" variant="contained">
             Save Changes
           </Button>
-          <Button
-            variant="outlined"
-            color="secondary"
-            onClick={() => navigate(`/post/${postId}`)} // Use navigate to redirect
-          >
+          <Button variant="outlined" onClick={() => navigate(from)}>
             Cancel
           </Button>
         </div>
@@ -123,3 +177,5 @@ const EditPost = () => {
 };
 
 export default EditPost;
+
+
