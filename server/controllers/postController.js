@@ -41,10 +41,17 @@ const summarizePost = async (req, res) => {
         res.status(500).json({ message: "Failed to generate summary. " + error.message });
     }
 };
+
+
+//pid = '6c251380-9dec-4e98-9821-91d06f2c3234'
+//cid = '18c1130b-b3e2-47fd-91d9-70ee3cc5c797'
+//uid = '66f5a632-afd0-4fde-8ea3-e0b87caa780e'
+
+
 const getPostsHomePage = async (req, res) =>{
     try{
         
-        const uid = req.userData?.id; // Optional - may be undefined if not logged in
+        const uid = req.userData?.id; 
 
         const filter = req.query.filter || 'best'; 
         let sortOption = {};
@@ -61,11 +68,14 @@ const getPostsHomePage = async (req, res) =>{
         const limit = 20
         const skip = (page - 1) * limit;
 
-        let query = {}; 
+        let query = {};
+        
+        let posts = undefined
+        const buffedPosts = []
 
         if (uid) {
             
-            const user = await User.findById(uid).select('joinedCommunities interests');
+            const user = await User.findById(uid).select('joinedCommunities interests savedPosts');
             
             
             if (!user) return res.status(404).json({ message: "User not found" });
@@ -83,29 +93,32 @@ const getPostsHomePage = async (req, res) =>{
             if (userCommsIds.length > 0) {
                 query = { communityID: { $in: userCommsIds } };
             }
-            
-        }
-        // If no user logged in, show all public posts (query is empty {})
 
-        const posts = await Post.find(query)
+            posts = await Post.find(query)
             .sort(sortOption) 
             .skip(skip)
             .limit(limit)
             .populate('userID', 'username image')
             .populate('communityID', 'name icon').lean()
-        const user = await User.findById(uid)
-        const buffedPosts = []
-        posts.forEach(post => {
-            const communityId = post.communityID._id
-            if(user.joinedCommunities.find(com=> com.community === communityId)){
-                buffedPosts.push({...post , isMember :  true})
-            }
-            else{
-                 buffedPosts.push({...post , isMember :  false})
-            }
-                
+
+            posts.forEach(post => {
+            buffedPosts.push({...post , isMember :  userCommsIds.includes(post.communityID._id.toString()), isSaved : user.savedPosts.includes(post._id.toString())});
+            });
+
             
-        });
+        }else{
+            posts = await Post.find(query)
+            .sort(sortOption) 
+            .skip(skip)
+            .limit(limit)
+            .populate('userID', 'username image')
+            .populate('communityID', 'name icon').lean()
+
+            posts.forEach(post => {
+            buffedPosts.push({...post , isMember :  false, isSaved : false});
+            });
+        }
+    
         res.status(200).send(buffedPosts);
         
     }catch(error){
@@ -133,28 +146,42 @@ const getPostsCommunity = async (req, res) =>{
         const page = parseInt(req.query.page) || 1;
         const limit = 20
         const skip = (page - 1) * limit;
-        if (uid) {
-            const userExists = await User.exists({ _id: uid });
-            if (!userExists) return res.status(404).json({ message: "User not found" });
-        }
+        
 
         const commExists = await Community.exists({_id:cid});
         if (!commExists) return res.status(404).json({ message: "Community not found" });
 
-        const posts = await Post.find({communityID: cid}).sort(sortOption).skip(skip).limit(limit).populate('userID', 'username image').populate('communityID', 'name icon').lean();
-        const user = await User.findById(uid)
-        const buffedPosts = []
-        posts.forEach(post => {
-            const communityId = post.communityID._id
-            if(user.joinedCommunities.find(com=> com.community === communityId)){
-                buffedPosts.push({...post , isMember :  true})
-            }
-            else{
-                 buffedPosts.push({...post , isMember :  false})
-            }
-                
+        let posts = [];
+        const buffedPosts = [];
+
+        
+        posts = await Post.find({ communityID: cid })
+            .sort(sortOption)
+            .skip(skip)
+            .limit(limit)
+            .populate('userID', 'username image')
+            .populate('communityID', 'name icon')
+            .lean();
+
+        if (uid) {
+            const user = await User.findById(uid).select('joinedCommunities savedPosts');
+            if(!user) return res.status(404).json({ message: "User not found" });
+
+            let userCommsIds = user.joinedCommunities.map(jc => jc.community);
+
             
-        });
+            posts.forEach(post => {
+            buffedPosts.push({...post , isMember :  userCommsIds.includes(post.communityID._id.toString()), isSaved : user.savedPosts.includes(post._id.toString())});
+            });
+
+            
+        } else {
+           
+            posts.forEach(post => {
+                buffedPosts.push({ ...post, isMember: false, isSaved: false });
+            });
+        }
+
         res.status(200).send(buffedPosts);
     }catch(error){
         res.status(500).json({message:error.message});
@@ -262,7 +289,7 @@ const editPost = async (req, res)=>{
         }
 
         if (post.userID.toString() !== uid) {
-            return res.status(403).json({ message: "You are not authorized to delete this post" });
+            return res.status(403).json({ message: "You are not authorized to edit this post" });
         }
 
         const post_u = await Post.findByIdAndUpdate(pid,
@@ -290,6 +317,7 @@ const upvotePost = async (req, res)=>{
     try{
         const {pid} = req.params;
         const uid = req.userData.id;
+        
 
         const userExists = await User.exists({_id:uid});
         if (!userExists) return res.status(404).json({ message: "User not found" });
@@ -457,15 +485,17 @@ const awardPost = async (req, res)=>{
 const savePost = async (req, res)=>{
     try {
         const { pid } = req.params; 
-        const uid = req.user.id; 
+        const uid = req.userData.id; 
 
         const user = await User.findById(uid);
         if (!user) return res.status(404).json({ message: "User not found" });
+        console.log('awel check tmm');
 
         const postExists = await Post.exists({ _id: pid });
         if (!postExists) {
             return res.status(404).json({ message: "Post not found" });
         }
+        console.log('tany check tmm');
 
         const isSaved = user.savedPosts.includes(pid);
         let updateQuery = {};
@@ -482,6 +512,8 @@ const savePost = async (req, res)=>{
 
         await User.findByIdAndUpdate(uid, updateQuery);
 
+        console.log('hena aho');
+
         res.status(200).json({ message: msg});
 
     } catch (error) {
@@ -492,7 +524,7 @@ const savePost = async (req, res)=>{
 
 const getSavedPosts = async (req, res)=>{
     try{
-        const uid = req.user.id; 
+        const uid = req.userData.id; 
 
         
         const user = await User.findById(uid).populate({
