@@ -113,7 +113,7 @@ export default function Posts({ posts , isHome }) {
   const fetchAwards = async (communityId) => {
     try {
       const res = await api.get(`/api/communities/${communityId}`);
-      const awards = res.data.awards || [];
+      const awards = res.data.Awards || [];
       setCommunityAwards((prev) => ({
         ...prev,
         [communityId]: awards,
