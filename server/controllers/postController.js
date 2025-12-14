@@ -48,84 +48,107 @@ const summarizePost = async (req, res) => {
 //uid = '66f5a632-afd0-4fde-8ea3-e0b87caa780e'
 
 
-const getPostsHomePage = async (req, res) =>{
-    try{
-        
-        const uid = req.userData?.id; 
+const getPostsHomePage = async (req, res) => {
+  try {
+    const uid = req.userData?.id;
 
-        const filter = req.query.filter || 'best'; 
-        let sortOption = {};
+    const filter = req.query.filter || "best";
+    let sortOption = {};
 
-        if(filter === 'best'){
-            sortOption = {voteCount: -1};
-        }else if(filter === 'hot'){
-            sortOption = {commentCount: -1};
-        }else{
-            sortOption = {createdAt: -1};
-        }
-        
-        const page = parseInt(req.query.page) || 1;
-        const limit = 20
-        const skip = (page - 1) * limit;
+    if (filter === "best") sortOption = { voteCount: -1 };
+    else if (filter === "hot") sortOption = { commentCount: -1 };
+    else sortOption = { createdAt: -1 };
 
-        let query = {};
-        
-        let posts = undefined
-        const buffedPosts = []
+    const page = parseInt(req.query.page) || 1;
+    const limit = 20;
+    const skip = (page - 1) * limit;
 
-        if (uid) {
-            
-            const user = await User.findById(uid).select('joinedCommunities interests savedPosts');
-            
-            
-            if (!user) return res.status(404).json({ message: "User not found" });
-
-            let userCommsIds = user.joinedCommunities.map(jc => jc.community);
-
-            if (user.interests && user.interests.length > 0) {
-                const interestCommsIds = await Community.distinct('_id', {
-                    interests: { $in: user.interests }
-                });
-                userCommsIds = Array.from(new Set([...userCommsIds, ...interestCommsIds]));
-            }
-
-            
-            if (userCommsIds.length > 0) {
-                query = { communityID: { $in: userCommsIds } };
-            }
-
-            posts = await Post.find(query)
-            .sort(sortOption) 
-            .skip(skip)
-            .limit(limit)
-            .populate('userID', 'username image')
-            .populate('communityID', 'name icon').lean()
-
-            posts.forEach(post => {
-            buffedPosts.push({...post , isMember :  userCommsIds.includes(post.communityID._id.toString()), isSaved : user.savedPosts.includes(post._id.toString())});
-            });
-
-            
-        }else{
-            posts = await Post.find(query)
-            .sort(sortOption) 
-            .skip(skip)
-            .limit(limit)
-            .populate('userID', 'username image')
-            .populate('communityID', 'name icon').lean()
-
-            posts.forEach(post => {
-            buffedPosts.push({...post , isMember :  false, isSaved : false});
-            });
-        }
     
-        res.status(200).send(buffedPosts);
-        
-    }catch(error){
-        console.log(error.message)
-        res.status(500).json({message:error.message});
+    if (!uid) {
+      const posts = await Post.find({})
+        .sort(sortOption)
+        .skip(skip)
+        .limit(limit)
+        .populate("userID", "username image")
+        .populate("communityID", "name icon")
+        .lean();
+
+      return res.status(200).json(
+        posts.map(p => ({
+          ...p,
+          isMember: false,
+          isSaved: false
+        }))
+      );
     }
-}
+
+    
+    const user = await User.findById(uid).select(
+      "joinedCommunities interests savedPosts"
+    );
+
+    if (!user)
+      return res.status(404).json({ message: "User not found" });
+
+    const joinedIds = user.joinedCommunities.map(jc =>
+      jc.community.toString()
+    );
+
+    let interestIds = [];
+    if (user.interests?.length) {
+      const ids = await Community.distinct("_id", {
+        interests: { $in: user.interests }
+      });
+      interestIds = ids.map(id => id.toString());
+    }
+
+    const priorityIds = Array.from(
+      new Set([...joinedIds])
+    );
+
+    // =============================
+    // SINGLE AGGREGATION QUERY
+    // =============================
+    const posts = await Post.aggregate([
+      {
+        $addFields: {
+          priority: {
+            $cond: [
+              { $in: ["$communityID", priorityIds] },
+              1,
+              0
+            ]
+          }
+        }
+      },
+      {
+        $sort: {
+          priority: -1,
+          ...sortOption
+        }
+      },
+      { $skip: skip },
+      { $limit: limit }
+    ]);
+
+    
+    await Post.populate(posts, [
+      { path: "userID", select: "username image" },
+      { path: "communityID", select: "name icon" }
+    ]);
+
+    const finalPosts = posts.map(post => ({
+      ...post,
+      isMember: joinedIds.includes(post.communityID._id.toString()),
+      isSaved: user.savedPosts.includes(post._id.toString())
+    }));
+
+    res.status(200).json(finalPosts);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: error.message });
+  }
+};
 
 
 const getPostsCommunity = async (req, res) =>{
@@ -168,7 +191,7 @@ const getPostsCommunity = async (req, res) =>{
             const user = await User.findById(uid).select('joinedCommunities savedPosts');
             if(!user) return res.status(404).json({ message: "User not found" });
 
-            let userCommsIds = user.joinedCommunities.map(jc => jc.community);
+            let userCommsIds = user.joinedCommunities.map(jc => jc.community.toString());
 
             
             posts.forEach(post => {

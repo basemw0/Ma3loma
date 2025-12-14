@@ -28,7 +28,7 @@ const getUserIdFromToken = () => {
   }
 };
 
-export default function Posts({ posts }) {
+export default function Posts({ posts, isHome }) {
   const [communityAwards, setCommunityAwards] = useState({});
   const [postList, setPostList] = useState(posts || []);
   const [joinedCommunities, setJoinedCommunities] = useState({});
@@ -206,9 +206,8 @@ export default function Posts({ posts }) {
               </span>
 
               <button
-                className={`vote-btn down ${
-                  isDownvoted ? "active" : ""
-                }`}
+                className={`vote-btn down ${isDownvoted ? "active" : ""
+                  }`}
                 onClick={(e) => handlevote(2, post._id, e)}
               >
                 <ArrowDownwardIcon fontSize="inherit" />
@@ -229,35 +228,34 @@ export default function Posts({ posts }) {
                 <div className="header-text">
                   <Link style={{
                     color: "inherit",
-                      textDecoration: "none",
-                      fontWeight: 700,
-                      fontSize: "0.95rem"}}
-                      to={"/api/communities/"+post.communityID._id}>
-                  
+                    textDecoration: "none",
+                    fontWeight: 700,
+                    fontSize: "0.95rem"
+                  }}
+                    to={"/api/communities/" + post.communityID._id}>
+
                     r/{post.communityID?.name}
-                  
+
                   </Link>
                   <span className="meta-dot">•</span>
-                  
+
                   <span className="user-meta">
                     u/{post.userID?.username}
                   </span>
-                  
+
                   <span className="time-meta">
                     {formatTime(post.createdAt)}
                   </span>
                 </div>
 
-                <button
-                  className={`join-btn modern-join ${
-                    isJoined ? "joined" : ""
-                  }`}
-                  onClick={(e) =>
-                    handleJoin(post.communityID?._id, e)
-                  }
-                >
-                  {isJoined ? "Joined" : "Join"}
-                </button>
+                {isHome && (
+                  <button
+                    className={`join-btn modern-join ${isJoined ? "joined" : ""}`}
+                    onClick={(e) => handleJoin(post.communityID?._id, e)}
+                  >
+                    {isJoined ? "Joined" : "Join"}
+                  </button>
+                )}
               </div>
 
               <div
