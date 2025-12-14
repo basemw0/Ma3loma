@@ -8,7 +8,7 @@ export default function PostsSection(props){
         <Stack direction='column'>
             <FilterBtn getPosts = {getPosts} setNum = {setNum} communityId = {communityId} setCurrentFilter = {setCurrentFilter} community = {community}/>
             <Stack direction='column'>
-                <Posts posts = {posts}/>
+                <Posts posts = {posts} isHome = {false}/>
             </Stack>
         </Stack>
     )

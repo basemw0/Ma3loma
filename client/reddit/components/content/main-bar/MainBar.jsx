@@ -35,7 +35,7 @@ export default function MainBar() {
   return (
     <div className="main-bar">
       <FilterBtn getPosts = {getPosts} setNum = {setNum} setCurrentFilter = {setCurrentFilter} community = "no"/>
-      <Posts posts = {posts} />
+      <Posts posts = {posts} isHome = {true} />
       <Button onClick={handleShowMore} variant="text">Show more</Button>
     </div>
   );

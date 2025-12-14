@@ -28,7 +28,7 @@ const getUserIdFromToken = () => {
   }
 };
 
-export default function Posts({ posts }) {
+export default function Posts({ posts , isHome }) {
   const [communityAwards, setCommunityAwards] = useState({});
   const [postList, setPostList] = useState(posts || []);
   const [joinedCommunities, setJoinedCommunities] = useState({});
@@ -248,15 +248,16 @@ export default function Posts({ posts }) {
                   </span>
                 </div>
 
-
-                <button
+              { isHome &&
+                (<button
                   className={`join-btn modern-join ${isJoined ? "joined" : ""}`}
                   onClick={(e) => handleJoin(post.communityID?._id, e)}
                 >
                   {isJoined ? "Joined" : "Join"}
-                </button>
-                
+                </button>)
+               }
               </div>
+              
 
               <div
                 className="card-body"
