@@ -5,7 +5,11 @@ const allTopics = ALLOWED_INTERESTS.flatMap(item => item.topics);
 const CommunitySchema = new mongoose.Schema({
   // ✅ Explicit String ID with UUID default
   _id: { type: String, default: () => crypto.randomUUID() },
-
+  owner:{
+    type: String, 
+    ref: "User",
+    required: true
+  },
   name: { type: String, required: true, unique: true },
   description: String,
   Roles: { 
@@ -51,5 +55,12 @@ const CommunitySchema = new mongoose.Schema({
     default: () => [{ name: "Gold", cost: 100, icon: "🪙" }]
   }
 }, { timestamps: true });
+CommunitySchema.pre('findOneAndDelete', async function(next) {
+    const doc = await this.model.findOne(this.getQuery());
+    if (doc) {
+        await mongoose.model('Post').deleteMany({ communityID: doc._id });
+    }
+    next();
+});
 
 module.exports = mongoose.model("Community", CommunitySchema);

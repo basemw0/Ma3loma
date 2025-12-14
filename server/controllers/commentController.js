@@ -116,17 +116,20 @@ const deleteComment = async (req, res) =>{
             return res.status(403).json({ message: "Not authorized" });
         }
 
+        await Post.findByIdAndUpdate(comment.postID ,{
+                $inc: {commentCount: -1}
+            } )
         if (comment.parentID) {
             
             await Comment.findByIdAndUpdate(comment.parentID, {
                 $pull: { replies: coid },
-                $inc: {commentCount: -1}
+              
             });
         } else {
             
             await Post.findByIdAndUpdate(comment.postID, {
                 $pull: { comments: coid },
-                $inc: {commentCount: -1}
+                
             });
         }
 

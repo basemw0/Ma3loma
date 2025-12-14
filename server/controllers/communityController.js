@@ -170,6 +170,7 @@ const createCommunity = async (req, res) => {
 const { name, description, interests,icon,banner,privacy } = req.body;
  const cid = req.params.id
   const userID = req.userData.id
+  let owner = userID
   if (!name || !userID) {
     return res.status(400).json({ message: "Name and UserID are required" });
   }
@@ -178,6 +179,7 @@ const { name, description, interests,icon,banner,privacy } = req.body;
     const newCommunity = new Community({
       name,
       description,
+      owner,
       interests: interests || [],
       icon: icon || undefined, 
       banner: banner || undefined,
@@ -326,6 +328,7 @@ const getCommunityById= async (req, res) => {
       path: "moderators.user",   
       select: "username image goldBalance _id"
     });
+
     
     if (!community) {
       return res.status(404).json({ message: "Community not found" });
@@ -333,6 +336,7 @@ const getCommunityById= async (req, res) => {
 
     let isMember = false;
     let userRole = "guest";
+    let isOwner = community.owner === userID
 
     if (userID) {
       const user = await User.findById(userID).select("joinedCommunities");
@@ -353,7 +357,8 @@ const getCommunityById= async (req, res) => {
     res.json({
       ...community.toObject(),
       isMember,
-      userRole
+      userRole,
+      isOwner
     });
 
   } catch (err) {
@@ -472,7 +477,27 @@ const searchCommunity = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 }
-
+const deleteCommunity = async (req , res)=>{
+  try{
+  const communityID = req.params.id
+  const userID = req.userData.id
+  const community = await Community.findById(communityID)
+  console.log("AH")
+  if(community && userID){
+    if(community.owner){
+    if(community.owner === userID){
+    console.log("WEE")
+     await Community.findByIdAndDelete(communityID)
+     console.log("Yo")
+    }}
+    else{
+      console.log("DOESNT EXIST")
+    }
+  }
+}catch(e){
+  res.status(500).json({ message: "Server Error" });
+}
+}
 module.exports = {
   getCommunities,
   createCommunity,
@@ -480,5 +505,6 @@ module.exports = {
   getCommunityById,
   searchCommunity,
   getCommunitiesByCategory,
-  updateCommunity
+  updateCommunity,
+  deleteCommunity
 }

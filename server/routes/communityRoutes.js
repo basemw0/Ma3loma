@@ -11,6 +11,9 @@ router.get('/Category', checkAuth.optionalAuth, communityController.getCommuniti
 
 router.get('/search', checkAuth.optionalAuth, communityController.searchCommunity)
 
+
+
+
 router.get('/:id', checkAuth.optionalAuth, communityController.getCommunityById);
 router.get('/best/:limit', checkAuth.optionalAuth, communityController.getCommunities);
 
@@ -38,7 +41,7 @@ router.post(
   communityController.joinCommunity
 );
 
-
+router.delete('/:id/delete', checkAuth.optionalAuth, communityController.deleteCommunity)
 router.put('/:id/update',communityController.updateCommunity)
 
 module.exports = router;

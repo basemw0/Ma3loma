@@ -33,6 +33,17 @@ export default function Header(props) {
         alert("Error" + e.message)
       }
     }
+    const handleDelete = async ()=>{
+      try{
+        const result = await api.delete("/api/communities/" + community._id + '/delete')
+        if(result.data){
+        alert("Deleted succesfully")}
+
+      }
+      catch(e){
+        alert(e)
+      }
+    }
   return (
     <Box sx={{ width: '100%', bgcolor: '#fff' }}>
       {/* Banner Image */}
@@ -149,6 +160,20 @@ export default function Header(props) {
           >
             {joined == 'Joined'?'Joined' : 'Join'}
           </Button>
+        {community.isOwner && (<Button
+          variant="contained"
+          onClick={handleDelete}
+          sx={{
+            backgroundColor : 'red',
+            color : 'white',
+            fontWeight: 600,
+            px: 4,
+            borderRadius: '20px',
+            '&:hover': { bgcolor: '#052826.' }
+          }}
+        >
+          Delete
+        </Button>)}
 
           <IconButton>
             <MoreHorizIcon />

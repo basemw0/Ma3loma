@@ -40,12 +40,14 @@ const CommentSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 CommentSchema.pre('findOneAndDelete', async function(next) {
-  const doc = await this.model.findOne(this.getQuery());
-  if (doc && doc.replies.length > 0) {
-    
-    await mongoose.model('Comment').deleteMany({ _id: { $in: doc.replies } });
-  }
-  next();
+    const doc = await this.model.findOne(this.getQuery());
+    if (doc && doc.replies.length > 0) {
+        // Iterate and trigger delete individually so hooks cascade down
+        for (const replyId of doc.replies) {
+            await mongoose.model('Comment').findByIdAndDelete(replyId);
+        }
+    }
+    next();
 });
 
 module.exports = mongoose.model("Comment", CommentSchema);
