@@ -6,6 +6,7 @@ import Sidebar from "./Sidebar";
 import Content from '../content/Content'
 import { Outlet } from "react-router-dom";
 
+
 const drawerWidth = 260;
 
 export default function Layout() {
@@ -13,6 +14,7 @@ export default function Layout() {
   const [floatingShrink, setFloatingShrink] = useState(false);
   const [tooltipOpen, setTooltipOpen] = useState(false);
   const [tooltipDisabled, setTooltipDisabled] = useState(false);
+  
 
 
 const handleToggleSidebar = () => {

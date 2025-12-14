@@ -10,7 +10,7 @@ export default function CommunitnyDetails(props){
         <>
          <h2 style={{marginBottom : 2}}>Tell us about your community</h2>
                 <p style={{opacity : 0.6}}>A name and description help people understand what your community is all about.</p>
-        <Stack direction='row'>
+        <Stack direction='row' sx={{minHeight : "100%"}}>
             <Stack direction='column' justifyContent='space-between'>
                 <CommunityName setCommunityDetails = {setCommunityDetails}/>
                 <span style={{alignSelf : 'flex-end', marginRight : 23 , opacity : 0.7}}>{communityDetails.name.length}/21</span>

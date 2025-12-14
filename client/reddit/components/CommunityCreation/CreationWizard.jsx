@@ -12,7 +12,7 @@ import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import { Box } from "@mui/material"
 import api from "../../src/api/axios";
 
-export default function CreationWizard(){
+export default function CreationWizard({close}){
     const [allCategories , setAllCategories] = useState(mockCategories)
     const [selectedTopics , setSelectedTopics] = useState([])
     const [privacy , setPrivacy] = useState('public')
@@ -48,6 +48,8 @@ export default function CreationWizard(){
     const handleNext = () => {
         if (step === 3) {
             createCommunity();
+            close();
+            alert("Community Created!")
             
         } else {
             setStep((prev) => prev + 1);
@@ -60,7 +62,7 @@ export default function CreationWizard(){
     }
 
     return(
-        <Box sx={{maxWidth: 768, maxHeight: 600, display: 'flex', flexDirection: 'column', justifyContent: 'center', margin: 'auto', marginTop: '15%', borderRadius: 4, boxShadow: 3,backgroundColor: 'white' , padding : 2}}>
+        <Box sx={{maxWidth: 768, minHeight : 400 ,maxHeight: 600, display: 'flex', flexDirection: 'column', justifyContent: 'center', margin: 'auto', borderRadius: 4, boxShadow: 3,backgroundColor: 'white' , padding : 2}}>
             {stepsArr[step]}
             <MobileStepper
             variant="dots"

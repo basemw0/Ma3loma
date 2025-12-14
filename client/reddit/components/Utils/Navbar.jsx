@@ -15,6 +15,7 @@ import {
   Divider,
   InputBase
 } from "@mui/material";
+
 import { styled } from "@mui/material/styles"; // Fix import source
 import SearchIcon from "@mui/icons-material/Search";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -22,6 +23,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import ma3lomaLogo from "./Ma3loma.jpeg";
 
 // --- 1. STYLED COMPONENTS (Defined here to prevent import errors) ---
+
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -70,6 +72,9 @@ export default function Navbar() {
   const [user, setUser] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+
+  //Handling creation wizard open and close
+  
 
   // Load user data
   useEffect(() => {

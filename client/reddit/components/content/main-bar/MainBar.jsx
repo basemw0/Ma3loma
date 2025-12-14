@@ -1,11 +1,3 @@
-import React from "react";
-
-import Whatshot from "@mui/icons-material/Whatshot";
-import NewReleases from "@mui/icons-material/NewReleases";
-import TrendingUp from "@mui/icons-material/TrendingUp";
-import Menu from "@mui/icons-material/Menu";
-import MoreHoriz from "@mui/icons-material/MoreHoriz";
-import ArrowDropDown from "@mui/icons-material/ArrowDropDown";
 import { useEffect } from "react";
 import { useState } from "react";
 import "./MainBar.css";
