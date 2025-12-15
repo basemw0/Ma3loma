@@ -9,7 +9,7 @@ const router = express.Router();
 router.get('/post/:pid', commentController.getPostComments);
 
 
-router.get('/replies/:coid', commentController.getCommentReplies);
+router.get('/:coid/replies', commentController.getCommentReplies);
 
 
 router.use(checkAuth);

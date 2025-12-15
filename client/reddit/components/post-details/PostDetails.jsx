@@ -924,6 +924,8 @@ const updateCommentInState = (commentsArray, updatedComment) => {
 }
 
 
+
+
 // import React, { useState, useEffect } from "react";
 // import api from "../../src/api/axios";
 // import { useParams, useNavigate } from "react-router-dom";
@@ -940,10 +942,11 @@ const updateCommentInState = (commentsArray, updatedComment) => {
 // export default function PostDetails() {
 //   const { postId } = useParams();
 //   const navigate = useNavigate();
+//   const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
   
 //   // --- STATE ---
 //   const [post, setPost] = useState(null);
-//   const [comments, setComments] = useState([]); // Stores Root comments (which contain nested replies)
+//   const [comments, setComments] = useState([]); // Root comments
 //   const [newComment, setNewComment] = useState("");
 //   const [loading, setLoading] = useState(true);
   
@@ -952,25 +955,21 @@ const updateCommentInState = (commentsArray, updatedComment) => {
 //   const [hasMoreComments, setHasMoreComments] = useState(true);
 //   const [loadingMore, setLoadingMore] = useState(false);
 
-//   // Feature State
+//   // UI State
 //   const [summary, setSummary] = useState("");
 //   const [isSummarizing, setIsSummarizing] = useState(false);
-//   const [openReplyComments, setOpenReplyComments] = useState(new Set());
+//   const [openReplyComments, setOpenReplyComments] = useState(new Set()); // Set of IDs
 //   const [openAwardMenu, setOpenAwardMenu] = useState(false);
 //   const [communityAwards, setCommunityAwards] = useState([]);
 
-//   const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
-
-//   // Helper to get ID
+//   // Helper to get User ID
 //   const getUserIdFromToken = () => {
 //     const token = localStorage.getItem("token");
 //     if (!token) return null;
 //     try {
 //       const payload = JSON.parse(atob(token.split(".")[1]));
 //       return payload.id;
-//     } catch (e) {
-//       return null;
-//     }
+//     } catch (e) { return null; }
 //   };
 //   const currentUserId = getUserIdFromToken();
 
@@ -978,106 +977,138 @@ const updateCommentInState = (commentsArray, updatedComment) => {
 //   useEffect(() => {
 //     const fetchPostDetails = async () => {
 //       try {
-//         // 1. Fetch Post Data
+//         // 1. Get Post
 //         const postResponse = await api.get(`${serverUrl}/api/posts/${postId}`);
 //         setPost(postResponse.data);
 
-//         // 2. Fetch Page 1 of Root Comments
+//         // 2. Get Root Comments (Page 1)
+//         // Backend returns replies as IDs (Strings) ["123", "456"]
 //         const commentsResponse = await api.get(`${serverUrl}/api/comments/post/${postId}?page=1&limit=10`);
         
 //         setComments(commentsResponse.data);
         
-//         // If we received fewer than 10 comments, we know there are no more pages
 //         if (commentsResponse.data.length < 10) {
 //             setHasMoreComments(false);
 //         }
         
 //         setLoading(false);
 //       } catch (error) {
-//         console.error("Error fetching post details:", error);
+//         console.error("Error fetching data:", error);
 //         setLoading(false);
 //       }
 //     };
 //     fetchPostDetails();
 //   }, [postId, serverUrl]);
 
-//   // --- PAGINATION HANDLER ---
-//   const handleLoadMoreComments = async () => {
-//     if (loadingMore) return;
-//     setLoadingMore(true);
-//     const nextPage = page + 1;
+//   // --- RECURSIVE HELPERS ---
 
-//     try {
-//       const res = await api.get(`${serverUrl}/api/comments/post/${postId}?page=${nextPage}&limit=10`);
-      
-//       if (res.data.length > 0) {
-//         // Append new root comments to the list
-//         setComments((prev) => [...prev, ...res.data]);
-//         setPage(nextPage);
-//       }
-      
-//       if (res.data.length < 10) {
-//         setHasMoreComments(false);
-//       }
-//     } catch (error) {
-//       console.error("Failed to load more comments", error);
-//     } finally {
-//       setLoadingMore(false);
-//     }
-//   };
-
-//   // --- STATE UPDATERS (RECURSIVE) ---
-
-//   // Update a specific comment (e.g. after editing or voting)
-//   const updateCommentInState = (commentsArray, updatedComment) => {
-//     return commentsArray.map((c) => {
+//   // 1. Update a specific comment (Vote/Edit)
+//   const updateCommentInState = (list, updatedComment) => {
+//     return list.map((c) => {
 //       if (c._id === updatedComment._id) {
 //         return {
 //           ...c,
-//           content: updatedComment.content || c.content,
-//           upvotes: updatedComment.upvotes,
-//           downvotes: updatedComment.downvotes,
+//           ...updatedComment, // Merge updates (content, votes, etc.)
+//           replies: c.replies // Preserve existing replies structure
 //         };
 //       }
-//       if (c.replies && c.replies.length > 0) {
+//       if (c.replies && c.replies.length > 0 && typeof c.replies[0] !== 'string') {
 //         return { ...c, replies: updateCommentInState(c.replies, updatedComment) };
 //       }
 //       return c;
 //     });
 //   };
 
-//   // Add a reply to a specific parent
-//   const addReplyToState = (commentsArray, parentID, newReply) => {
-//     return commentsArray.map((c) => {
+//   // 2. Add a newly created reply to a parent
+//   const addReplyToState = (list, parentID, newReply) => {
+//     return list.map((c) => {
 //       if (c._id === parentID) {
-//         // Found the parent, add the reply to its list
+//         // We push the full object immediately so it shows up
 //         return { ...c, replies: [...(c.replies || []), newReply] };
 //       }
-//       if (c.replies && c.replies.length > 0) {
-//         // Recursive search
+//       if (c.replies && c.replies.length > 0 && typeof c.replies[0] !== 'string') {
 //         return { ...c, replies: addReplyToState(c.replies, parentID, newReply) };
 //       }
 //       return c;
 //     });
 //   };
 
-//   // Remove a comment
-//   const deleteCommentFromState = (commentsArray, idToDelete) => {
-//     // Filter out from current level
-//     const filtered = commentsArray.filter((c) => c._id !== idToDelete);
-    
-//     // If nothing removed at this level, check children
-//     if (filtered.length === commentsArray.length) {
-//       return commentsArray.map((c) => ({
-//         ...c,
-//         replies: c.replies ? deleteCommentFromState(c.replies, idToDelete) : [],
-//       }));
+//   // 3. Load fetched replies into a parent (The "View Replies" logic)
+//   const loadRepliesIntoState = (list, parentID, fetchedReplies) => {
+//     return list.map((c) => {
+//       if (c._id === parentID) {
+//         return { ...c, replies: fetchedReplies }; // Replace ID strings with Objects
+//       }
+//       if (c.replies && c.replies.length > 0 && typeof c.replies[0] !== 'string') {
+//         return { ...c, replies: loadRepliesIntoState(c.replies, parentID, fetchedReplies) };
+//       }
+//       return c;
+//     });
+//   };
+
+//   // 4. Delete a comment
+//   const deleteCommentFromState = (list, idToDelete) => {
+//     const filtered = list.filter((c) => c._id !== idToDelete);
+//     if (filtered.length === list.length) {
+//       // Nothing deleted at this level, check children
+//       return list.map((c) => {
+//         if (c.replies && c.replies.length > 0 && typeof c.replies[0] !== 'string') {
+//             return { ...c, replies: deleteCommentFromState(c.replies, idToDelete) };
+//         }
+//         return c;
+//       });
 //     }
 //     return filtered;
 //   };
 
-//   // --- ACTIONS ---
+//   // --- HANDLERS ---
 
+//   // 1. Pagination
+//   const handleLoadMoreComments = async () => {
+//     if (loadingMore) return;
+//     setLoadingMore(true);
+//     const nextPage = page + 1;
+//     try {
+//       const res = await api.get(`${serverUrl}/api/comments/post/${postId}?page=${nextPage}&limit=10`);
+//       if (res.data.length > 0) {
+//         setComments((prev) => [...prev, ...res.data]);
+//         setPage(nextPage);
+//       }
+//       if (res.data.length < 10) setHasMoreComments(false);
+//     } catch (error) {
+//       console.error(error);
+//     } finally {
+//       setLoadingMore(false);
+//     }
+//   };
+
+//   // 2. Toggle/Fetch Replies (Smart Logic)
+//   const toggleReplies = async (commentId, replies) => {
+//     // Check if we have replies and if they are Strings (IDs)
+//     const needsFetching = replies && replies.length > 0 && typeof replies[0] === 'string';
+
+//     if (needsFetching) {
+//         try {
+//             // Fetch the real objects
+//             const res = await api.get(`${serverUrl}/api/comments/${commentId}/replies?page=1&limit=20`);
+//             // Update state to replace IDs with Objects
+//             setComments(prev => loadRepliesIntoState(prev, commentId, res.data));
+//         } catch (error) {
+//             console.error("Failed to load replies:", error);
+//             return; // Stop here if failed
+//         }
+//     }
+
+//     // Toggle Visibility
+//     setOpenReplyComments(prev => {
+//         const newSet = new Set(prev);
+//         if (newSet.has(commentId)) newSet.delete(commentId);
+//         else newSet.add(commentId);
+//         return newSet;
+//     });
+//   };
+
+//   // 3. Voting
 //   const handlevote = async (type, id, object) => {
 //     const route = object === "post" ? "posts" : "comments";
 //     const action = type === 1 ? "upvote" : "downvote";
@@ -1093,21 +1124,21 @@ const updateCommentInState = (commentsArray, updatedComment) => {
 //     }
 //   };
 
+//   // 4. Create Root Comment
 //   const handleCommentSubmit = async (e) => {
 //     e.preventDefault();
 //     if (!newComment.trim()) return;
 //     try {
 //       const commentData = { content: newComment, postID: postId, parentID: null };
 //       const response = await api.post(`${serverUrl}/api/comments/create`, commentData);
-      
-//       // Add new root comment to the TOP of the list
 //       setComments([response.data, ...comments]);
 //       setNewComment("");
 //     } catch (error) {
-//       alert("Error posting comment: " + error.message);
+//       alert("Error: " + error.message);
 //     }
 //   };
 
+//   // 5. Create Reply
 //   const handleReplySubmit = async (parentID, replyContent) => {
 //     if (!replyContent.trim()) return;
 //     try {
@@ -1116,20 +1147,30 @@ const updateCommentInState = (commentsArray, updatedComment) => {
 //         postID: postId,
 //         parentID,
 //       });
-      
 //       setComments((prev) => addReplyToState(prev, parentID, response.data));
+//       // Auto-open the parent to see the new reply
 //       setOpenReplyComments((prev) => new Set(prev).add(parentID));
 //     } catch (error) {
 //       alert("Error replying: " + error.message);
 //     }
 //   };
 
+//   // 6. Delete/Edit
+//   const handleDeleteComment = async (coid) => {
+//     if (!currentUserId) return;
+//     if (!window.confirm("Delete this comment?")) return;
+//     try {
+//       await api.delete(`${serverUrl}/api/comments/${coid}`);
+//       setComments((prev) => deleteCommentFromState(prev, coid));
+//     } catch (error) {
+//       alert("Failed to delete: " + error.message);
+//     }
+//   };
+
 //   const handleEditComment = async (commentId, newContent) => {
 //     if (!newContent.trim()) return false;
 //     try {
-//       const response = await api.put(`${serverUrl}/api/comments/edit/${commentId}`, {
-//         content: newContent
-//       });
+//       const response = await api.put(`${serverUrl}/api/comments/edit/${commentId}`, { content: newContent });
 //       setComments((prev) => updateCommentInState(prev, response.data));
 //       return true;
 //     } catch (error) {
@@ -1138,41 +1179,14 @@ const updateCommentInState = (commentsArray, updatedComment) => {
 //     }
 //   };
 
-//   const handleDeleteComment = async (coid) => {
-//     if (!currentUserId) return;
-//     if (!window.confirm("Delete this comment?")) return;
-//     try {
-//       await api.delete(`${serverUrl}/api/comments/${coid}`);
-//       setComments((prev) => deleteCommentFromState(prev, coid));
-//     } catch (error) {
-//       alert("Failed to delete comment: " + error.message);
-//     }
-//   };
-
-//   // --- POST ACTIONS (Edit, Delete, Summarize, Award) ---
-
-//   const handleDeletePost = async () => {
-//     if (!currentUserId || post.userID._id !== currentUserId) return;
-//     if (!window.confirm("Are you sure you want to delete this post?")) return;
-//     try {
-//       await api.delete(`${serverUrl}/api/posts/delete/${post._id}`);
-//       navigate("/");
-//     } catch (error) {
-//       alert("Failed to delete post: " + error.message);
-//     }
-//   };
-
-//   const handleEditPost = () => {
-//     navigate(`/api/posts/${post._id}/edit`);
-//   };
-
+//   // --- POST ACTIONS ---
 //   const handleSummarize = async () => {
 //     setIsSummarizing(true);
 //     try {
 //       const response = await api.get(`${serverUrl}/api/posts/${post._id}/summarize`);
 //       setSummary(response.data.summary);
 //     } catch (error) {
-//       alert("Could not summarize: " + (error.response?.data?.message || error.message));
+//       alert("Summarize failed: " + (error.response?.data?.message || error.message));
 //     } finally {
 //       setIsSummarizing(false);
 //     }
@@ -1182,7 +1196,7 @@ const updateCommentInState = (commentsArray, updatedComment) => {
 //     if (!openAwardMenu) {
 //       try {
 //         const res = await api.get(`${serverUrl}/api/communities/${post.communityID._id}`);
-//         // Handle Capitalization Mismatch from Backend
+//         // Handle Capitalization Mismatch
 //         setCommunityAwards(res.data.Awards || res.data.awards || []);
 //       } catch {
 //         console.log("Failed to load awards");
@@ -1198,7 +1212,7 @@ const updateCommentInState = (commentsArray, updatedComment) => {
 //       alert("Award given!");
 //       setOpenAwardMenu(false);
 //     } catch (error) {
-//       alert("Failed to give award: " + error.message);
+//       alert("Failed: " + error.message);
 //     }
 //   };
 
@@ -1207,20 +1221,22 @@ const updateCommentInState = (commentsArray, updatedComment) => {
 //       await api.post(`${serverUrl}/api/comments/${commentId}/award/${awardId}`);
 //       alert("Award given to comment!");
 //     } catch (error) {
-//       alert("Failed to give award: " + error.message);
+//       alert("Failed: " + error.message);
 //     }
 //   };
 
-//   const toggleReplies = (commentId) => {
-//     setOpenReplyComments((prev) => {
-//       const newSet = new Set(prev);
-//       if (newSet.has(commentId)) newSet.delete(commentId);
-//       else newSet.add(commentId);
-//       return newSet;
-//     });
+//   const handleDeletePost = async () => {
+//     if (!currentUserId || post.userID._id !== currentUserId) return;
+//     if (!window.confirm("Delete Post?")) return;
+//     try {
+//       await api.delete(`${serverUrl}/api/posts/delete/${post._id}`);
+//       navigate("/");
+//     } catch (error) {
+//       alert("Failed: " + error.message);
+//     }
 //   };
 
-//   // --- COMMENT ITEM COMPONENT ---
+//   // --- SUB-COMPONENT: COMMENT ITEM ---
 //   const CommentItem = ({ comment, level = 0 }) => {
 //     const [replyContent, setReplyContent] = useState("");
 //     const [isEditing, setIsEditing] = useState(false);
@@ -1244,7 +1260,6 @@ const updateCommentInState = (commentsArray, updatedComment) => {
 //       <div className="comment" style={{ marginLeft: level * 20 }} key={comment._id}>
 //         <div className="comment-header">
 //             <span className="comment-author">{comment.userID?.username || "Unknown"}:</span>
-//             {/* Display Comment Awards Here if needed */}
 //         </div>
 
 //         {isEditing ? (
@@ -1278,7 +1293,8 @@ const updateCommentInState = (commentsArray, updatedComment) => {
 //                <div className="award-dropdown">
 //                  {(communityAwards.length === 0) ? <div>No awards</div> : 
 //                     communityAwards.map(a => (
-//                         <div key={a._id} className="award-item" onClick={() => giveCommentAward(comment._id, a._id)}>
+//                         // ✅ FIX: Use award.name as key to fix React error
+//                         <div key={a.name} className="award-item" onClick={() => giveCommentAward(comment._id, a.name)}>
 //                             {a.icon} {a.name}
 //                         </div>
 //                     ))
@@ -1296,12 +1312,18 @@ const updateCommentInState = (commentsArray, updatedComment) => {
 //         )}
 
 //         {hasReplies && (
-//             <button className="toggle-replies-btn" onClick={() => toggleReplies(comment._id)}>
-//                 {isRepliesOpen ? "Hide" : `View ${comment.replies.length}`} Replies
+//             <button 
+//                 className="toggle-replies-btn" 
+//                 // ✅ KEY: Pass comment.replies so toggle function can check if fetch is needed
+//                 onClick={() => toggleReplies(comment._id, comment.replies)}
+//                 style={{ background: 'none', border: 'none', color: '#0079d3', cursor: 'pointer', padding: '5px 0', fontWeight: 'bold' }}
+//             >
+//                 {isRepliesOpen ? "Hide" : `View ${comment.replies.length} Replies`}
 //             </button>
 //         )}
 
-//         {isRepliesOpen && hasReplies && (
+//         {/* ✅ Only map replies if they are Objects (Fetched). If they are strings, we haven't fetched yet. */}
+//         {isRepliesOpen && hasReplies && typeof comment.replies[0] !== 'string' && (
 //             comment.replies.map(reply => (
 //                 <CommentItem key={reply._id} comment={reply} level={level + 1} />
 //             ))
@@ -1324,36 +1346,45 @@ const updateCommentInState = (commentsArray, updatedComment) => {
 //           <span>u/{post.userID?.username}</span>
 //         </div>
 
-//         {/* Post Actions (Edit/Delete) */}
+//         {/* Display Received Awards on Post */}
+//         {post.awardsReceived && post.awardsReceived.length > 0 && (
+//             <div className="post-awards-bar" style={{ display: 'flex', gap: '4px', margin: '4px 0' }}>
+//                 {Object.keys(post.awardsReceived.reduce((acc, curr) => { acc[curr.awardName] = true; return acc; }, {}))
+//                 .map(awardName => (
+//                     <span key={awardName} style={{ background: '#f0f0f0', borderRadius: '12px', padding: '2px 6px', fontSize: '0.75rem' }}>
+//                         🏆 {awardName}
+//                     </span>
+//                 ))}
+//             </div>
+//         )}
+
 //         {post.userID._id === currentUserId && (
-//             <div className="owner-actions">
-//                 <button onClick={handleEditPost} style={{marginRight: 10}}>Edit Post</button>
+//             <div className="owner-actions" style={{margin: '10px 0'}}>
+//                 <button onClick={() => navigate(`/api/posts/${post._id}/edit`)} style={{marginRight: 10}}>Edit Post</button>
 //                 <button onClick={handleDeletePost} style={{color: 'red'}}>Delete Post</button>
 //             </div>
 //         )}
 
-//         {/* AI Summary */}
-//         <div className="summary-section">
+//         <div className="summary-section" style={{margin: '10px 0'}}>
 //             {!summary && (
 //                 <button onClick={handleSummarize} disabled={isSummarizing}>
 //                     {isSummarizing ? "Summarizing..." : "✨ Summarize AI"}
 //                 </button>
 //             )}
-//             {summary && <div className="ai-summary">{summary}</div>}
+//             {summary && <div className="ai-summary" style={{background:'#f9f9f9', padding:10, borderRadius:5}}>{summary}</div>}
 //         </div>
 
-//         {/* Post Voting & Awards */}
 //         <div className="post-interactions">
 //             <button onClick={() => handlevote(1, post._id, "post")}>⬆ {post.upvotes.length}</button>
 //             <button onClick={() => handlevote(2, post._id, "post")}>⬇ {post.downvotes.length}</button>
             
-//             <div className="award-container">
+//             <div className="award-container" style={{display:'inline-block', position:'relative', marginLeft: 10}}>
 //                 <button onClick={toggleAwardMenu}>🎁 Award</button>
 //                 {openAwardMenu && (
 //                     <div className="award-dropdown">
 //                         {(communityAwards.length === 0) && <div>No awards available</div>}
 //                         {communityAwards.map(award => (
-//                             <div key={award._id || award.name} className="award-item" onClick={(e)=> giveAward(award._id, e)}>
+//                             <div key={award.name} className="award-item" onClick={(e)=> giveAward(award.name, e)}>
 //                                 {award.icon} {award.name} ({award.cost})
 //                             </div>
 //                         ))}
@@ -1376,25 +1407,23 @@ const updateCommentInState = (commentsArray, updatedComment) => {
 //       <div className="comments-section">
 //         <h3>Comments</h3>
         
-//         {/* Comment Form */}
 //         <form onSubmit={handleCommentSubmit} className="main-comment-form">
 //             <textarea 
 //                 value={newComment} 
 //                 onChange={e => setNewComment(e.target.value)} 
 //                 placeholder="What are your thoughts?"
 //                 rows="4"
+//                 style={{width: '100%'}}
 //             />
-//             <button type="submit">Post Comment</button>
+//             <button type="submit" style={{marginTop: 5}}>Post Comment</button>
 //         </form>
 
-//         {/* Comment List */}
-//         <div className="comments-list">
+//         <div className="comments-list" style={{marginTop: 20}}>
 //             {comments.map(comment => (
 //                 <CommentItem key={comment._id} comment={comment} />
 //             ))}
 //         </div>
 
-//         {/* Load More Button */}
 //         {hasMoreComments && (
 //             <button 
 //                 onClick={handleLoadMoreComments} 
@@ -1409,4 +1438,3 @@ const updateCommentInState = (commentsArray, updatedComment) => {
 //     </div>
 //   );
 // }
-// */
