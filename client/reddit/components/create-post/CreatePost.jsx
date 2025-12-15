@@ -177,7 +177,7 @@ const CreatePost = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from || "/"; // Previous page or home
+  const from = "/api/communities/"+communityID; // Previous page or home
 
   useEffect(() => {
     const getCommunity = async (id) => {
