@@ -21,6 +21,8 @@ router.get('/community/:cid', checkAuth.optionalAuth, postController.getPostsCom
 
 router.get('/:pid', postController.getPostDetails);
 
+router.get('/search', checkAuth.optionalAuth, postController.searchPosts);
+
 router.use(checkAuth);
 router.get('/saved', checkAuth, postController.getSavedPosts);
 

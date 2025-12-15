@@ -566,6 +566,93 @@ const getSavedPosts = async (req, res) => {
 
 
 
+const searchPosts = async (req, res) => {
+  const { q } = req.query;
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+  const userID = req.userData?.id; 
+
+  try {
+    const results = [];
+    let excludedIds = [];
+
+    // 1. PRIMARY SEARCH: Title & Content (Paginated)
+    // We apply skip/limit here because this is the main source of truth
+    const searchRegex = new RegExp(q, "i");
+    
+    const directMatches = await Post.find({
+      $or: [
+        { title: { $regex: searchRegex } },
+        { content: { $regex: searchRegex } }
+      ]
+    })
+    .sort({ voteCount: -1 }) 
+    .skip(skip)      // ✅ Skip previous pages
+    .limit(limit)    // ✅ Limit current page
+    .populate('userID', 'username image')
+    .populate('communityID', 'name icon');
+
+    results.push(...directMatches);
+    directMatches.forEach(p => excludedIds.push(p._id));
+
+    // 2. FILLER LOGIC (Only run on Page 1 if we have few results)
+    // We don't want "Recommended" posts showing up randomly on Page 5.
+    if (page === 1 && results.length < limit) {
+        
+        const remainingLimit = limit - results.length;
+
+        // A. Search Communities by Name
+        const matchedCommunities = await Community.find({ name: { $regex: searchRegex } }).select('_id');
+        
+        if (matchedCommunities.length > 0) {
+            const commIds = matchedCommunities.map(c => c._id);
+            const communityPosts = await Post.find({
+                _id: { $nin: excludedIds },
+                communityID: { $in: commIds }
+            })
+            .sort({ voteCount: -1 })
+            .limit(remainingLimit) // Only fill what's left
+            .populate('userID', 'username image')
+            .populate('communityID', 'name icon');
+
+            results.push(...communityPosts);
+            communityPosts.forEach(p => excludedIds.push(p._id));
+        }
+    }
+
+    // 3. User Personalization (Enhance with isMember/isSaved)
+    // (Optimization: Fetch user data ONLY if we have results to enhance)
+    if (results.length > 0 && userID) {
+        const user = await User.findById(userID).select("joinedCommunities savedPosts");
+        if (user) {
+            const joinedSet = new Set(user.joinedCommunities.map(jc => jc.community.toString()));
+            const savedSet = new Set(user.savedPosts.map(sp => sp.toString()));
+
+            // Enhance in-memory
+            const finalResults = results.map(post => {
+                const obj = post.toObject ? post.toObject() : post;
+                const commId = obj.communityID?._id?.toString() || obj.communityID?.toString();
+                return {
+                    ...obj,
+                    isMember: commId ? joinedSet.has(commId) : false,
+                    isSaved: savedSet.has(obj._id.toString())
+                };
+            });
+            return res.json(finalResults);
+        }
+    }
+
+    // If no user or no results, return clean objects
+    return res.json(results.map(r => r.toObject ? r.toObject() : r));
+
+  } catch (err) {
+    console.error("Search Posts Error:", err);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+
 module.exports = {
     getPostsHomePage,
     getPostsCommunity,
@@ -578,5 +665,6 @@ module.exports = {
     awardPost,
     summarizePost,
     savePost,
-    getSavedPosts
+    getSavedPosts,
+    searchPosts
 };
