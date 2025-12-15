@@ -15,11 +15,7 @@ const getPostComments = async (req, res) =>{
         const postExists = await Post.exists({_id:pid});
         if(!postExists) return res.status(404).json({message: 'Post Not Exist (CommentController)'});
 
-        const comments = await Comment.find({postID: pid}).sort({createdAt: -1}).skip(skip).limit(limit).populate('userID', 'username image').populate({
-            path: 'replies',
-            options: {limit: 2, sort: {createdAt: 1}},
-            populate: {path: 'userID', select: 'username image'}
-        });
+        const comments = await Comment.find({postID: pid, parentID: null}).sort({createdAt: -1}).skip(skip).limit(limit).populate('userID', 'username image');
 
         res.status(200).send(comments);
 
@@ -62,7 +58,7 @@ const createComment = async (req, res) =>{
 
         if(parentID != null){
             const parentExists = await Comment.exists({_id:parentID});
-            if(!parentExists) return res.status(404).json({message: 'Post Not Exist (CommentController)'});
+            if(!parentExists) return res.status(404).json({message: 'Parent Not Exist (CommentController)'});
         }
 
 
@@ -75,7 +71,7 @@ const createComment = async (req, res) =>{
             userID,
             parentID: parentID || null
         });
-        newComment.populate("userID" ,"username image")
+        await newComment.populate("userID" ,"username image")
 
         await Post.findByIdAndUpdate(postID, { 
             $inc: { commentCount: 1 } 
@@ -118,7 +114,8 @@ const deleteComment = async (req, res) =>{
 
         await Post.findByIdAndUpdate(comment.postID ,{
                 $inc: {commentCount: -1}
-            } )
+        } );
+
         if (comment.parentID) {
             
             await Comment.findByIdAndUpdate(comment.parentID, {

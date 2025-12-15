@@ -16,12 +16,13 @@ router.get('/home', checkAuth.optionalAuth, postController.getPostsHomePage);
 
 router.get('/community/:cid', checkAuth.optionalAuth, postController.getPostsCommunity);
 
-router.get('/saved', checkAuth, postController.getSavedPosts);
+
 
 
 router.get('/:pid', postController.getPostDetails);
 
 router.use(checkAuth);
+router.get('/saved', checkAuth, postController.getSavedPosts);
 
 router.post('/:communityID/create', postController.createPost);
 

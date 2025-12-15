@@ -221,21 +221,7 @@ const getPostDetails = async (req, res) => {
 
         const post = await Post.findById(pid)
             .populate('userID', 'username image')
-            .populate('communityID', 'name moderators')
-            .populate({
-                path: 'comments',
-
-                options: { sort: { createdAt: -1 }, limit: 10 },
-                populate: [
-
-                    { path: 'userID', select: 'username image' },
-
-                    {
-                        path: 'replies',
-                        populate: { path: 'userID', select: 'username image' }
-                    }
-                ]
-            });
+            .populate('communityID', 'name moderators');
 
         res.status(200).json(post);
     } catch (error) {
