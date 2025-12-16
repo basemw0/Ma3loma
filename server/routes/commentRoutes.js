@@ -6,6 +6,8 @@ const commentController = require('../controllers/commentController');
 const router = express.Router();
 
 
+router.get('/search', commentController.searchComments);
+
 router.get('/post/:pid', commentController.getPostComments);
 
 

@@ -112,9 +112,7 @@ const deleteComment = async (req, res) =>{
             return res.status(403).json({ message: "Not authorized" });
         }
 
-        await Post.findByIdAndUpdate(comment.postID ,{
-                $inc: {commentCount: -1}
-        } );
+        
 
         if (comment.parentID) {
             
@@ -130,7 +128,10 @@ const deleteComment = async (req, res) =>{
             });
         }
 
-        await Comment.findByIdAndDelete(coid);
+        await Comment.findOneAndDelete({ _id: coid });
+
+        const newCount = await Comment.countDocuments({ postID: comment.postID });
+        await Post.findByIdAndUpdate(comment.postID, { commentCount: newCount });
 
         res.status(200).json({ message: "Comment deleted" });
 
@@ -339,6 +340,56 @@ const awardComment = async (req, res)=>{
     }
 }
 
+const searchComments = async (req, res) => {
+    try {
+        const { q } = req.query;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        if (!q) return res.status(400).json({ message: "Query required" });
+
+        const searchRegex = new RegExp(q, "i");
+
+        // 1. Find matching comments
+        const matchingComments = await Comment.find({ content: { $regex: searchRegex } })
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .populate('userID', 'username image') // Comment Author
+            // 2. Populate the entire Post Structure
+            .populate({
+                path: 'postID',
+                select: 'title content voteCount createdAt mediaUrl mediaType communityID userID',
+                populate: [
+                    { path: 'communityID', select: 'name icon' },
+                    { path: 'userID', select: 'username image' } // Post Author
+                ]
+            });
+
+        // 3. Format Response
+        const results = matchingComments
+            .filter(c => c.postID) // Filter out if post was deleted (orphans)
+            .map(c => {
+                const commentObj = c.toObject();
+                const postObj = commentObj.postID; // Extract full post
+                
+                // Optional: Clean up recursive reference
+                delete commentObj.postID;
+
+                return {
+                    post: postObj,          // The Whole Post Object
+                    matchedComment: commentObj // The Specific Comment
+                };
+            });
+
+        res.status(200).json(results);
+
+    } catch (error) {
+        console.error("Search Comment Error", error);
+        res.status(500).json({ message: error.message });
+    }
+};
 
 
 
@@ -350,5 +401,6 @@ module.exports = {
     editComment,
     upvoteComment,
     downvoteComment,
-    awardComment
+    awardComment,
+    searchComments
 };
