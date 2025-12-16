@@ -21,6 +21,7 @@ import CreationWizard from '../components/CommunityCreation/CreationWizard';
 import { AuthModalProvider, useAuthModal } from './context/AuthModalContext';
 import AuthModal from '../components/Utils/AuthModal';   
 import api from '../src/api/axios';
+import SearchResults from '../components/Landing/SearchResults';
 
 const AxiosInterceptor = ({ children }) => {
   const { openLogin } = useAuthModal();
@@ -72,6 +73,7 @@ function App() {
             <Route path="/" element={<Layout />}>
               <Route index element={<Content />} />
               <Route path="api/home" element={<Content />} />
+              <Route path="api/search" element={<SearchResults />} />
               <Route path="api/communities/:communityId" element={<CommunityPage />} />
               <Route path="api/communities/best/:number" element={<CommunitiesPage />} />
               <Route path="api/communities/category" element={<ExploreCommunities />} />

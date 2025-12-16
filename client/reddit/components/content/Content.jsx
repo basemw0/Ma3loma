@@ -3,7 +3,7 @@ import React from "react";
 import "./Content.css";
 import MainBar from "./main-bar/MainBar";
 
-export default function Content() {
+export default function Content({search}) {
   return (
     <div className="content">
       <div className="bars-wrapper">

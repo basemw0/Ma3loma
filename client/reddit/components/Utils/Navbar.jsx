@@ -115,6 +115,11 @@ export default function Navbar() {
     color: "#fff",
     "&:hover": { bgcolor: "#bd3200", boxShadow: "none" }
   };
+  const handleSearch = (e) => {
+    if (e.key === 'Enter') {
+      navigate(`api/search?q=${encodeURIComponent(e.target.value)}`);
+    }
+  };
 
   return (
     <AppBar
@@ -147,7 +152,7 @@ export default function Navbar() {
         </Tooltip>
 
         {/* --- CENTER: Search --- */}
-        <Search>
+        <Search onKeyDown={handleSearch}>
           <SearchIconWrapper>
             <SearchIcon />
           </SearchIconWrapper>
