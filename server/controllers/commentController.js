@@ -2,7 +2,6 @@ const Post = require('../models/Post.js');
 const User = require('../models/User.js');
 const Community = require('../models/Community.js')
 const Comment = require('../models/Comment.js');
-const { CommentBank } = require('@mui/icons-material');
 
 const getPostComments = async (req, res) =>{
     //Button if comment is mine delete

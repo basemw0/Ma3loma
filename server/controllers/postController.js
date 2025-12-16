@@ -659,6 +659,64 @@ const searchPosts = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+// Add this to controllers/postController.js
+
+const getPostsByUser = async (req, res) => {
+    try {
+        const { uid } = req.params; // The ID of the profile we are viewing
+        const currentUserId = req.userData?.id; // The ID of the person browsing (if logged in)
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = 20;
+        const skip = (page - 1) * limit;
+
+        const filter = req.query.filter || 'new';
+        let sortOption = { createdAt: -1 };
+        
+        if (filter === 'best') sortOption = { voteCount: -1 };
+        if (filter === 'hot') sortOption = { commentCount: -1 };
+
+        // 1. Fetch posts by this user
+        const posts = await Post.find({ userID: uid })
+            .sort(sortOption)
+            .skip(skip)
+            .limit(limit)
+            .populate('userID', 'username image')
+            .populate('communityID', 'name icon')
+            .lean();
+
+        // 2. Add isMember/isSaved flags if the viewer is logged in
+        if (currentUserId) {
+            const currentUser = await User.findById(currentUserId).select('joinedCommunities savedPosts');
+            
+            if (currentUser) {
+                const joinedSet = new Set(currentUser.joinedCommunities.map(jc => jc.community.toString()));
+                const savedSet = new Set(currentUser.savedPosts.map(s => s.toString()));
+
+                const buffedPosts = posts.map(post => ({
+                    ...post,
+                    isMember: post.communityID ? joinedSet.has(post.communityID._id.toString()) : false,
+                    isSaved: savedSet.has(post._id.toString())
+                }));
+                
+                return res.status(200).json(buffedPosts);
+            }
+        }
+
+        // 3. If viewer is guest
+        const guestPosts = posts.map(post => ({
+            ...post,
+            isMember: false,
+            isSaved: false
+        }));
+
+        res.status(200).json(guestPosts);
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 
 
 module.exports = {
@@ -674,5 +732,6 @@ module.exports = {
     summarizePost,
     savePost,
     getSavedPosts,
-    searchPosts
+    searchPosts,
+    getPostsByUser
 };

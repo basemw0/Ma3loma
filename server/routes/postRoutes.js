@@ -21,11 +21,12 @@ router.get('/search', checkAuth.optionalAuth, postController.searchPosts);
 
 
 router.get('/:pid', postController.getPostDetails);
+router.get('/user/:uid', postController.getPostsByUser);
+
 
 
 router.use(checkAuth);
 router.get('/saved', checkAuth, postController.getSavedPosts);
-
 router.post('/:communityID/create', postController.createPost);
 
 
