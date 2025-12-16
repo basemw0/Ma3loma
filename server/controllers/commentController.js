@@ -381,7 +381,7 @@ const searchComments = async (req, res) => {
                     matchedComment: commentObj // The Specific Comment
                 };
             });
-
+        console.log(results)
         res.status(200).json(results);
 
     } catch (error) {

@@ -373,9 +373,7 @@ const getCommunityById= async (req, res) => {
 
 const searchCommunity = async (req, res) => {
   const { q } = req.query;
-  const communityID = "3934d4bf-f5d0-4ae6-b227-809022cd5628"
   const userID = req.userData.id
-  console.log(q)
 
   try {
     const userMap = {};

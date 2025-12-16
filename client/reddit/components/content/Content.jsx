@@ -8,7 +8,7 @@ export default function Content({search}) {
     <div className="content">
       <div className="bars-wrapper">
         <div className="bars-wrapper-inside">
-          <MainBar />
+          <MainBar search = "" />
         </div>
       </div>
     </div>

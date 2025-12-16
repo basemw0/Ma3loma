@@ -12,7 +12,7 @@ export default function MainBar(props) {
   const [currentFilter , setCurrentFilter] = useState("best")
   const [num , setNum] = useState(1)
   const getPosts = async (num , filter ,search) => {
-        const query = search == ""?"": `?q=${search}`
+        const query = (search == ""?"":`?q=${search}`)
         let response = ""
         if(search){
         response = await api.get("/api/posts/search"+query + '&page=' + num+"&filter=" + filter);

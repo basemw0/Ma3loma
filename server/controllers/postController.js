@@ -567,7 +567,7 @@ const getSavedPosts = async (req, res) => {
 
 
 const searchPosts = async (req, res) => {
-  const { q } = req.query.q;
+  const { q } = req.query;
 
   const filter = req.query.filter || "best";
     let sortOption = {};

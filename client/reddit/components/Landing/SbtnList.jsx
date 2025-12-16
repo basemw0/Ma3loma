@@ -4,7 +4,7 @@ import {Stack} from "@mui/material";
 import { useState } from "react";
 export default function SbtnList(){
   const filters = ['Posts', 'Communities' ,'Comments'];
-  const [selectedFilter, setSelectedFilter] = useState('Posts');
+  const [selectedFilter, setSelectedFilter] = useState('Comments');
 
   return (
     <Box sx={{ p: 4, display: 'flex', justifyContent: 'center' }}>

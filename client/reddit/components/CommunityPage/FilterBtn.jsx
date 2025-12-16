@@ -19,24 +19,14 @@ export default function FilterBtn(props){
         if (value === 3) filterName = "new";
 
         setCurrentFilter(filterName);
-        
-        // LOGIC FIX: When filtering, we fetch Page 1, 
-        // but we must set 'num' to 2 so the NEXT "Show More" click fetches Page 2.
        
         setNum(2); 
         if(community === "yes"){
-            if(search!=""){
             getPosts(communityId,1, filterName , search);
-            }else{
-                getPosts(communityId,1, filterName);
-            }
+           
         }
         else{
-             if(search!=""){
-            getPosts(communityId,1, filterName , search);
-            }else{
-                getPosts(communityId,1, filterName);
-            }
+            getPosts(1, filterName , search);
         }
     };
 
