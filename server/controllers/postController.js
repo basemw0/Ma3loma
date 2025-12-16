@@ -567,7 +567,15 @@ const getSavedPosts = async (req, res) => {
 
 
 const searchPosts = async (req, res) => {
-  const { q } = req.query;
+  const { q } = req.query.q;
+
+  const filter = req.query.filter || "best";
+    let sortOption = {};
+
+    if (filter === "best") sortOption = { voteCount: -1 };
+    else if (filter === "hot") sortOption = { commentCount: -1 };
+    else sortOption = { createdAt: -1 };
+
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const skip = (page - 1) * limit;
@@ -587,7 +595,7 @@ const searchPosts = async (req, res) => {
         { content: { $regex: searchRegex } }
       ]
     })
-    .sort({ voteCount: -1 }) 
+    .sort(sortOption) 
     .skip(skip)      // ✅ Skip previous pages
     .limit(limit)    // ✅ Limit current page
     .populate('userID', 'username image')
@@ -611,7 +619,7 @@ const searchPosts = async (req, res) => {
                 _id: { $nin: excludedIds },
                 communityID: { $in: commIds }
             })
-            .sort({ voteCount: -1 })
+            .sort(sortOption)
             .limit(remainingLimit) // Only fill what's left
             .populate('userID', 'username image')
             .populate('communityID', 'name icon');

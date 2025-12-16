@@ -17,11 +17,11 @@ router.get('/home', checkAuth.optionalAuth, postController.getPostsHomePage);
 router.get('/community/:cid', checkAuth.optionalAuth, postController.getPostsCommunity);
 
 
+router.get('/search', checkAuth.optionalAuth, postController.searchPosts);
 
 
 router.get('/:pid', postController.getPostDetails);
 
-router.get('/search', checkAuth.optionalAuth, postController.searchPosts);
 
 router.use(checkAuth);
 router.get('/saved', checkAuth, postController.getSavedPosts);
