@@ -489,7 +489,7 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { Button } from "@mui/material";
 
 const COMMENTS_LIMIT = 3;
-// Video component placeholder
+
 function Video({ src }) {
   return <video controls src={src} style={{ maxWidth: '100%', height: 'auto' }} />;
 }
@@ -497,7 +497,6 @@ function Video({ src }) {
 export default function PostDetails() {
   const [commentsPage, setCommentsPage] = useState(1);
   const [hasMoreComments, setHasMoreComments] = useState(true);
-  const [RepliesNum , setRepliesNum] = useState(1);
   const { postId } = useParams();
   const navigate = useNavigate();
   const [post, setPost] = useState(null);
@@ -535,7 +534,6 @@ export default function PostDetails() {
       } else {
         setComments((prev) => [...prev, ...newData]); 
       }
-
       
       if (newData.length < COMMENTS_LIMIT) {
         setHasMoreComments(false);
@@ -553,12 +551,8 @@ export default function PostDetails() {
     const fetchPostDetails = async () => {
       try {
         const postResponse = await api.get(`${serverUrl}/api/posts/${postId}`);
-
         setPost(postResponse.data);
-
-        
         await fetchComments(1);
-        
         setLoading(false);
       } catch (error) {
         console.error("Error fetching post details or comments:", error);
@@ -570,7 +564,6 @@ export default function PostDetails() {
   const handleShowMoreComments = () => {
     fetchComments(commentsPage + 1);
   };
-
 
   const handlevote = async (type, id, object) => {
     const route = object === "post" ? "posts" : "comments";
@@ -595,7 +588,6 @@ export default function PostDetails() {
           content: updatedComment.content || c.content,
           upvotes: updatedComment.upvotes,
           downvotes: updatedComment.downvotes,
-          // Do NOT touch userID
         };
       }
       if (c.replies && c.replies.length > 0) {
@@ -634,7 +626,14 @@ export default function PostDetails() {
   const addReplyToState = (commentsArray, parentID, newReply) => {
     return commentsArray.map((c) => {
       if (c._id === parentID) {
-        return { ...c, replies: [...(c.replies || []), newReply] };
+        // If adding a reply manually, update total count
+        const currentReplies = c.replies || [];
+        const currentTotal = c.totalReplyCount || currentReplies.length;
+        return { 
+            ...c, 
+            replies: [...currentReplies, newReply],
+            totalReplyCount: currentTotal + 1
+        };
       }
       if (c.replies && c.replies.length > 0) {
         return { ...c, replies: addReplyToState(c.replies, parentID, newReply) };
@@ -658,23 +657,44 @@ export default function PostDetails() {
     }
   };
 
-  const loadReplies = async (commentId) => {
+  const loadReplies = async (commentId, page) => {
     try {
-      // Fetch replies using the function you confirmed exists!
-      // We use limit=50 to ensure we get a good chunk of the thread
       const response = await api.get(
-        `${serverUrl}/api/comments/${commentId}/replies?page=1&limit=${COMMENTS_LIMIT}`
+        `${serverUrl}/api/comments/${commentId}/replies/?page=${page}&limit=${COMMENTS_LIMIT}`
       );
       const newReplies = response.data;
 
       setComments((prev) => {
         const updateRecursive = (list) => {
           return list.map((c) => {
+            
             if (c._id === commentId) {
-              // Replace the "String ID" placeholder with actual data
-              return { ...c, replies: newReplies };
+              const currentReplies = c.replies || [];
+              
+              const isUnloaded = currentReplies.length > 0 && typeof currentReplies[0] === 'string';
+              
+              // ✅ FIX 3: Robust Total Calculation
+              const realTotal = isUnloaded 
+                  ? currentReplies.length 
+                  : (c.totalReplyCount || currentReplies.length);
+
+              if (page === 1 || isUnloaded) {
+                return { 
+                    ...c, 
+                    replies: newReplies, 
+                    totalReplyCount: realTotal 
+                };
+              } else {
+                const existingIds = new Set(currentReplies.map(r => r._id));
+                const uniqueNew = newReplies.filter(r => !existingIds.has(r._id));
+                return { 
+                    ...c, 
+                    replies: [...currentReplies, ...uniqueNew],
+                    totalReplyCount: realTotal 
+                };
+              }
             }
-            // Recurse down if the children are already objects
+            
             if (c.replies && c.replies.length > 0 && typeof c.replies[0] === 'object') {
               return { ...c, replies: updateRecursive(c.replies) };
             }
@@ -684,11 +704,12 @@ export default function PostDetails() {
         return updateRecursive(prev);
       });
 
-      // Mark this thread as open
       setOpenReplyComments(prev => new Set(prev).add(commentId));
+      return newReplies.length;
 
     } catch (error) {
       alert("Failed to load replies: " + error.message);
+      return 0;
     }
   };
 
@@ -793,6 +814,8 @@ export default function PostDetails() {
   };
 
   const CommentItem = ({ comment, level = 0 }) => {
+    const [replyPage, setReplyPage] = useState(1);       
+    const [hasMoreReplies, setHasMoreReplies] = useState(true);
     const [replyContent, setReplyContent] = useState("");
     const [openCommentAwardMenu, setOpenCommentAwardMenu] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -812,28 +835,41 @@ export default function PostDetails() {
       if (success) setIsEditing(false);
     };
 
-    const handleToggleReplies = () => {
-      // If already open, just close them (no fetch needed)
+    const handleToggleReplies = async () => {
       if (openReplyComments.has(comment._id)) {
         toggleReplies(comment._id);
         return;
       }
 
-      // Check if replies are just IDs (Strings) or real Objects
-      // If "String", we haven't loaded them yet -> Fetch!
       const repliesAreNotLoaded = comment.replies &&
         comment.replies.length > 0 &&
         typeof comment.replies[0] === "string";
 
       if (repliesAreNotLoaded) {
-        loadReplies(comment._id); 
+        const count = await loadReplies(comment._id, 1);
+        setReplyPage(1); 
+        if(count < COMMENTS_LIMIT) setHasMoreReplies(false); 
       } else {
-        toggleReplies(comment._id); // Data exists, just open the folder
+        toggleReplies(comment._id);
       }
+    };
+
+    // ✅ FIX 1: Define nextPage properly
+    const handleShowMoreReplies = async () => {    
+        const nextPage = replyPage + 1;
+        const count = await loadReplies(comment._id, nextPage);
+        
+        setReplyPage(nextPage);
+        if (count < COMMENTS_LIMIT) {
+            setHasMoreReplies(false);
+        }
     };
 
     const hasReplies = comment.replies && comment.replies.length > 0;
     const isRepliesOpen = openReplyComments.has(comment._id);
+    
+    // ✅ FIX 2: Handle initial state (undefined totalReplyCount)
+    const displayCount = comment.totalReplyCount || (comment.replies ? comment.replies.length : 0);
 
     return (
       <div className="comment" style={{ marginLeft: level * 20 }} key={comment._id}>
@@ -880,15 +916,39 @@ export default function PostDetails() {
         {hasReplies && (
           <button
             style={{ marginLeft: '10px', cursor: 'pointer', background: 'none', border: 'none', color: '#0079d3' }}
-            onClick={handleToggleReplies}  // ✅ NEW: This triggers the fetch logic */
+            onClick={handleToggleReplies} 
           >
-            {isRepliesOpen ? "Hide Replies" : `View ${comment.replies.length} ${comment.replies.length === 1 ? 'reply' : 'replies'}`}
+            {isRepliesOpen ? "Hide Replies" : `View ${displayCount} ${displayCount === 1 ? 'reply' : 'replies'}`}
           </button>
         )}
 
-        {isRepliesOpen && hasReplies && comment.replies.map((reply) => (
-          <CommentItem key={reply._id} comment={reply} level={level + 1} />
-        ))}
+        {isRepliesOpen && hasReplies && (
+            <>
+                {comment.replies.map((reply) => (
+                     typeof reply === 'object' ? (
+                         <CommentItem key={reply._id} comment={reply} level={level + 1} />
+                     ) : null 
+                ))}
+                
+                {hasMoreReplies && (
+                    <button 
+                        onClick={handleShowMoreReplies} 
+                        style={{ 
+                            marginLeft: '10px', 
+                            marginTop:'5px', 
+                            color: '#ff4500', 
+                            background:'none', 
+                            border:'none', 
+                            cursor:'pointer', 
+                            fontSize:'0.9rem', 
+                            fontWeight: 'bold' 
+                        }}
+                    >
+                        Load more replies...
+                    </button>
+                )}
+            </>
+        )}
       </div>
     );
   };
@@ -989,7 +1049,6 @@ export default function PostDetails() {
           <CommentItem key={comment._id} comment={comment} />
         ))}
 
-        {/* ✅ Show More Top-Level Comments Button*/} 
         {hasMoreComments && comments.length > 0 && (
             <button 
                 onClick={handleShowMoreComments}
@@ -1007,7 +1066,6 @@ export default function PostDetails() {
     </div>
   );
 }
-
 
 
 
