@@ -7,7 +7,7 @@ import { Button } from "@mui/material";
 import FilterBtn from '../../CommunityPage/FilterBtn'
 
 export default function MainBar(props) {
-  const {search = ""} = props
+  const {search = "" , saved = false} = props
   const [posts , setPosts] = useState([])
   const [currentFilter , setCurrentFilter] = useState("best")
   const [num , setNum] = useState(1)
@@ -16,6 +16,9 @@ export default function MainBar(props) {
         let response = ""
         if(search){
         response = await api.get("/api/posts/search"+query + '&page=' + num+"&filter=" + filter);
+        }
+        else if (saved){
+          response = await api.get("/api/posts/saved?page=" + num+"&filter=" + filter);
         }
         else{
            response = await api.get("/api/posts/home?page=" + num + "&filter=" + filter);

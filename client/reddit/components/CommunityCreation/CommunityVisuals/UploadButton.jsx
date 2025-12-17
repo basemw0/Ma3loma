@@ -4,7 +4,7 @@ import { styled } from '@mui/material/styles';
 import uploadToCloudinary from '../../../src/utils/uploadCloudinary'
 
 export default function UploadButton(props) {
-  const {setCommunityVisuals , icon} = props
+  const {setCommunityVisuals , icon , edit = false} = props
   const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
     clipPath: 'inset(50%)',
@@ -17,7 +17,13 @@ export default function UploadButton(props) {
     width: 1,
   });
   const handleChange = async (file)=>{
-    if(icon){
+    if(edit){
+      let url = await uploadToCloudinary(file)
+      setCommunityVisuals((prev)=>{
+        return {...prev , image : url.url}
+      })
+    }
+    else if(icon){
       let url = await uploadToCloudinary(file)
       setCommunityVisuals((prev)=>{
         return {...prev , icon : url.url}

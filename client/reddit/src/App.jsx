@@ -24,6 +24,7 @@ import api from '../src/api/axios';
 import SearchResults from '../components/Landing/SearchResults';
 import UserProfile from '../components/UserPage/UserProfile';
 
+import Saved from '../components/Saved';
 const AxiosInterceptor = ({ children }) => {
   const { openLogin } = useAuthModal();
   const navigate = useNavigate();
@@ -74,6 +75,7 @@ function App() {
             <Route path="/" element={<Layout />}>
               <Route index element={<Content />} />
               <Route path="api/home" element={<Content />} />
+              <Route path="api/posts/saved" element={<Saved />} />
               <Route path="api/search" element={<SearchResults />} />
               <Route path="api/communities/:communityId" element={<CommunityPage />} />
               <Route path="api/communities/best/:number" element={<CommunitiesPage />} />
