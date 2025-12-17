@@ -15,7 +15,7 @@ return(
       {current == 1 &&   <MainBar key = {q} search = {q}/>}
       {current == 2 &&   <CommunityList search= {q}/>}
       {current == 3 &&   <CommentList search = {q}/>}
-      {current == 4 &&   <UserList search = {q}/>}
+      {current == 4 &&   <UserList key = {q} search = {q}/>}
     </Stack>
 )
 }

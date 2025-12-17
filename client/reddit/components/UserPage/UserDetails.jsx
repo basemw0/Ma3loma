@@ -34,19 +34,10 @@ export default function UserDetails({ user }) {
 
         {/* Description / Bio */}
         <Box sx={{ bgcolor: '#fff', p: 2, borderRadius: 1, mb: 2, border: '1px solid #edeff1' }}>
-          <Typography sx={{ fontSize: '0.875rem', lineHeight: 1.5, mb: 1 }}>
-            {user.description || "This user hasn't written a bio yet."}
-          </Typography>
-
-          {/* Stats */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
             <Box>
               <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{user.goldBalance || 0}</Typography>
               <Typography variant="caption" color="text.secondary">Gold</Typography>
-            </Box>
-            <Box>
-              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>1</Typography>
-              <Typography variant="caption" color="text.secondary">Karma</Typography>
             </Box>
           </Box>
         </Box>

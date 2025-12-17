@@ -7,7 +7,7 @@ export default function UserListItem(props) {
   const navigate = useNavigate();
 
   const handleUserClick = () => {
-    // navigate(`/u/${user.username}`);
+    navigate('/api/profile/'+user._id);
   };
 
   return (

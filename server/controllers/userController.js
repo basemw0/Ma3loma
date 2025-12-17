@@ -354,20 +354,15 @@ const searchUsers = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
     
-    // Create regex for case-insensitive search
     const searchRegex = new RegExp(query, "i");
 
-    // 3. Query Execution
     const users = await User.find({
       username: { $regex: searchRegex }
     })
-    .select("username image karma description isVerified") // Fields needed for your MUI component
-    .sort({ karma: -1 }) // Sort by highest karma (relevance)
-    .skip(skip)          // Pagination: Skip previous pages
-    .limit(limit)        // Pagination: Limit results per page
-    .lean();             // Returns plain JS objects (fixes the ._doc issue)
-
-    // 4. Return results
+    .select("username image   ") // Fields needed for your MUI component
+    .skip(skip)         
+    .limit(limit)        
+    .lean();           
     res.status(200).json(users);
 
   } catch (error) {
