@@ -162,7 +162,7 @@ export default function Posts({ posts , isHome }) {
     if (!currentUserId) return openLogin();
 
     try {
-      const res = await api.post(`/api/posts/${postId}/save`);
+      const res = await api.put(`/api/posts/${postId}/save`);
       setSavedPosts((prev) => ({
         ...prev,
         [postId]: !prev[postId],
@@ -368,7 +368,7 @@ export default function Posts({ posts , isHome }) {
                     <div
                       key={award._id}
                       className="award-item"
-                      onClick={(e) => giveAward(post._id, award._id, e)}
+                      onClick={(e) => giveAward(post._id, award.name, e)}
                     >
                       {award.icon ? award.icon + " " : "🎁 "}
                       {award.name} – {award.cost} Coins

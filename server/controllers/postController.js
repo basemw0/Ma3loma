@@ -442,22 +442,24 @@ const downvotePost = async (req, res) => {
 
 const awardPost = async (req, res) => {
     try {
-        const cid = "3934d4bf-f5d0-4ae6-b227-809022cd5628"
+        
         const uid = req.userData.id;
-        const { awardName } = req.body;
+        const { pid, awardName } = req.params;
 
         const user = await User.findById(uid);
         if (!user) return res.status(404).json({ message: "User not found" });
-
-        const comm = await Community.findById(cid);
-        if (!comm) {
-            return res.status(404).json({ message: "Community not found" });
-        }
 
         const post = await Post.findById(pid);
         if (!post) {
             return res.status(404).json({ message: "Post not found" });
         }
+
+        const comm = await Community.findById(post.communityID);
+        if (!comm) {
+            return res.status(404).json({ message: "Community not found" });
+        }
+
+        
 
         const award = comm.Awards.find(a => a.name === awardName);
         if (!award) {
@@ -465,6 +467,7 @@ const awardPost = async (req, res) => {
         }
 
         if (user.goldBalance < award.cost) {
+            console.log('mfe4 flos');
             return res.status(404).json({ message: "Not Enough Gold" });
         }
 
@@ -485,7 +488,9 @@ const awardPost = async (req, res) => {
                 }
             },
             { new: true }
-        ).populate('awardsReceived.givenBy', 'username');
+        ).populate("userID", "username image").populate("communityID", "name").populate('awardsReceived.givenBy', 'username');
+
+        console.log("aywa b2a")
 
         res.status(200).send(post_u);
 

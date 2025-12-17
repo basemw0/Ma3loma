@@ -281,8 +281,8 @@ const downvoteComment = async (req, res) =>{
 
 const awardComment = async (req, res)=>{
     try{
-        const {coid} = req.params;
-        const {awardName} = req.body;
+        const {coid, awardName} = req.params;
+        
         const uid = req.userData.id;
 
         const user = await User.findById(uid);
@@ -310,7 +310,9 @@ const awardComment = async (req, res)=>{
         }
 
         if(user.goldBalance < award.cost){
+            console.log('mfe4 flos 2')
             return res.status(404).json({message: "Not Enough Gold"});
+            
         }
 
         await User.findByIdAndUpdate(uid, 
@@ -330,7 +332,9 @@ const awardComment = async (req, res)=>{
                 }
             },
             {new: true} 
-        ).populate('awardsReceived.givenBy', 'username');
+        ).populate("userID", "username image").populate('awardsReceived.givenBy', 'username');
+
+        console.log('aywa b2a 2');
 
         res.status(200).send(comment_u);
 

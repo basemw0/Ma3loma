@@ -29,7 +29,7 @@ router.delete('/:coid',  commentController.deleteComment);
 router.put('/:coid/upvote',commentController.upvoteComment);
 router.put('/:coid/downvote', commentController.downvoteComment);
 
-router.post('/:coid/award', commentController.awardComment);
+router.post('/:coid/award/:awardName', commentController.awardComment);
 
 
 module.exports = router;

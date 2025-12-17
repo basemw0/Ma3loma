@@ -40,8 +40,8 @@ router.put('/:pid/upvote', postController.upvotePost);
 router.put('/:pid/downvote', postController.downvotePost);
 
 router.get('/:pid/summarize', checkAuth, postController.summarizePost);
-router.post('/:pid/award/:cid', postController.awardPost);
+router.post('/:pid/award/:awardName', postController.awardPost);
 
-router.post('/:pid/save', postController.savePost);
+router.put('/:pid/save', postController.savePost);
 
 module.exports = router;
