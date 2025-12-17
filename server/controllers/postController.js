@@ -542,6 +542,7 @@ const savePost = async (req, res) => {
 
 
 const getSavedPosts = async (req, res) => {
+    console.log("YO")
     try {
         const uid = req.userData.id;
 
@@ -575,11 +576,11 @@ const getSavedPosts = async (req, res) => {
        
 
         const posts = user.savedPosts.map(post => ({
-            ...post,
+            ...post.toObject(),
             isSaved: true,
             isMember: joinedIds.includes(post.communityID._id.toString())
-
         }));
+       
 
         res.status(200).json(posts);
 

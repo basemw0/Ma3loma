@@ -26,7 +26,7 @@ router.get('/user/:uid', postController.getPostsByUser);
 
 
 router.use(checkAuth);
-router.get('/saved', checkAuth, postController.getSavedPosts);
+router.get('/saved/me', checkAuth, postController.getSavedPosts);
 router.post('/:communityID/create', postController.createPost);
 
 

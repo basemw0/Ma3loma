@@ -3,23 +3,22 @@ import { Box, Button } from "@mui/material";
 import { useParams } from "react-router-dom";
 import api from "../../src/api/axios";
 
-// Import components from the SAME folder
 import UserHeader from "./UserHeader";
 import UserDetails from "./UserDetails";
 import PostsSection from "./PostsSection";
+import EditPost from "../edit-post/EditPost";
 
 export default function UserProfile() {
     const { userId } = useParams();
-    
     const [posts, setPosts] = useState([]);
     // 1. FIX: Default to "best" to match FilterBtn.jsx default
     const [currentFilter, setCurrentFilter] = useState("best");
     const [num, setNum] = useState(1);
     const [user, setUser] = useState(null);
 
-    // Fetch User Info
     const getUser = async (id) => {
         try {
+            console.log(id)
             let response = await api.get("/api/users/" + id);
             setUser(response.data);
         } catch (e) {

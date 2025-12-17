@@ -11,21 +11,21 @@ export default function MainBar(props) {
   const [posts , setPosts] = useState([])
   const [currentFilter , setCurrentFilter] = useState("best")
   const [num , setNum] = useState(1)
-  const getPosts = async (num , filter ,search) => {
+  const getPosts = async (num , filter ,search , saved) => {
         const query = (search == ""?"":`?q=${search}`)
         let response = ""
-        if(search){
+        if(search!=""){
         response = await api.get("/api/posts/search"+query + '&page=' + num+"&filter=" + filter);
         }
         else if (saved){
-          response = await api.get("/api/posts/saved?page=" + num+"&filter=" + filter);
+        response = await api.get("/api/posts/saved/me?page=" + num + "&filter=" + filter);
         }
         else{
            response = await api.get("/api/posts/home?page=" + num + "&filter=" + filter);
 
         }
         if(num ===1){
-            setPosts(response.data);
+        setPosts(response.data);
         }
         else{
         setPosts((prev)=>{
@@ -34,12 +34,12 @@ export default function MainBar(props) {
         }
     };
     const handleShowMore = () => {
-        getPosts(num, currentFilter , search);
+        getPosts(num, currentFilter , search , saved);
         setNum(prev => prev + 1); 
     };
 
     useEffect(() => {
-        getPosts(num , currentFilter , search);
+        getPosts(num , currentFilter , search , saved);
         setNum(2)
     }, []);
   if (!posts) return <div>Loading...</div>;

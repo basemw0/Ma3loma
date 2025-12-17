@@ -1,14 +1,14 @@
 import React from "react";
 
-import "./Content.css";
-import MainBar from "./main-bar/MainBar";
+import "./content/Content.css";
+import MainBar from "./content/main-bar/MainBar";
 
 export default function Saved() {
   return (
     <div className="content">
       <div className="bars-wrapper">
         <div className="bars-wrapper-inside">
-          <MainBar search = "" saved = {true} />
+          <MainBar search = "" saved ={true} />
         </div>
       </div>
     </div>

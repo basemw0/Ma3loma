@@ -256,17 +256,34 @@ const getUserById = async (req, res) => {
 
     let me = false;
 
-    if (req.userData && req.userData.id === userID) {
+    if ((req.userData) && req.userData.id === userID) {
         me = true;
     }
-
     res.status(200).json({ ...user.toObject(), me });
 
   } catch (err) {
+    console.log(err.message)
     res.status(500).json({ message: "Server Error", error: err.message });
   }
 };
-
+const checkPass = async (req , res)=>{
+  const {pass} = req.body
+  try{
+  const userID = req.userData.id
+  const user = await User.findById(userID)
+  if(user){
+    const result = await bcrypt.compare(pass , user.password) 
+    if(result){
+      res.status(200).json(true)
+    }
+    else{
+      res.status(404).json(false)
+    }
+  }}
+  catch(e){
+    console.log(e.message)
+  }
+}
 
 const editUser = async(req, res) =>{
   try{
@@ -293,9 +310,31 @@ const editUser = async(req, res) =>{
 
 
   }catch(error){
-    console.log('problem in edit');
+    console.log(error.message);
     res.status(500).json({message: error.message})
+
   }
+}
+const changePass = async (req , res)=>{
+  const {newPass} = req.body
+  const password = newPass
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
+  const userID = req.userData.id;
+  let user = await User.findById(userID)
+  try{
+  if(user){
+
+    user = await User.findByIdAndUpdate(userID , {password : hashedPassword} ,{new : true})
+    console.log(user.password)
+    res.status(200).json(user);
+  }
+}
+catch(e){
+  console.log(e.message);
+  res.status(500).json({message: e.message})
+}
+
 }
 
 module.exports = {
@@ -308,5 +347,7 @@ module.exports = {
   resetPassword,
   getMe,
   getUserById,
-  editUser
+  editUser,
+  changePass,
+  checkPass
 };

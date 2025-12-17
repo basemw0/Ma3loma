@@ -4,8 +4,17 @@ import CakeIcon from '@mui/icons-material/Cake';
 import EditIcon from '@mui/icons-material/Edit';
 import LockIcon from '@mui/icons-material/Lock';
 import ChatIcon from '@mui/icons-material/Chat';
-
+import EditProfile from '../EditProfile'
+import ChangePass from '../ChangePass';
+import { useState } from 'react';
 export default function UserDetails({ user }) {
+      const [isEditOpen, setIsEditOpen] = useState(false);
+      const handleOpen = () => setIsEditOpen(true);
+      const handleClose = () => setIsEditOpen(false);
+
+      const [isChangeOpen, setIsChangeOpen] = useState(false);
+      const handleChangeOpen = () => setIsChangeOpen(true);
+      const handleChangeClose = () => setIsChangeOpen(false);
   return (
     <>
       <Box
@@ -62,20 +71,22 @@ export default function UserDetails({ user }) {
               fullWidth 
               startIcon={<EditIcon />}
               sx={{ borderRadius: '20px', textTransform: 'none', fontWeight: 'bold' }}
-              onClick={() => alert("Navigate to Edit Profile")}
+              onClick={handleOpen}
             >
               Edit Profile
             </Button>
+            <EditProfile onClose={handleClose} open = {isEditOpen} Iuser = {user}/>
             
             <Button 
               variant="contained" 
               fullWidth 
               startIcon={<LockIcon />}
               sx={{ borderRadius: '20px', textTransform: 'none', fontWeight: 'bold' }}
-              onClick={() => alert("Navigate to Change Password")}
+              onClick={()=>{setIsChangeOpen(true)}}
             >
               Change Password
             </Button>
+            <ChangePass Iuser = {user} open = {isChangeOpen} onClose={handleChangeClose}/>
           </Stack>
         ) : (
           null
