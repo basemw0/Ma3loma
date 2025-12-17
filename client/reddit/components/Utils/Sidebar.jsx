@@ -55,7 +55,6 @@ export default function Sidebar({ open, onToggle, drawerWidth }) {
 
   const resourceItems = [
     { label: "About Ma3loma", icon: <InfoIcon />, to: "/about" },
-    { label: "Blog", icon: <ArticleIcon />, to: "/blog" },
   ];
 
   const [openWizard, setOpenWizard] = React.useState(false);
