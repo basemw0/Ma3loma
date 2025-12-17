@@ -247,14 +247,21 @@ const getMe = async (req, res) => {
   }
 };
 const getUserById = async (req, res) => {
-  const userID = req.params.id
+  const userID = req.params.id;
   try {
-    // req.userData is set by the check-auth middleware
-    const user = await User.findById(userID).select("-password"); 
+    const user = await User.findById(userID).select("-password");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    res.status(200).json(user);
+
+    let me = false;
+
+    if (req.userData && req.userData.id === userID) {
+        me = true;
+    }
+
+    res.status(200).json({ ...user.toObject(), me });
+
   } catch (err) {
     res.status(500).json({ message: "Server Error", error: err.message });
   }

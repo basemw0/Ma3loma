@@ -22,6 +22,7 @@ import { AuthModalProvider, useAuthModal } from './context/AuthModalContext';
 import AuthModal from '../components/Utils/AuthModal';   
 import api from '../src/api/axios';
 import SearchResults from '../components/Landing/SearchResults';
+import UserProfile from '../components/UserPage/UserProfile';
 
 const AxiosInterceptor = ({ children }) => {
   const { openLogin } = useAuthModal();
@@ -81,6 +82,7 @@ function App() {
               <Route path="api/posts/:postId/edit" element={<EditPost />} /> {/* EDIT POST */}
               <Route path="api/posts/:postId" element={<PostDetails />} />
               <Route path="api/communities/create" element={<CreationWizard />} />
+              <Route path="api/profile/:userId" element={<UserProfile />} />           
             </Route>
           </Routes>
         </AxiosInterceptor>
