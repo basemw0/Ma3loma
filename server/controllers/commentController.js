@@ -183,7 +183,7 @@ const upvoteComment = async (req, res) =>{
 
 
 
-        const comment_u = await Comment.findByIdAndUpdate(coid, updateQuery, { new: true }).populate("userID","username image");
+        const comment_u = await Comment.findOneAndUpdate({_id:coid}, updateQuery, { new: true }).populate("userID","username image");
         res.status(200).json(comment_u);
     }catch(error){
         res.status(500).json({message:error.message});
@@ -216,7 +216,9 @@ const editComment = async (req, res)=>{
                 mediaUrl, 
                 mediaType
             },
-            {new:true}
+            {new:true,
+                runValidators: true
+            }
         ).populate("userID","username image");
 
         res.status(200).json(comment_u);
@@ -268,7 +270,7 @@ const downvoteComment = async (req, res) =>{
         }
     
             
-        const comment_u = await Comment.findByIdAndUpdate(coid, updateQuery, { new: true }).populate("userID","username image");
+        const comment_u = await Comment.findOneAndUpdate({_id:coid}, updateQuery, { new: true }).populate("userID","username image");
     
         res.status(200).json(comment_u);
     

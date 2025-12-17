@@ -259,6 +259,38 @@ const getUserById = async (req, res) => {
     res.status(500).json({ message: "Server Error", error: err.message });
   }
 };
+
+
+const editUser = async(req, res) =>{
+  try{
+    const uid = req.userData.id;
+
+    const user = await User.findById(uid);
+    if(!user) return res.status(404).json({mssage: 'user not found (edit)'});
+
+    const {username, goldBalance, image} = req.body;
+
+    const user_u = await User.findByIdAndUpdate(uid,
+      {
+        username,
+        goldBalance,
+        image
+      },
+      {new: true,
+        runValidators: true,
+        context: 'query'
+      }
+    );
+
+    res.status(200).json(user_u);
+
+
+  }catch(error){
+    console.log('problem in edit');
+    res.status(500).json({message: error.message})
+  }
+}
+
 module.exports = {
   getUsers,
   signup,
@@ -268,5 +300,6 @@ module.exports = {
   forgotPassword,
   resetPassword,
   getMe,
-  getUserById
+  getUserById,
+  editUser
 };

@@ -312,7 +312,9 @@ const editPost = async (req, res) => {
                 mediaUrl,
                 mediaType
             },
-            { new: true }
+            { new: true,
+                runValidators: true
+             }
         );
 
         res.status(200).json(post_u);
@@ -367,7 +369,7 @@ const upvotePost = async (req, res) => {
         }
 
 
-        const post_u = await Post.findByIdAndUpdate(pid, updateQuery, { new: true }).populate("userID", "username image")
+        const post_u = await Post.findOneAndUpdate({_id: pid}, updateQuery, { new: true }).populate("userID", "username image")
             .populate("communityID", "name")
 
         res.status(200).json(post_u);
@@ -424,7 +426,7 @@ const downvotePost = async (req, res) => {
         }
 
 
-        const post_u = await Post.findByIdAndUpdate(pid, updateQuery, { new: true }).populate("userID", "username image")
+        const post_u = await Post.findOneAndUpdate({_id: pid}, updateQuery, { new: true }).populate("userID", "username image")
             .populate("communityID", "name")
 
 
@@ -527,7 +529,7 @@ const savePost = async (req, res) => {
             msg = "Post saved successfully";
         }
 
-        await User.findByIdAndUpdate(uid, updateQuery);
+        await User.findByIdAndUpdate(uid, updateQuery, {new: true});
 
         console.log('hena aho');
 
@@ -543,9 +545,22 @@ const getSavedPosts = async (req, res) => {
     try {
         const uid = req.userData.id;
 
+        const filter = req.query.filter || "best";
+        let sortOption = {};
+
+        if (filter === "best") sortOption = { voteCount: -1 };
+        else if (filter === "hot") sortOption = { commentCount: -1 };
+        else sortOption = { createdAt: -1 };
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = 5;
+        const skip = (page - 1) * limit;
+
+
 
         const user = await User.findById(uid).populate({
             path: 'savedPosts',
+            options: {skip: skip, limit: limit, sort: sortOption},
             populate: [
                 { path: 'userID', select: 'username image' },
                 { path: 'communityID', select: 'name icon' }
@@ -554,15 +569,19 @@ const getSavedPosts = async (req, res) => {
 
         if (!user) return res.status(404).json({ message: "User not found" });
 
+        const joinedIds = user.joinedCommunities.map(jc =>
+            jc.community.toString()
+        );
+       
 
-        const page = parseInt(req.query.page) || 1;
-        const limit = 20;
-        const skip = (page - 1) * limit;
+        const posts = user.savedPosts.map(post => ({
+            ...post,
+            isSaved: true,
+            isMember: joinedIds.includes(post.communityID._id.toString())
 
+        }));
 
-        const savedPosts = user.savedPosts.reverse().slice(skip, skip + limit);
-
-        res.status(200).json(savedPosts);
+        res.status(200).json(posts);
 
     } catch (error) {
         res.status(500).json({ message: error.message });
