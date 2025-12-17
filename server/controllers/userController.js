@@ -337,6 +337,29 @@ catch(e){
 
 }
 
+
+
+const searchUsers = async (req, res) => {
+  try {
+    const { query } = req.query; 
+
+    if (!query || query.trim() === "") {
+      return res.status(200).json([]);
+    }
+
+    
+    const users = await User.find({
+      username: { $regex: query, $options: "i" } 
+    })
+    .select("username image") 
+    .limit(10);
+
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ message: "Error searching users", error: error.message });
+  }
+};
+
 module.exports = {
   getUsers,
   signup,
@@ -349,5 +372,6 @@ module.exports = {
   getUserById,
   editUser,
   changePass,
-  checkPass
+  checkPass,
+  searchUsers
 };
