@@ -373,7 +373,11 @@ const getCommunityById= async (req, res) => {
 
 const searchCommunity = async (req, res) => {
   const { q } = req.query;
-  const userID = req.userData.id
+  const userID = req.userData?.id;
+  
+  const page = parseInt(req.query.page) || 1;
+  const limit = 10
+  const skip = (page - 1) * limit;
 
   try {
     const userMap = {};
@@ -399,19 +403,17 @@ const searchCommunity = async (req, res) => {
     let excludedIds = [];
     const recommendations = [];
 
-    const exactMatch = await Community.findOne({
-      name: q
-    });
-
+    
+    const exactMatch = await Community.findOne({ name: q });
     if (exactMatch) {
       excludedIds.push(exactMatch._id);
     }
 
-   
+    
     const substringMatches = await Community.find({
       _id: { $nin: excludedIds },
       name: { $regex: new RegExp(q, "i") }
-    }).limit(10);
+    }).limit(50); 
 
     recommendations.push(...substringMatches);
     substringMatches.forEach(c => excludedIds.push(c._id));
@@ -420,25 +422,20 @@ const searchCommunity = async (req, res) => {
       const exactInterestMatches = await Community.find({
         _id: { $nin: excludedIds },
         interests: { $in: exactMatch.interests }
-      }).limit(10);
+      }).limit(20);
 
       recommendations.push(...exactInterestMatches);
       exactInterestMatches.forEach(c => excludedIds.push(c._id));
     }
 
-
-    const substringInterests = substringMatches
-      .map(c => c.interests)
-      .flat(); // Flatten [[A,B], [B,C]] into [A,B,B,C]
-    
-    // Remove duplicates from this interest list
+    const substringInterests = substringMatches.map(c => c.interests).flat();
     const uniqueSubInterests = [...new Set(substringInterests)];
 
     if (uniqueSubInterests.length > 0) {
       const subInterestMatches = await Community.find({
         _id: { $nin: excludedIds },
         interests: { $in: uniqueSubInterests }
-      }).limit(10);
+      }).limit(20);
 
       recommendations.push(...subInterestMatches);
       subInterestMatches.forEach(c => excludedIds.push(c._id));
@@ -450,24 +447,29 @@ const searchCommunity = async (req, res) => {
         const userInterestMatches = await Community.find({
           _id: { $nin: excludedIds },
           interests: { $in: user.interests }
-        }).limit(10);
+        }).limit(20);
 
         recommendations.push(...userInterestMatches);
-      }
-      else{
-       const topCommunities = await Community.aggregate([
-      { $sort: { numberOfMembers: -1 } },
-      { $limit: 50 }
-    ]);
-    recommendations.push(...topCommunities);
+      } else {
+        const topCommunities = await Community.aggregate([
+          { $match: { _id: { $nin: excludedIds } } }, 
+          { $sort: { numberOfMembers: -1 } },
+          { $limit: 20 }
+        ]);
+        recommendations.push(...topCommunities);
       }
     }
 
+    const paginatedRecommendations = recommendations.slice(skip, skip + limit);
+
     return res.json({
       found: !!exactMatch,
-      exactMatch: exactMatch ? enhance([exactMatch])[0] : null,
-      recommendations: enhance(recommendations)
-      
+      // If we are on Page 1, we show the exact match. On Page 2+, usually, you don't repeat it.
+      exactMatch: (page === 1 && exactMatch) ? enhance([exactMatch])[0] : null,
+      recommendations: enhance(paginatedRecommendations),
+      // Optional: Send total count so frontend knows when to stop "Show More"
+      totalRecommendations: recommendations.length, 
+      hasMore: (skip + limit) < recommendations.length
     });
 
   } catch (err) {

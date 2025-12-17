@@ -1,31 +1,40 @@
-import React, { useState, useEffect } from "react";
-import { List, Paper, Divider } from "@mui/material";
+import React, { useState, useEffect, useDebugValue } from "react";
+import { List, Paper, Divider , Button } from "@mui/material";
 import CommunityItem from "./CommunityItem"; // Make sure to import the component above
 import api from "../../src/api/axios";
 export default function CommunityList(props) {
   const [communities, setCommunities] = useState([]);
   const {search} = props 
-
-  useEffect( () => {
-    const getCom = async()=>{
-    const response = await api.get('/api/communities/search?q='+search)
+  const [num , setNum] = useState(1)
+  const getCom = async(num)=>{
+    const response = await api.get('/api/communities/search?q='+search+"&page="+num)
     let commArr =[]
     if(response.data){
         if(response.data.found){
-           commArr = [commArr , ...response.data.exactMatch]
+           commArr = [...commArr , ...response.data.exactMatch]
         }
         if(response.data.recommendations){
-             commArr = [commArr , ...response.data.recommendations]
+             commArr = [...commArr , ...response.data.recommendations]
         }
     }
-    
-    setCommunities(commArr);}
-    getCom()
+    setCommunities((prev)=>{
+      return [...prev , ...commArr];
+    });
+  }
+  const handleShowMore = () => {
+        getCom(num)
+        setNum(prev => prev + 1); 
+    };
+
+  useEffect( () => {
+    getCom(1)
+    setNum(2)
   }, [search]);
 
 
 
   return (
+    <div style={{display :'flex' , flexDirection : 'column' , alignItems : 'center' , justifyContent : 'center' }}>
     <Paper 
         elevation={0} 
         sx={{ 
@@ -45,5 +54,7 @@ export default function CommunityList(props) {
         ))}
       </List>
     </Paper>
+     <Button onClick={handleShowMore} variant="text">Show more</Button>
+    </div>
   );
 }

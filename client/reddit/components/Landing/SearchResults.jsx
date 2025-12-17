@@ -3,16 +3,17 @@ import { useSearchParams } from 'react-router-dom';import SbtnList from "./SbtnL
 import MainBar from "../content/main-bar/MainBar";
 import CommunityList from "./CommunityList";
 import CommentList from "./CommentList";
+import { useState } from "react";
 export default function SearchResults(){
 const [searchParams] = useSearchParams();
 const q = searchParams.get('q');
+const [current , setCurrent] = useState(1)
 return(
     <Stack direction="column">
-       <SbtnList/>
-       {/* <MainBar key={q} search = {q}/> */}
-       {/* <CommunityList search = {q}/> */}
-       <CommentList search = {q}/>
+       <SbtnList setCurrent = {setCurrent}/>
+      {current == 1 &&   <MainBar key = {q} search = {q}/>}
+      {current == 2 &&   <CommunityList search= {q}/>}
+      {current == 3 &&   <CommentList search = {q}/>}
     </Stack>
-
 )
 }
