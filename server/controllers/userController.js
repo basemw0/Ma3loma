@@ -111,6 +111,7 @@ const login = async (req, res) => {
       { expiresIn: 3600 }
     );
 
+
     res.status(200).json({
       message: 'Login successful',
       user: {

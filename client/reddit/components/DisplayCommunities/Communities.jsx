@@ -6,7 +6,7 @@ export default function Communities(props){
     const { communitiesArr } = props;
     return (
         <Box sx={{ 
-            width: '70%',
+            maxWidth: '100%',
             maxHeight: '80%',
             display: 'flex',
             flexDirection: 'column',
