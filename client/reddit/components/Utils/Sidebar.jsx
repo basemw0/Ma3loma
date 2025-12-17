@@ -47,7 +47,7 @@ export default function Sidebar({ open, onToggle, drawerWidth }) {
 
   const feedItems = [
     { label: "Home", icon: <HomeIcon />, to: "api/home" },
-    { label: "Saved", icon: <StarBorderIcon />, to: "/saved" },
+    { label: "Saved", icon: <StarBorderIcon />, to: "/api/posts/saved" },
     { label: "Explore communities", icon: <ExploreIcon />, to: "/api/communities/category" },
     { label: "All communities", icon: <RedditIcon />, to: "/api/communities/best/1" },
     { label: "Create a community", icon: <AddIcon />},

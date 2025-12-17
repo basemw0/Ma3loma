@@ -99,7 +99,7 @@ export default function Navbar() {
 
   const handleProfile = () => {
     handleClose();
-    navigate(`/profile/${user?.username}`);
+    navigate(`/api/profile/${user?.id}`);
   };
 
   // Button Style

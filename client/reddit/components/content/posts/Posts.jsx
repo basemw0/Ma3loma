@@ -31,6 +31,7 @@ const getUserIdFromToken = () => {
 export default function Posts({ posts , isHome }) {
   const [communityAwards, setCommunityAwards] = useState({});
   const [postList, setPostList] = useState(posts || []);
+  console.log(postList)
   const [joinedCommunities, setJoinedCommunities] = useState({});
   const [openAwardMenu, setOpenAwardMenu] = useState(null);
   const [savedPosts, setSavedPosts] = useState({});
