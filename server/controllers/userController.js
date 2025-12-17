@@ -342,22 +342,40 @@ catch(e){
 
 const searchUsers = async (req, res) => {
   try {
-    const { query } = req.query; 
+    const { query } = req.query;
 
+    // 1. Basic validation
     if (!query || query.trim() === "") {
       return res.status(200).json([]);
     }
 
+    // 2. Pagination & Setup (Matching your searchPosts style)
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
     
-    const users = await User.find({
-      username: { $regex: query, $options: "i" } 
-    })
-    .select("username image") 
-    .limit(10);
+    // Create regex for case-insensitive search
+    const searchRegex = new RegExp(query, "i");
 
+    // 3. Query Execution
+    const users = await User.find({
+      username: { $regex: searchRegex }
+    })
+    .select("username image karma description isVerified") // Fields needed for your MUI component
+    .sort({ karma: -1 }) // Sort by highest karma (relevance)
+    .skip(skip)          // Pagination: Skip previous pages
+    .limit(limit)        // Pagination: Limit results per page
+    .lean();             // Returns plain JS objects (fixes the ._doc issue)
+
+    // 4. Return results
     res.status(200).json(users);
+
   } catch (error) {
-    res.status(500).json({ message: "Error searching users", error: error.message });
+    console.error("Search Users Error:", error);
+    res.status(500).json({ 
+      message: "Error searching users", 
+      error: error.message 
+    });
   }
 };
 

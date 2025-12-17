@@ -5,7 +5,7 @@ import { useState } from "react";
 import Posts from "../content/posts/Posts";
 export default function SbtnList(props){
   const {setCurrent} = props
-  const filters = ['Posts', 'Communities' ,'Comments'];
+  const filters = ['Posts', 'Communities' ,'Comments', "Users"];
   const [selectedFilter, setSelectedFilter] = useState('Posts');
   const handleChange = (filter)=>{
     if(filter === "Posts"){
@@ -16,6 +16,9 @@ export default function SbtnList(props){
     }
     else if(filter === "Comments"){
       setCurrent(3)
+    }
+    else if(filter === "Users"){
+      setCurrent(4)
     }
     setSelectedFilter(filter)
   }

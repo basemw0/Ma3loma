@@ -542,7 +542,6 @@ const savePost = async (req, res) => {
 
 
 const getSavedPosts = async (req, res) => {
-    console.log("YO")
     try {
         const uid = req.userData.id;
 
