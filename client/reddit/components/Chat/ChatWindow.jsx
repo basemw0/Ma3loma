@@ -40,7 +40,7 @@ export default function ChatWindow({ recipient, onClose }) {
   useEffect(() => {
     setLoading(true);
     fetchMessages();
-    const interval = setInterval(fetchMessages, 3000); 
+    const interval = setInterval(fetchMessages, 1000); 
     return () => clearInterval(interval);
   }, [recipient?._id]); // ✅ FIX 4: Safe dependency
 
