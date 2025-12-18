@@ -19,7 +19,7 @@ import Landing from '../components/Landing/Landing';
 import PostDetails from '../components/post-details/PostDetails';
 import CreationWizard from '../components/CommunityCreation/CreationWizard';
 import { AuthModalProvider, useAuthModal } from './context/AuthModalContext';
-import AuthModal from '../components/Utils/AuthModal';   
+import AuthModal from '../components/Utils/AuthModal';
 import api from '../src/api/axios';
 import SearchResults from '../components/Landing/SearchResults';
 import UserProfile from '../components/UserPage/UserProfile';
@@ -49,15 +49,7 @@ function App() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const queryParams = new URLSearchParams(location.search);
-    const token = queryParams.get('token');
-    if (token) {
-      localStorage.setItem('token', token);
-      window.history.replaceState({}, document.title, "/");
-      navigate("/");
-    }
-  }, [location, navigate]);
+
 
   return (
     <>
@@ -84,7 +76,7 @@ function App() {
               <Route path="api/posts/:postId/edit" element={<EditPost />} /> {/* EDIT POST */}
               <Route path="api/posts/:postId" element={<PostDetails />} />
               <Route path="api/communities/create" element={<CreationWizard />} />
-              <Route path="api/profile/:userId" element={<UserProfile />} />           
+              <Route path="api/profile/:userId" element={<UserProfile />} />
             </Route>
           </Routes>
         </AxiosInterceptor>

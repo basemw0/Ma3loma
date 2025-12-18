@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { 
-  Dialog, DialogContent, TextField, Button, Typography, Box, IconButton, Divider 
+import {
+  Dialog, DialogContent, TextField, Button, Typography, Box, IconButton, Divider
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useForm } from "react-hook-form";
@@ -21,7 +21,7 @@ export default function AuthModal() {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "${serverUrl}/auth/google";
+    window.location.href = `${serverUrl}/auth/google`;
   };
 
   const onSubmit = async (data) => {
@@ -44,13 +44,13 @@ export default function AuthModal() {
 
       // Handle Success
       const userData = view === 'login' ? response.data.user : response.data.user;
-      
+
       if (userData && userData.token) {
         localStorage.setItem("token", userData.token);
         localStorage.setItem("user", JSON.stringify(userData));
-        
+
         // Reload to update UI (Navbar etc) or you can use a UserContext to update state without reload
-        window.location.reload(); 
+        window.location.reload();
         closeModal();
       }
     } catch (err) {
@@ -60,17 +60,17 @@ export default function AuthModal() {
   };
 
   return (
-    <Dialog 
-      open={isOpen} 
-      onClose={closeModal} 
-      maxWidth="xs" 
+    <Dialog
+      open={isOpen}
+      onClose={closeModal}
+      maxWidth="xs"
       fullWidth
       PaperProps={{
         style: { borderRadius: 20, padding: '10px' }
       }}
     >
       <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        
+
         {/* Header */}
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h5" fontWeight="bold">
@@ -86,15 +86,15 @@ export default function AuthModal() {
         </Typography>
 
         {/* Google Button */}
-        <Button 
-          variant="outlined" 
-          fullWidth 
+        <Button
+          variant="outlined"
+          fullWidth
           startIcon={<img src={googleIcon} alt="G" style={{ width: 18 }} />}
           onClick={handleGoogleLogin}
-          sx={{ 
-            borderRadius: 5, 
-            textTransform: 'none', 
-            borderColor: '#dadce0', 
+          sx={{
+            borderRadius: 5,
+            textTransform: 'none',
+            borderColor: '#dadce0',
             color: '#3c4043',
             fontWeight: 'bold'
           }}
@@ -106,7 +106,7 @@ export default function AuthModal() {
 
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          
+
           {view === 'signup' && (
             <TextField
               label="Email"
@@ -143,15 +143,15 @@ export default function AuthModal() {
             </Typography>
           )}
 
-          <Button 
-            type="submit" 
-            variant="contained" 
+          <Button
+            type="submit"
+            variant="contained"
             fullWidth
-            sx={{ 
-              borderRadius: 5, 
-              textTransform: 'none', 
-              backgroundColor: '#FF4500', 
-              fontWeight: 'bold', 
+            sx={{
+              borderRadius: 5,
+              textTransform: 'none',
+              backgroundColor: '#FF4500',
+              fontWeight: 'bold',
               fontSize: '1rem',
               '&:hover': { backgroundColor: '#e03e00' }
             }}
@@ -163,7 +163,7 @@ export default function AuthModal() {
         {/* Toggle View */}
         <Typography variant="body2" align="center" sx={{ mt: 1 }}>
           {view === 'login' ? "New to Reddit? " : "Already a redditor? "}
-          <span 
+          <span
             style={{ color: '#0079D3', fontWeight: 'bold', cursor: 'pointer' }}
             onClick={() => switchView(view === 'login' ? 'signup' : 'login')}
           >
