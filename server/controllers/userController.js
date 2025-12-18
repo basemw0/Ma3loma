@@ -250,6 +250,7 @@ const getMe = async (req, res) => {
 const getUserById = async (req, res) => {
   const userID = req.params.id;
   try {
+    
     const user = await User.findById(userID).select("-password");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -257,7 +258,7 @@ const getUserById = async (req, res) => {
 
     let me = false;
 
-    if ((req.userData) && req.userData.id === userID) {
+    if (req.userData && req.userData.id == userID) {
         me = true;
     }
     res.status(200).json({ ...user.toObject(), me });
@@ -342,35 +343,22 @@ catch(e){
 
 const searchUsers = async (req, res) => {
   try {
-    const { query } = req.query;
+    const { query } = req.query; 
 
-    // 1. Basic validation
     if (!query || query.trim() === "") {
       return res.status(200).json([]);
     }
 
-    // 2. Pagination & Setup (Matching your searchPosts style)
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
     
-    const searchRegex = new RegExp(query, "i");
-
     const users = await User.find({
-      username: { $regex: searchRegex }
+      username: { $regex: query, $options: "i" } 
     })
-    .select("username image   ") // Fields needed for your MUI component
-    .skip(skip)         
-    .limit(limit)        
-    .lean();           
-    res.status(200).json(users);
+    .select("username image") 
+    .limit(10);
 
+    res.status(200).json(users);
   } catch (error) {
-    console.error("Search Users Error:", error);
-    res.status(500).json({ 
-      message: "Error searching users", 
-      error: error.message 
-    });
+    res.status(500).json({ message: "Error searching users", error: error.message });
   }
 };
 

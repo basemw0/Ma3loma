@@ -1,30 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Box,
-  Button,
-  Tooltip,
-  IconButton,
-  Avatar,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  Divider,
-  InputBase
+  AppBar, Toolbar, Typography, Box, Button, Tooltip,
+  IconButton, Avatar, Menu, MenuItem, ListItemIcon,
+  Divider, InputBase, Badge // ✅ Added Badge
 } from "@mui/material";
 
-import { styled } from "@mui/material/styles"; // Fix import source
+import { styled } from "@mui/material/styles"; 
 import SearchIcon from "@mui/icons-material/Search";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'; // ✅ Added Chat Icon
 import ma3lomaLogo from "./Ma3loma.jpeg";
 
-// --- 1. STYLED COMPONENTS (Defined here to prevent import errors) ---
+// ✅ Import Inbox Popover
+import InboxPopover from './InboxPopover';
 
-
+// --- 1. STYLED COMPONENTS ---
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
   borderRadius: "999px",
@@ -67,14 +59,17 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 // --- 2. MAIN COMPONENT ---
 
-export default function Navbar() {
+// ✅ Receive onOpenChat prop
+export default function Navbar({ onMenuClick, onOpenChat }) {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  
+  // Profile Menu State
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
-  //Handling creation wizard open and close
-  
+  // ✅ Inbox Popover State
+  const [inboxAnchor, setInboxAnchor] = useState(null);
 
   // Load user data
   useEffect(() => {
@@ -89,6 +84,10 @@ export default function Navbar() {
   const handleMenuClick = (event) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
   
+  // ✅ Inbox Handlers
+  const handleInboxClick = (event) => setInboxAnchor(event.currentTarget);
+  const handleInboxClose = () => setInboxAnchor(null);
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -102,7 +101,12 @@ export default function Navbar() {
     navigate(`/api/profile/${user?.id}`);
   };
 
-  // Button Style
+  const handleSearch = (e) => {
+    if (e.key === 'Enter') {
+      navigate(`api/search?q=${encodeURIComponent(e.target.value)}`);
+    }
+  };
+
   const buttonStyle = {
     textTransform: "none",
     borderRadius: "999px",
@@ -114,11 +118,6 @@ export default function Navbar() {
     bgcolor: "#D93900",
     color: "#fff",
     "&:hover": { bgcolor: "#bd3200", boxShadow: "none" }
-  };
-  const handleSearch = (e) => {
-    if (e.key === 'Enter') {
-      navigate(`api/search?q=${encodeURIComponent(e.target.value)}`);
-    }
   };
 
   return (
@@ -176,8 +175,22 @@ export default function Navbar() {
               </Button>
             </>
           ) : (
-            // LOGGED IN VIEW (Avatar + Dropdown)
+            // LOGGED IN VIEW
             <>
+              {/* ✅ 1. Chat Icon & Inbox Popover */}
+              <IconButton onClick={handleInboxClick} size="medium" sx={{ color: "inherit" }}>
+                <Badge color="error" variant="dot">
+                   <ChatBubbleOutlineIcon />
+                </Badge>
+              </IconButton>
+
+              <InboxPopover 
+                anchorEl={inboxAnchor} 
+                onClose={handleInboxClose} 
+                onOpenChat={onOpenChat} // Pass global chat opener
+              />
+
+              {/* 2. User Avatar */}
               <IconButton onClick={handleMenuClick} size="small" aria-controls={open ? 'account-menu' : undefined} aria-haspopup="true" aria-expanded={open ? 'true' : undefined}>
                 <Avatar 
                   src={user.image} 

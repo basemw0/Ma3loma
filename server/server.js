@@ -8,6 +8,7 @@ const userRoutes = require('./routes/userRoute');
 const communityRoutes = require('./routes/communityRoutes');
 const postRoutes = require('./routes/postRoutes.js');
 const commentRoutes = require('./routes/commentRoutes.js');
+const chatRoutes = require('./routes/chatRoutes.js');
 const passport = require("passport"); 
 require('./config/passport');        
 const authRoutes = require('./routes/authRoutes');
@@ -26,7 +27,7 @@ app.use(passport.initialize());
 app.use('/api/users', userRoutes);
 app.use('/api/communities', communityRoutes);
 app.use('/api/posts', postRoutes);
-app.use('/api/comments', commentRoutes);
+app.use('/api/chat', chatRoutes);
 app.use('/auth', authRoutes);
 app.use(express.static(path.join(__dirname, '../client/reddit/dist')));
 

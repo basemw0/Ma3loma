@@ -7,7 +7,9 @@ import ChatIcon from '@mui/icons-material/Chat';
 import EditProfile from '../EditProfile'
 import ChangePass from '../ChangePass';
 import { useState } from 'react';
-export default function UserDetails({ user }) {
+
+// ✅ Accept onChatClick
+export default function UserDetails({ user, onChatClick }) {
       const [isEditOpen, setIsEditOpen] = useState(false);
       const handleOpen = () => setIsEditOpen(true);
       const handleClose = () => setIsEditOpen(false);
@@ -15,6 +17,7 @@ export default function UserDetails({ user }) {
       const [isChangeOpen, setIsChangeOpen] = useState(false);
       const handleChangeOpen = () => setIsChangeOpen(true);
       const handleChangeClose = () => setIsChangeOpen(false);
+
   return (
     <>
       <Box
@@ -27,22 +30,26 @@ export default function UserDetails({ user }) {
           display: { xs: 'none', md: 'block' }
         }}
       >
-        {/* Title */}
         <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, fontSize: '1.1rem' }}>
           About u/{user.username}
         </Typography>
 
-        {/* Description / Bio */}
         <Box sx={{ bgcolor: '#fff', p: 2, borderRadius: 1, mb: 2, border: '1px solid #edeff1' }}>
+          <Typography sx={{ fontSize: '0.875rem', lineHeight: 1.5, mb: 1 }}>
+            {user.description || "This user hasn't written a bio yet."}
+          </Typography>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
             <Box>
               <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{user.goldBalance || 0}</Typography>
               <Typography variant="caption" color="text.secondary">Gold</Typography>
             </Box>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>1</Typography>
+              <Typography variant="caption" color="text.secondary">Karma</Typography>
+            </Box>
           </Box>
         </Box>
 
-        {/* Created Date */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
           <CakeIcon sx={{ fontSize: 20, color: '#7c7c7c' }} />
           <Typography sx={{ color: '#7c7c7c', fontSize: '0.875rem' }}>
@@ -51,11 +58,8 @@ export default function UserDetails({ user }) {
         </Box>
 
         <Divider sx={{ my: 2 }} />
-
-        {/* ---------------- BUTTONS LOGIC ---------------- */}
         
         {user.me ? (
-          // IF IT IS ME: Show Edit & Change Password
           <Stack spacing={1}>
             <Button 
               variant="outlined" 
@@ -84,7 +88,7 @@ export default function UserDetails({ user }) {
         )}
       </Box>
 
-      {/* ---------------- CHAT BUTTON (Bottom Right Corner) ---------------- */}
+      {/* ---------------- CHAT BUTTON ---------------- */}
       {!user.me && (
         <Fab 
           color="primary" 
@@ -93,13 +97,14 @@ export default function UserDetails({ user }) {
           sx={{
             position: 'fixed',
             bottom: 20,
-            right: 20, // <--- CHANGED FROM LEFT TO RIGHT
+            right: 20, 
             zIndex: 9999,
             textTransform: 'none',
             fontWeight: 'bold',
             boxShadow: 3
           }}
-          onClick={() => alert("Open Chat Window")}
+          // ✅ FIX: Call the onChatClick prop directly
+          onClick={onChatClick}
         >
           <ChatIcon sx={{ mr: 1 }} />
           Chat
