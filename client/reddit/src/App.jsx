@@ -11,7 +11,7 @@ import { Routes, Route } from 'react-router-dom';
 import Layout from '../components/Utils/Layout';
 import CreatePost from '../components/create-post/CreatePost'
 import Content from '../components/content/Content';
-import Login from '../components/Pages/Login';
+import Login from '../components/Pages/Login/'
 import Signup from '../components/Pages/Signup';
 import ForgotPassword from '../components/Pages/ForgotPassword';
 import ResetPassword from '../components/Pages/ResetPassword';
