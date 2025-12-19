@@ -13,7 +13,7 @@ const ConversationSchema = new mongoose.Schema({
   lastMessage: {
     content: String,
     senderID: { type: String, ref: "User" },
-    read: { type: Boolean, default: false }, // Simple bool
+    read: { type: Boolean, default: false }, 
     createdAt: Date
   }
 

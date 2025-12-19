@@ -19,9 +19,7 @@ export default function FilterBtn(props){
         if (value === 3) filterName = "new";
 
         setCurrentFilter(filterName);
-        
-        // LOGIC FIX: When filtering, we fetch Page 1, 
-        // but we must set 'num' to 2 so the NEXT "Show More" click fetches Page 2.
+    
        
         setNum(2); 
         if(community === "yes"){
@@ -48,7 +46,6 @@ export default function FilterBtn(props){
                     onChange={handleChange}
                     displayEmpty
                     renderValue={(selected) => {
-                        // This makes the button say "Sort by Best"
                         const labels = {1: "Best", 2: "Hot", 3: "New"};
                         return <span style={{color: '#5f6368'}}>Sort by <b>{labels[selected]}</b></span>;
                     }}
@@ -61,7 +58,7 @@ export default function FilterBtn(props){
                         '&.Mui-focused': { backgroundColor: 'white' },
                     }}
                 >
-                    {/* Use ListSubheader for non-clickable headers */}
+                    {}
                     <ListSubheader>Sort by</ListSubheader>
                     
                     <MenuItem value={1}>Best</MenuItem>

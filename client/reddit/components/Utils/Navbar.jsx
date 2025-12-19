@@ -3,20 +3,18 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   AppBar, Toolbar, Typography, Box, Button, Tooltip,
   IconButton, Avatar, Menu, MenuItem, ListItemIcon,
-  Divider, InputBase, Badge // ✅ Added Badge
+  Divider, InputBase, Badge 
 } from "@mui/material";
 
 import { styled } from "@mui/material/styles"; 
 import SearchIcon from "@mui/icons-material/Search";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
-import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'; // ✅ Added Chat Icon
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'; 
 import ma3lomaLogo from "./Ma3loma.jpeg";
 
-// ✅ Import Inbox Popover
 import InboxPopover from './InboxPopover';
 
-// --- 1. STYLED COMPONENTS ---
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
   borderRadius: "999px",
@@ -57,21 +55,15 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-// --- 2. MAIN COMPONENT ---
-
-// ✅ Receive onOpenChat prop
 export default function Navbar({ onMenuClick, onOpenChat }) {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   
-  // Profile Menu State
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
-  // ✅ Inbox Popover State
   const [inboxAnchor, setInboxAnchor] = useState(null);
 
-  // Load user data
   useEffect(() => {
     const token = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
@@ -80,11 +72,9 @@ export default function Navbar({ onMenuClick, onOpenChat }) {
     }
   }, []);
 
-  // Dropdown handlers
   const handleMenuClick = (event) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
   
-  // ✅ Inbox Handlers
   const handleInboxClick = (event) => setInboxAnchor(event.currentTarget);
   const handleInboxClose = () => setInboxAnchor(null);
 
@@ -133,7 +123,7 @@ export default function Navbar({ onMenuClick, onOpenChat }) {
     >
       <Toolbar sx={{ minHeight: "56px !important", display: "flex", justifyContent: "space-between" }}>
         
-        {/* --- LEFT: Logo --- */}
+        {}
         <Tooltip title="Go to Ma3loma home">
           <Box
             component={Link}
@@ -150,7 +140,7 @@ export default function Navbar({ onMenuClick, onOpenChat }) {
           </Box>
         </Tooltip>
 
-        {/* --- CENTER: Search --- */}
+        {}
         <Search onKeyDown={handleSearch}>
           <SearchIconWrapper>
             <SearchIcon />
@@ -161,10 +151,9 @@ export default function Navbar({ onMenuClick, onOpenChat }) {
           />
         </Search>
 
-        {/* --- RIGHT: Auth Logic --- */}
+        {}
         <Box sx={{ display: "flex", gap: 1.5, alignItems: "center", minWidth: "fit-content" }}>
           {!user ? (
-            // GUEST VIEW
             <>
               <Button component={Link} to="/login" variant="outlined" 
                 sx={{ ...buttonStyle, bgcolor: "transparent", color: "#D93900", border: "1px solid #D93900", "&:hover": { bgcolor: "#fff3f0", border: "1px solid #bd3200" } }}>
@@ -175,9 +164,8 @@ export default function Navbar({ onMenuClick, onOpenChat }) {
               </Button>
             </>
           ) : (
-            // LOGGED IN VIEW
             <>
-              {/* ✅ 1. Chat Icon & Inbox Popover */}
+              {}
               <IconButton onClick={handleInboxClick} size="medium" sx={{ color: "inherit" }}>
                 <Badge color="error" variant="dot">
                    <ChatBubbleOutlineIcon />
@@ -187,10 +175,10 @@ export default function Navbar({ onMenuClick, onOpenChat }) {
               <InboxPopover 
                 anchorEl={inboxAnchor} 
                 onClose={handleInboxClose} 
-                onOpenChat={onOpenChat} // Pass global chat opener
+                onOpenChat={onOpenChat} 
               />
 
-              {/* 2. User Avatar */}
+              {}
               <IconButton onClick={handleMenuClick} size="small" aria-controls={open ? 'account-menu' : undefined} aria-haspopup="true" aria-expanded={open ? 'true' : undefined}>
                 <Avatar 
                   src={user.image} 

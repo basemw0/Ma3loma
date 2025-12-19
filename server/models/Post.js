@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 const crypto = require('crypto');
 
 const PostSchema = new mongoose.Schema({
-  // ✅ Explicit String ID with UUID default
   _id: { type: String, default: () => crypto.randomUUID() },
 
   title: String,
@@ -15,10 +14,9 @@ const PostSchema = new mongoose.Schema({
   },
 
 
-  voteCount: { type: Number, default: 0 },      // Stores (Upvotes - Downvotes)
+  voteCount: { type: Number, default: 0 },     
   commentCount: { type: Number, default: 0 },
 
-  // ✅ All references converted from ObjectId to String
   userID: { type: String, ref: "User", required: true },
   communityID: { type: String, ref: "Community" },
 
@@ -34,12 +32,9 @@ const PostSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
-// ✅ AUTOMATIC CLEANUP HOOK
 PostSchema.pre('findOneAndDelete', async function(next) {
     const doc = await this.model.findOne(this.getQuery());
     if (doc) {
-        // 1. Delete all comments that have this postID
-        // (This triggers the Comment model's own hook to delete their replies too!)
         await mongoose.model('Comment').deleteMany({ postID: doc._id });
     }
     next();

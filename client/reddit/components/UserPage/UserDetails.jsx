@@ -8,7 +8,6 @@ import EditProfile from '../EditProfile'
 import ChangePass from '../ChangePass';
 import { useState } from 'react';
 
-// ✅ Accept onChatClick
 export default function UserDetails({ user, onChatClick }) {
       const [isEditOpen, setIsEditOpen] = useState(false);
       const handleOpen = () => setIsEditOpen(true);
@@ -88,7 +87,7 @@ export default function UserDetails({ user, onChatClick }) {
         )}
       </Box>
 
-      {/* ---------------- CHAT BUTTON ---------------- */}
+      {}
       {!user.me && (
         <Fab 
           color="primary" 
@@ -103,7 +102,6 @@ export default function UserDetails({ user, onChatClick }) {
             fontWeight: 'bold',
             boxShadow: 3
           }}
-          // ✅ FIX: Call the onChatClick prop directly
           onClick={onChatClick}
         >
           <ChatIcon sx={{ mr: 1 }} />

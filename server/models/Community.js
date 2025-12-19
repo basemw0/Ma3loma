@@ -3,7 +3,6 @@ const ALLOWED_INTERESTS = require("../config/interests");
 const crypto = require('crypto');
 const allTopics = ALLOWED_INTERESTS.flatMap(item => item.topics);
 const CommunitySchema = new mongoose.Schema({
-  // ✅ Explicit String ID with UUID default
   _id: { type: String, default: () => crypto.randomUUID() },
   owner:{
     type: String, 

@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 const crypto = require('crypto');
 
 const CommentSchema = new mongoose.Schema({
-  // ✅ Explicit String ID with UUID default
   _id: { type: String, default: () => crypto.randomUUID() },
 
   content: String,
@@ -15,7 +14,6 @@ const CommentSchema = new mongoose.Schema({
 
   voteCount: { type: Number, default: 0 },
 
-  // ✅ All references converted from ObjectId to String
   postID: { type: String, ref: "Post", required: true },
   userID: { type: String, ref: "User", required: true },
 
@@ -42,7 +40,6 @@ const CommentSchema = new mongoose.Schema({
 CommentSchema.pre('findOneAndDelete', async function(next) {
     const doc = await this.model.findOne(this.getQuery());
     if (doc && doc.replies.length > 0) {
-        // Iterate and trigger delete individually so hooks cascade down
         for (const replyId of doc.replies) {
             await mongoose.model('Comment').findByIdAndDelete(replyId);
         }

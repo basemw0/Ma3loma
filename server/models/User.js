@@ -6,7 +6,6 @@ const crypto = require('crypto');
 const uniqueValidator = require('mongoose-unique-validator');
 
 const UserSchema = new mongoose.Schema({
-  // ✅ Explicit String ID with UUID default
   _id: { type: String, default: () => crypto.randomUUID() },
 
   username: { 
@@ -45,14 +44,14 @@ const UserSchema = new mongoose.Schema({
   interests: [{ 
     type: String, 
     enum: {
-      values: allTopics, // Uses the flattened array
+      values: allTopics, 
       message: '{VALUE} is not a supported interest' 
     }
   }],
   joinedCommunities: [{
     _id: false, 
     community: { 
-      type: String, // ✅ Ref converted to String
+      type: String, 
       ref: "Community",
       required: true
     },
@@ -62,7 +61,7 @@ const UserSchema = new mongoose.Schema({
     },
     joinedAt: { type: Date, default: Date.now }
   }],
-  savedPosts: [{ type: String, ref: "Post" }], // ✅ Ref converted to String
+  savedPosts: [{ type: String, ref: "Post" }],
   resetPasswordToken: String,
   resetPasswordExpire: Date
 }, { timestamps: true });

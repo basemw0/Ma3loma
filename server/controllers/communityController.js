@@ -8,26 +8,22 @@ const { validationResult } = require('express-validator');
 
 
 const getCommunities= async (req, res) => {
-  const userID = req.userData?.id; // Get from check-auth middleware (optional, used for personalization)
+  const userID = req.userData?.id; 
   const limit = req.params.limit;
 
 
   try {
-    // 1. ✅ Get the total count of communities in the DB
     const totalDocs = await Community.countDocuments({});
 
-    // 2. Run your specific aggregation for pagination
     let communities = await Community.aggregate([
-      // {$match:{privacy:{ $in: ["public", "restricted"] }}},
       { $sort: { numberOfMembers: -1 } },
       { $skip: 25 * (limit - 1) },
       { $limit: 25 }
     ]);
 
-    // Helper function to format the response consistently
     const formatResponse = (list) => {
       return {
-        total: totalDocs, // <--- Sending total count here
+        total: totalDocs,
         communities: list
       };
     };
@@ -67,7 +63,6 @@ const getCommunities= async (req, res) => {
       };
     });
 
-    // 3. ✅ Send final response with total count
     res.json(formatResponse(personalizedCommunities));
 
   } catch (err) {
@@ -78,7 +73,7 @@ const getCommunities= async (req, res) => {
 
 
 const getCommunitiesByCategory = async (req, res) => {
-  const userID = req.userData?.id; // Get from check-auth middleware (optional)
+  const userID = req.userData?.id; 
   const { q } = req.query; 
 
   try {
@@ -101,15 +96,11 @@ const getCommunitiesByCategory = async (req, res) => {
         $match: { 
           
           interests: { $in: targetTopics },
-          // privacy: { $in: ["public", "restricted"] } // Optional based on your previous code
         } 
       },
-      // Unwind allows us to duplicate the community for each interest it has
       { $unwind: "$interests" },
       { 
-        $match: { 
-          // Filter again so we only group by the topics belonging to THIS category
-          // (Removes "Cooking" interest if we are currently looking at "Gaming" category)
+        $match: {
           interests: { $in: targetTopics }
         } 
       },
@@ -165,7 +156,6 @@ const getCommunitiesByCategory = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
-// ✅ CREATE COMMUNITY ENDPOINT
 const createCommunity = async (req, res) => {
 const { name, description, interests,icon,banner,privacy } = req.body;
  const cid = req.params.id
@@ -185,7 +175,6 @@ const { name, description, interests,icon,banner,privacy } = req.body;
       banner: banner || undefined,
       privacy:privacy||undefined
 
-      // numberOfMembers defaults to 1
     });
 
     const savedCommunity = await newCommunity.save();
@@ -205,7 +194,6 @@ const { name, description, interests,icon,banner,privacy } = req.body;
     res.status(201).json(savedCommunity);
 
   } catch (err) {
-    // 3. 🚨 HANDLE DUPLICATE NAME ERROR HERE
     if (err.code === 11000) {
       return res.status(400).json({ message: "Community name already taken" });
     }
@@ -254,7 +242,6 @@ const updateCommunity = async (req, res) => {
     res.json(updatedCommunity);
 
   } catch (err) {
-    // 3. 🚨 HANDLE DUPLICATE NAME ERROR HERE
    
     
     console.error("Error Updating community:", err);
@@ -262,7 +249,6 @@ const updateCommunity = async (req, res) => {
   }
 }
 
-// ✅ JOIN / LEAVE COMMUNITY (Toggle)
 const joinCommunity= async (req, res) => {
   const communityID = req.params.id
   const userID =req.userData.id
@@ -319,7 +305,6 @@ const joinCommunity= async (req, res) => {
   }
 }
 
-// ✅ GET COMMUNITY BY ID (With "Am I a Member?" Check)
 const getCommunityById= async (req, res) => {
    const communityID = req.params.id
    const userID = req.userData?.id;
@@ -464,10 +449,8 @@ const searchCommunity = async (req, res) => {
 
     return res.json({
       found: !!exactMatch,
-      // If we are on Page 1, we show the exact match. On Page 2+, usually, you don't repeat it.
       exactMatch: (page === 1 && exactMatch) ? enhance([exactMatch])[0] : null,
       recommendations: enhance(paginatedRecommendations),
-      // Optional: Send total count so frontend knows when to stop "Show More"
       totalRecommendations: recommendations.length, 
       hasMore: (skip + limit) < recommendations.length
     });

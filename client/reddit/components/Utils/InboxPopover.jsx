@@ -5,8 +5,7 @@ import {
   Box, CircularProgress 
 } from '@mui/material';
 
-// ✅ FIX 1: Corrected Import Path (Removed extra 'src/')
-// Ensure this matches your actual folder structure
+
 import api from '../../src/api/axios'; 
 
 export default function InboxPopover({ anchorEl, onClose, onOpenChat }) {
@@ -26,23 +25,21 @@ export default function InboxPopover({ anchorEl, onClose, onOpenChat }) {
     try {
       const response = await api.get('/api/chat/inbox');
       
-      // ✅ FIX 2: Safety Check - Ensure we received an Array
       if (Array.isArray(response.data)) {
         setConversations(response.data);
       } else {
         console.error("Inbox data is not an array:", response.data);
-        setConversations([]); // Fallback to empty to prevent crash
+        setConversations([]);
       }
     } catch (error) {
       console.error("Error fetching inbox:", error);
-      setConversations([]); // Fallback on error
+      setConversations([]); 
     } finally {
       setLoading(false);
     }
   };
 
   const handleSelect = (friend) => {
-    // ✅ FIX 3: Safety Check - Ensure function exists before calling
     if (onOpenChat && friend) {
       onOpenChat(friend);
     }
@@ -94,7 +91,7 @@ export default function InboxPopover({ anchorEl, onClose, onOpenChat }) {
                       noWrap
                       sx={{ maxWidth: '200px' }}
                     >
-                      {/* ✅ FIX 4: Safety Check - Handle missing lastMessage */}
+                      {}
                       {chat.lastMessage?.content || "No messages"}
                     </Typography>
                   }

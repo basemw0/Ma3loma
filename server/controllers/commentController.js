@@ -4,7 +4,6 @@ const Community = require('../models/Community.js')
 const Comment = require('../models/Comment.js');
 
 const getPostComments = async (req, res) =>{
-    //Button if comment is mine delete
     try{
         const {pid} = req.params;
         const page = parseInt(req.query.page) || 1;
@@ -161,20 +160,17 @@ const upvoteComment = async (req, res) =>{
         let updateQuery = {};
 
         if (isUpvoted) {
-            // 1. Already Upvoted -> Remove it (Toggle OFF)
             updateQuery = {
                 $pull: { upvotes: uid },
                 $inc: { voteCount: -1 }
             };
         } else if (isDownvoted) {
-            // 2. Was Downvoted -> Switch to Upvote (Big Jump +2)
             updateQuery = {
                 $pull: { downvotes: uid },
                 $addToSet: { upvotes: uid },
-                $inc: { voteCount: 2 } // +1 to neutralize, +1 to go up
+                $inc: { voteCount: 2 } 
             };
         } else {
-            // 3. Neutral -> New Upvote (+1)
             updateQuery = {
                 $addToSet: { upvotes: uid },
                 $inc: { voteCount: 1 }
@@ -249,20 +245,17 @@ const downvoteComment = async (req, res) =>{
         let updateQuery = {};
 
         if (isDownvoted) {
-            // 1. Already Downvoted -> Remove it (Toggle OFF)
             updateQuery = {
                 $pull: { downvotes: uid },
                 $inc: { voteCount: 1 }
             };
         } else if (isUpvoted) {
-            // 2. Was Upvoted -> Switch to Downvote (Big Drop -2)
             updateQuery = {
                 $pull: { upvotes: uid },
                 $addToSet: { downvotes: uid },
-                $inc: { voteCount: -2 } // -1 to neutralize, -1 to go down
+                $inc: { voteCount: -2 }
             };
         } else {
-            // 3. Neutral -> New Downvote (-1)
             updateQuery = {
                 $addToSet: { downvotes: uid },
                 $inc: { voteCount: -1 }
@@ -356,35 +349,32 @@ const searchComments = async (req, res) => {
 
         const searchRegex = new RegExp(q, "i");
 
-        // 1. Find matching comments
         const matchingComments = await Comment.find({ content: { $regex: searchRegex } })
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
-            .populate('userID', 'username image') // Comment Author
-            // 2. Populate the entire Post Structure
+            .populate('userID', 'username image') 
             .populate({
                 path: 'postID',
                 select: 'title content voteCount createdAt mediaUrl mediaType communityID userID',
                 populate: [
                     { path: 'communityID', select: 'name icon' },
-                    { path: 'userID', select: 'username image' } // Post Author
+                    { path: 'userID', select: 'username image' } 
                 ]
             });
 
-        // 3. Format Response
         const results = matchingComments
-            .filter(c => c.postID) // Filter out if post was deleted (orphans)
+            .filter(c => c.postID) 
             .map(c => {
                 const commentObj = c.toObject();
-                const postObj = commentObj.postID; // Extract full post
+                const postObj = commentObj.postID; 
                 
-                // Optional: Clean up recursive reference
+            
                 delete commentObj.postID;
 
                 return {
-                    post: postObj,          // The Whole Post Object
-                    matchedComment: commentObj // The Specific Comment
+                    post: postObj,          
+                    matchedComment: commentObj 
                 };
             });
         console.log(results)

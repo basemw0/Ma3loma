@@ -6,8 +6,6 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import SendIcon from '@mui/icons-material/Send';
 
-// ✅ FIX 1: Standard import path (Adjust if your api folder is elsewhere)
-// If this fails, try: import api from '../../src/api/axios';
 import api from '../../src/api/axios'; 
 
 export default function ChatWindow({ recipient, onClose }) {
@@ -22,7 +20,6 @@ export default function ChatWindow({ recipient, onClose }) {
       
       const response = await api.get(`/api/chat/messages/${recipient._id}`);
       
-      // ✅ FIX 2: Ensure we always set an array
       if (Array.isArray(response.data)) {
         setMessages(response.data);
       } else {
@@ -32,7 +29,6 @@ export default function ChatWindow({ recipient, onClose }) {
     } catch (error) {
       console.error("Error fetching messages:", error);
     } finally {
-      // ✅ FIX 3: Stop loading even if error occurs
       setLoading(false);
     }
   };
@@ -42,7 +38,7 @@ export default function ChatWindow({ recipient, onClose }) {
     fetchMessages();
     const interval = setInterval(fetchMessages, 1000); 
     return () => clearInterval(interval);
-  }, [recipient?._id]); // ✅ FIX 4: Safe dependency
+  }, [recipient?._id]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -126,11 +122,9 @@ export default function ChatWindow({ recipient, onClose }) {
         ) : (
           messages.length > 0 ? (
             messages.map((msg, index) => {
-              // ✅ FIX 5: Crash Protection (Handle null sender)
               const sender = msg.senderID || {}; 
               const senderId = sender._id || sender; 
               
-              // Compare IDs safely
               const isFromThem = senderId === recipient?._id;
               
               return (

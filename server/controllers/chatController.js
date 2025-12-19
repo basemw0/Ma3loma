@@ -2,25 +2,20 @@ const Conversation = require('../models/Conversation');
 const Message = require('../models/Message');
 const User = require('../models/User');
 
-// 1. Send Message (Using Recipient ID in Params)
 const sendMessage = async (req, res) => {
     try {
-        const { recipientId } = req.params; // <--- The ID of the person you are messaging
-        const senderID = req.userData.id;   // <--- You (from token)
+        const { recipientId } = req.params; 
+        const senderID = req.userData.id;   
         
-        // Get content and media (using exact structure from your Post/Comment models)
         const { content, mediaUrl, mediaType } = req.body;
 
-        // A. Find the conversation between these two users
         let conversation = await Conversation.findOne({
             participants: { $all: [senderID, recipientId] }
         });
 
-        // B. If no conversation exists, create one immediately
         if (!conversation) {
             conversation = await Conversation.create({
                 participants: [senderID, recipientId],
-                // Initial lastMessage is empty or the current one
                 lastMessage: {
                     content: content || "Sent an attachment",
                     senderID: senderID,
@@ -30,7 +25,6 @@ const sendMessage = async (req, res) => {
             });
         }
 
-        // C. Create the Message
         const newMessage = await Message.create({
             conversationID: conversation._id,
             senderID: senderID,
@@ -40,8 +34,6 @@ const sendMessage = async (req, res) => {
             read: false 
         });
 
-        // D. Update the Conversation's "lastMessage"
-        // This makes the Inbox show the latest text instantly
         await Conversation.findByIdAndUpdate(conversation._id, {
             lastMessage: {
                 content: content || (mediaType && mediaType !== 'none' ? `Sent a ${mediaType}` : "Message"),
@@ -59,27 +51,21 @@ const sendMessage = async (req, res) => {
     }
 };
 
-// 2. Get Messages (Using Recipient ID in Params)
-// Instead of asking for a ConvID, you just ask "Show me messages with User X"
-// 2. Get Messages (Debug Version)
 const getMessages = async (req, res) => {
     try {
         const { recipientId } = req.params;
-        // The hardcoded ID you are testing with
         const myId = req.userData.id; 
         
         console.log("--- DEBUG CHAT FETCH ---");
         console.log("1. Me (Hardcoded):", myId);
         console.log("2. Recipient (From URL):", recipientId);
 
-        // A. Find the conversation
         const conversation = await Conversation.findOne({
             participants: { $all: [myId, recipientId] }
         });
 
         if (!conversation) {
             console.log("❌ Conversation NOT found between these two IDs.");
-            // Check if maybe they are stored differently?
             const allConvs = await Conversation.find({});
             console.log(`(DEBUG: Total conversations in DB: ${allConvs.length})`);
             return res.status(200).json([]);
@@ -87,7 +73,6 @@ const getMessages = async (req, res) => {
 
         console.log("✅ Conversation Found! ID:", conversation._id);
 
-        // B. Fetch messages using that ID
         const messages = await Message.find({ conversationID: conversation._id })
             .sort({ createdAt: -1 })
             .limit(20)
@@ -108,8 +93,6 @@ const getMessages = async (req, res) => {
     }
 };
 
-// 3. Get Inbox (My list of chats)
-// controllers/chatController.js
 
 const getInbox = async (req, res) => {
     try {
@@ -119,14 +102,12 @@ const getInbox = async (req, res) => {
         console.log("🔑 My ID (from Token):", myId);
         console.log("   Type of My ID:", typeof myId);
 
-        // 1. Fetch RAW conversations first (No populate) to see what's really in the DB
         const rawConvs = await Conversation.find({ participants: myId });
         console.log(`🔎 Found ${rawConvs.length} raw matches for my ID.`);
         
         if (rawConvs.length > 0) {
             console.log("   📄 First Raw Match Participants:", rawConvs[0].participants);
         } else {
-             // If 0 matches, check if the ID is stored differently?
              console.log("❌ No matches found. Checking ALL conversations to see format...");
              const anyConv = await Conversation.findOne();
              if (anyConv) {
@@ -135,16 +116,13 @@ const getInbox = async (req, res) => {
              }
         }
 
-        // 2. Now try the populate
         const conversations = await Conversation.find({ participants: myId })
             .sort({ updatedAt: -1 })
             .populate('participants', 'username image');
 
         const inbox = conversations.reduce((acc, conv) => {
-            // Filter out nulls (deleted users)
             const validParticipants = conv.participants.filter(p => p && p._id);
             
-            // Find friend
             const friend = validParticipants.find(p => p._id.toString() !== myId);
 
             console.log(`   🔄 Processing Chat ${conv._id}:`);

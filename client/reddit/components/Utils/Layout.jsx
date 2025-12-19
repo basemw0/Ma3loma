@@ -5,40 +5,33 @@ import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import Content from '../content/Content'
 import { Outlet } from "react-router-dom";
-import ChatWindow from '../Chat/ChatWindow'; // ✅ Added ChatWindow Import
+import ChatWindow from '../Chat/ChatWindow';
 
 const drawerWidth = 260;
 
 export default function Layout() {
-  // --- Existing Sidebar State ---
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [floatingShrink, setFloatingShrink] = useState(false);
   const [tooltipOpen, setTooltipOpen] = useState(false);
   const [tooltipDisabled, setTooltipDisabled] = useState(false);
   
-  // --- ✅ NEW: Global Chat State (For Inbox) ---
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatRecipient, setChatRecipient] = useState(null);
 
-  // Function passed to Navbar -> Inbox
   const openInboxChat = (user) => {
     setChatRecipient(user);
     setIsChatOpen(true);
   };
 
   const handleToggleSidebar = () => {
-    // 🟧 Instantly hide tooltip
     setTooltipOpen(false);
 
-    // 🟧 Prevent tooltip from reopening during animation
     setTooltipDisabled(true);
 
-    // 🟧 Sidebar animation length (match your 250ms)
     setTimeout(() => {
       setTooltipDisabled(false);
     }, 280);
 
-    // 🔥 Toggle sidebar
     setSidebarOpen((prev) => !prev);
   };
 
@@ -52,26 +45,26 @@ export default function Layout() {
 
   return (
     <Box sx={{ display: "flex", height: "100vh", bgcolor: "#f6f7f8" }}>
-      {/* TOP NAVBAR (Passed the openInboxChat function) */}
+      {}
       <Navbar 
         onMenuClick={handleToggleSidebar} 
-        onOpenChat={openInboxChat} // ✅ Pass function to Navbar
+        onOpenChat={openInboxChat} 
       />
 
-      {/* SIDEBAR (desktop + mobile both controlled by sidebarOpen) */}
+      {}
       <Sidebar
         open={sidebarOpen}
         onToggle={handleToggleSidebar}
         drawerWidth={drawerWidth}
       />
 
-      {/* FLOATING BURGER BUTTON – RESPONSIBLE AGAIN 🙂 */}
+      {}
       <Tooltip
             title={sidebarOpen ? "Collapse Navigation" : "Expand Navigation"}
             arrow
             placement="right"
-            enterDelay={220}        // Reddit timing
-            leaveDelay={80}         // Reddit slight fade
+            enterDelay={220}        
+            leaveDelay={80}        
             open={tooltipDisabled ? false : tooltipOpen}
             onOpen={() => setTooltipOpen(true)}
             onClose={() => setTooltipOpen(false)}
@@ -126,7 +119,7 @@ export default function Layout() {
         </Tooltip>
 
 
-      {/* MAIN CONTENT */}
+      {}
       <Box
         component="main"
         sx={{
@@ -141,7 +134,7 @@ export default function Layout() {
         <Outlet />
       </Box>
 
-      {/* ✅ NEW: Global Chat Window (Triggered by Inbox) */}
+      {}
       {isChatOpen && chatRecipient && (
         <ChatWindow 
           recipient={chatRecipient} 

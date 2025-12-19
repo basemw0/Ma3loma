@@ -153,7 +153,6 @@ async function reseed() {
   process.exit(0);
 }
 
-// Run the chat seeder
 //seedChatsOnly(); 
 
 module.exports = { connectDB, seedChatsOnly };

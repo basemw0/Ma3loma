@@ -4,7 +4,7 @@ import { Box, Avatar, Typography } from '@mui/material';
 export default function UserHeader({ user }) {
   return (
     <Box sx={{ width: '100%', bgcolor: '#fff' }}>
-      {/* Banner Image */}
+      {}
       <Box
         sx={{
           width: '100%',
@@ -12,7 +12,7 @@ export default function UserHeader({ user }) {
           height: { xs: '80px', sm: '120px', md: '200px' },
           position: 'relative',
           overflow: 'hidden',
-          bgcolor: '#33a8ff' // Default color if no banner
+          bgcolor: '#33a8ff' 
         }}
       >
         {user.banner && (
@@ -29,7 +29,7 @@ export default function UserHeader({ user }) {
         )}
       </Box>
 
-      {/* Info Bar */}
+      {}
       <Box
         sx={{
           display: 'flex',
@@ -40,7 +40,7 @@ export default function UserHeader({ user }) {
           bgcolor: '#fff',
         }}
       >
-        {/* Left side - Avatar and Name */}
+        {}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <Avatar
             src={user.image}

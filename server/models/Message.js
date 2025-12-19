@@ -4,7 +4,6 @@ const crypto = require('crypto');
 const MessageSchema = new mongoose.Schema({
   _id: { type: String, default: () => crypto.randomUUID() },
 
-  // Link to the conversation
   conversationID: { 
     type: String, 
     ref: "Conversation", 
@@ -18,9 +17,8 @@ const MessageSchema = new mongoose.Schema({
     required: true 
   },
 
-  content: { type: String, default: "" }, // Can be empty if sending just media
+  content: { type: String, default: "" }, 
   
-  // ✅ EXACT MATCH to your Post.js / Comment.js media structure
   mediaUrl: { type: String, default: "" }, 
   mediaType: { 
     type: String, 
@@ -28,12 +26,10 @@ const MessageSchema = new mongoose.Schema({
     default: "none" 
   },
 
-  // ✅ Simple Boolean for 1-on-1 chat
   read: { type: Boolean, default: false }
 
 }, { timestamps: true });
 
-// Index: Find messages in a chat, sorted by time
 MessageSchema.index({ conversationID: 1, createdAt: 1 });
 
 module.exports = mongoose.model("Message", MessageSchema);

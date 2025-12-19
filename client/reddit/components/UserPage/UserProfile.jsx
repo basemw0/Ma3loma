@@ -3,13 +3,11 @@ import { Box, Button } from "@mui/material";
 import { useParams } from "react-router-dom";
 import api from "../../src/api/axios";
 
-// Import components
 import UserHeader from "./UserHeader";
 import UserDetails from "./UserDetails";
 import PostsSection from "./PostsSection";
 import EditPost from "../edit-post/EditPost";
 
-// ✅ RESTORED: Import ChatWindow directly (The "Old Way")
 import ChatWindow from "../Chat/ChatWindow"; 
 
 export default function UserProfile() {
@@ -21,7 +19,6 @@ export default function UserProfile() {
     const [num, setNum] = useState(1);
     const [user, setUser] = useState(null);
 
-    // ✅ RESTORED: Local State for Chat Window
     const [isChatOpen, setIsChatOpen] = useState(false);
 
     const getUser = async (id) => {
@@ -55,7 +52,6 @@ export default function UserProfile() {
         if(userId){
             getUser(userId);
             setNum(1); 
-            // Close chat when switching profiles
             setIsChatOpen(false); 
         }
     }, [userId]);
@@ -87,14 +83,14 @@ export default function UserProfile() {
                     </Button>
                 </Box>
 
-                {/* ✅ RESTORED: Pass the local toggle function */}
+                {}
                 <UserDetails 
                     user={user} 
                     onChatClick={() => setIsChatOpen(prev => !prev)} 
                 />
             </Box>
 
-            {/* ✅ RESTORED: Render ChatWindow locally */}
+            {}
             {isChatOpen && (
                 <ChatWindow 
                     recipient={user} 
