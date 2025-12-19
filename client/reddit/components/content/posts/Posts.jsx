@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
@@ -16,6 +15,7 @@ import Video from "../../video/Video";
 import api from "../../../src/api/axios";
 import "./Posts.css";
 import { useAuthModal } from "../../../src/context/AuthModalContext";
+import toast from "react-hot-toast";
 
 const getUserIdFromToken = () => {
   const token = localStorage.getItem("token");
@@ -73,7 +73,7 @@ export default function Posts({ posts , isHome }) {
         );
       }
     } catch (e) {
-      alert("Error: " + e.message);
+      toast.error("Error: " + e.message);
     }
   };
 
@@ -96,7 +96,7 @@ export default function Posts({ posts , isHome }) {
         }));
       }
     } catch (error) {
-      alert("Failed to join/leave: " + error.message);
+      toast.error("Failed to join/leave: " + error.message);
     }
   };
 
@@ -130,10 +130,10 @@ export default function Posts({ posts , isHome }) {
 
     try {
       await api.post(`/api/posts/${postId}/award/${awardType}`);
-      alert("Award given!");
+      toast.success("Award given!");
       setOpenAwardMenu(null);
     } catch (err) {
-      alert("Failed to give award");
+      toast.error("Failed to give award");
     }
   };
 
@@ -143,7 +143,7 @@ export default function Posts({ posts , isHome }) {
 
     const post = postList.find((p) => p._id === postId);
     if (!post || post.userID?._id !== currentUserId) {
-      alert("You can only delete your own posts.");
+      toast.error("You can only delete your own posts.");
       return;
     }
 
@@ -152,9 +152,9 @@ export default function Posts({ posts , isHome }) {
     try {
       await api.delete(`/api/posts/delete/${postId}`);
       setPostList((prev) => prev.filter((p) => p._id !== postId));
-      alert("Post deleted successfully.");
+      toast.success("Post deleted successfully.");
     } catch (err) {
-      alert("Failed to delete post: " + err.message);
+      toast.error("Failed to delete post: " + err.message);
     }
   };
 
@@ -168,9 +168,9 @@ export default function Posts({ posts , isHome }) {
         ...prev,
         [postId]: !prev[postId],
       }));
-      alert(res.data.message);
+      toast.success(res.data.message);
     } catch (err) {
-      alert("Failed to save post: " + err.message);
+      toast.error("Failed to save post: " + err.message);
     }
   };
 
@@ -309,10 +309,6 @@ export default function Posts({ posts , isHome }) {
                   <span>Award</span>
                 </div>
 
-                <div className="action-pill modern-pill">
-                  <ShareOutlinedIcon fontSize="small" />
-                  <span>Share</span>
-                </div>
 
                 {/* Save / Unsave */}
                 <div
@@ -324,10 +320,6 @@ export default function Posts({ posts , isHome }) {
                     style={{ color: savedPosts[post._id] ? "#ff4500" : "inherit" }}
                   />
                   <span>{savedPosts[post._id] ? "Saved" : "Save"}</span>
-                </div>
-
-                <div className="action-pill icon-only modern-pill">
-                  <MoreHorizIcon fontSize="small" />
                 </div>
 
                 {/* Edit button for post owner */}

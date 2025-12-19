@@ -261,6 +261,7 @@ const deletePost = async (req, res) => {
     try {
         const { pid } = req.params;
         const uid = req.userData.id;
+        console.log(uid)
 
 
         const post = await Post.findById(pid);
@@ -270,10 +271,22 @@ const deletePost = async (req, res) => {
         }
 
 
+        const comm = await Community.findById(post.communityID);
+
+        if(!comm){
+            return res.status(404).json({message: 'Community Not Found'});
+        }
+        console.log(comm.moderators)
+        if(comm.moderators.find((mod)=> mod.user === uid)){
+            console.log("ANA MODERATOR")
+            const p = await Post.findByIdAndDelete(pid);
+            return res.status(200).json({ message: 'Post deleted successfully!' });
+            
+        }
+
         if (post.userID.toString() !== uid) {
             return res.status(403).json({ message: "You are not authorized to delete this post" });
         }
-
 
         const p = await Post.findByIdAndDelete(pid);
 

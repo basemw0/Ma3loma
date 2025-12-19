@@ -9,6 +9,7 @@ import { Avatar, Box, Stack, Typography } from '@mui/material'; // Added Box/Sta
 import UploadButton from './CommunityCreation/CommunityVisuals/UploadButton';
 import { useState } from 'react';
 import api from '../src/api/axios';
+import toast from 'react-hot-toast';
 
 export default function EditProfile({ open, onClose, Iuser }) {
     const [user, setUser] = useState(Iuser);
@@ -24,13 +25,13 @@ export default function EditProfile({ open, onClose, Iuser }) {
                 image
             });
             if (response.status == 200) {
-                alert("User succesfully updated");
+               toast.success("Profile succesfully updated")
                 onClose();
             } else {
                 alert(response.status);
             }
         } catch (e) {
-            alert("Error: " + e.message);
+          toast.error("Failed to update profile")
         }
     };
 

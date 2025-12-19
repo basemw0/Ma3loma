@@ -249,6 +249,7 @@ const getMe = async (req, res) => {
 };
 const getUserById = async (req, res) => {
   const userID = req.params.id;
+  console.log(userID + "EL PARAM")
   try {
     
     const user = await User.findById(userID).select("-password");

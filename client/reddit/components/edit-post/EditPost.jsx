@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import "./EditPost.css";
 import TextField from "@mui/material/TextField";
@@ -6,13 +5,15 @@ import Button from "@mui/material/Button";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import api from "../../src/api/axios";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
+import uploadToCloudinary from "../../src/utils/uploadCloudinary";
+import toast from 'react-hot-toast'; // Consistent error handling
 
 const EditPost = () => {
   const { postId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = location.state?.from || "/"; // Previous page or default to home
+  const from = location.state?.from || "/";
 
   const [post, setPost] = useState({
     title: "",
@@ -21,26 +22,27 @@ const EditPost = () => {
     mediaType: "none",
     communityID: "",
   });
-  const [file, setFile] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  
+  const [file, setFile] = useState(null); // Stores the NEW file if selected
+  const [loading, setLoading] = useState(true); // Initial fetch loading
+  const [isSaving, setIsSaving] = useState(false); // Saving/Uploading loading state
 
   useEffect(() => {
     const fetchPost = async () => {
       try {
         const response = await api.get(`/api/posts/${postId}`);
         if (response.data) {
-          const post = response.data;
+          const fetchedPost = response.data;
           setPost({
-            title: post.title || "",
-            content: post.content || "",
-            mediaUrl: post.mediaUrl || "",
-            mediaType: post.mediaType || "none",
-            communityID: post.communityID?._id || "",
+            title: fetchedPost.title || "",
+            content: fetchedPost.content || "",
+            mediaUrl: fetchedPost.mediaUrl || "",
+            mediaType: fetchedPost.mediaType || "none",
+            communityID: fetchedPost.communityID?._id || "",
           });
         }
       } catch (err) {
-        setError("Failed to fetch post.");
+        toast.error("Failed to load post data.");
       } finally {
         setLoading(false);
       }
@@ -52,22 +54,53 @@ const EditPost = () => {
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (!selectedFile) return;
+    
     setFile(selectedFile);
-    const url = URL.createObjectURL(selectedFile);
+    
+    // INSTANT PREVIEW: Create a local blob URL so the user sees it immediately
+    const previewUrl = URL.createObjectURL(selectedFile);
+    
     setPost({
       ...post,
-      mediaUrl: url,
+      mediaUrl: previewUrl, // Show blob locally
       mediaType: selectedFile.type.startsWith("image") ? "image" : "video",
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSaving(true); // Start loading
+
     try {
-      await api.put(`/api/posts/edit/${postId}`, post);
-      navigate(from); // Go back to previous page
+      let finalMediaUrl = post.mediaUrl;
+      let finalMediaType = post.mediaType;
+
+      // Only upload if a NEW file was selected
+      if (file) {
+        const uploadData = await uploadToCloudinary(file);
+        if (uploadData && uploadData.url) {
+            finalMediaUrl = uploadData.url;
+            finalMediaType = uploadData.type === "video" ? "video" : "image";
+        }
+      }
+
+      // Prepare the object to send to backend
+      const updatedPost = {
+        ...post,
+        mediaUrl: finalMediaUrl, // Ensure we send the Cloudinary URL (not the blob)
+        mediaType: finalMediaType
+      };
+
+      await api.put(`/api/posts/edit/${postId}`, updatedPost);
+      
+      toast.success("Post updated successfully!");
+      navigate(from); 
+
     } catch (err) {
-      alert("Failed to save changes: " + err.message);
+      console.error(err);
+      toast.error("Failed to save changes.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -76,7 +109,6 @@ const EditPost = () => {
   };
 
   if (loading) return <div>Loading post...</div>;
-  if (error) return <div>{error}</div>;
 
   return (
     <div className="edit-post-container">
@@ -119,12 +151,13 @@ const EditPost = () => {
               variant="contained"
               component="span"
               startIcon={<UploadFileIcon />}
+              disabled={isSaving}
             >
               {file ? "Change File" : "Upload Media"}
             </Button>
           </label>
 
-          {file && (
+          {(file || post.mediaUrl) && (
             <Button
               variant="outlined"
               color="error"
@@ -133,6 +166,7 @@ const EditPost = () => {
                 setFile(null);
                 setPost({ ...post, mediaUrl: "", mediaType: "none" });
               }}
+              disabled={isSaving}
             >
               Remove Media
             </Button>
@@ -149,6 +183,7 @@ const EditPost = () => {
           )}
         </div>
 
+        {/* This field is technically auto-calculated, but kept if you want manual override */}
         <TextField
           select
           SelectProps={{ native: true }}
@@ -157,6 +192,7 @@ const EditPost = () => {
           value={post.mediaType}
           onChange={handleChange}
           fullWidth
+          disabled={isSaving}
         >
           <option value="none">None</option>
           <option value="image">Image</option>
@@ -164,10 +200,20 @@ const EditPost = () => {
         </TextField>
 
         <div className="edit-post-actions">
-          <Button type="submit" variant="contained">
-            Save Changes
+          <Button 
+            type="submit" 
+            variant="contained" 
+            disabled={isSaving}
+            style={{ opacity: isSaving ? 0.7 : 1 }}
+          >
+            {isSaving ? "Saving..." : "Save Changes"}
           </Button>
-          <Button variant="outlined" onClick={() => navigate(from)}>
+          
+          <Button 
+            variant="outlined" 
+            onClick={() => navigate(from)}
+            disabled={isSaving}
+          >
             Cancel
           </Button>
         </div>
@@ -177,5 +223,3 @@ const EditPost = () => {
 };
 
 export default EditPost;
-
-
