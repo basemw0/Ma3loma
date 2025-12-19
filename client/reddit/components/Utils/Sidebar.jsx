@@ -37,9 +37,9 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     padding: 0,
   },
   '& .MuiPaper-root': {
-     maxWidth: 'none',
-     width: 'auto',
-     backgroundImage: 'none',
+    maxWidth: 'none',
+    width: 'auto',
+    backgroundImage: 'none',
   },
 }));
 
@@ -50,7 +50,7 @@ export default function Sidebar({ open, onToggle, drawerWidth }) {
     { label: "Saved", icon: <StarBorderIcon />, to: "/api/posts/saved" },
     { label: "Explore communities", icon: <ExploreIcon />, to: "/api/communities/category" },
     { label: "All communities", icon: <RedditIcon />, to: "/api/communities/best/1" },
-    { label: "Create a community", icon: <AddIcon />},
+    { label: "Create a community", icon: <AddIcon /> },
   ];
 
   const resourceItems = [
@@ -59,12 +59,12 @@ export default function Sidebar({ open, onToggle, drawerWidth }) {
 
   const [openWizard, setOpenWizard] = React.useState(false);
   const [dialogKey, setDialogKey] = React.useState(0);
-  
+
   const handleClickOpen = () => {
     setDialogKey(prev => prev + 1); // Force remount
     setOpenWizard(true);
   };
-  
+
   const handleClose = () => {
     setOpenWizard(false);
   };
@@ -101,20 +101,7 @@ export default function Sidebar({ open, onToggle, drawerWidth }) {
 
       <Divider sx={{ my: 1 }} />
 
-      {/* RESOURCES */}
-      <SidebarSection title="RESOURCES" defaultOpen={true}>
-        {resourceItems.map((item) => (
-          <ListItemButton
-            key={item.label}
-            component={Link}
-            to={item.to}
-            sx={{ borderRadius: "999px", mx: 1, mb: 0.5 }}
-          >
-            <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
-            <ListItemText primary={item.label} />
-          </ListItemButton>
-        ))}
-      </SidebarSection>
+
 
       {/* COPYRIGHT FOOTER */}
       <Box sx={{ mt: "auto", p: 2, textAlign: "center", fontSize: "12px", color: "#888" }}>
