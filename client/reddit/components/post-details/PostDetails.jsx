@@ -525,7 +525,7 @@ export default function PostDetails() {
   const fetchComments = async (page) => {
     try {
       const response = await api.get(
-        `${serverUrl}/api/comments/post/${postId}?page=${page}&limit=${COMMENTS_LIMIT}`
+        `/api/comments/post/${postId}?page=${page}&limit=${COMMENTS_LIMIT}`
       );
       const newData = response.data;
 
@@ -1072,6 +1072,3 @@ export default function PostDetails() {
     </div>
   );
 }
-
-
-
