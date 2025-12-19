@@ -3,15 +3,14 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   AppBar, Toolbar, Typography, Box, Button, Tooltip,
   IconButton, Avatar, Menu, MenuItem, ListItemIcon,
-  Divider, InputBase, Badge 
+  Divider, InputBase, Badge
 } from "@mui/material";
 
-import { styled } from "@mui/material/styles"; 
+import { styled } from "@mui/material/styles";
 import SearchIcon from "@mui/icons-material/Search";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
-import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'; 
-import ma3lomaLogo from "./Ma3loma.jpeg";
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 
 import InboxPopover from './InboxPopover';
 
@@ -58,7 +57,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 export default function Navbar({ onMenuClick, onOpenChat }) {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  
+
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -74,7 +73,7 @@ export default function Navbar({ onMenuClick, onOpenChat }) {
 
   const handleMenuClick = (event) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
-  
+
   const handleInboxClick = (event) => setInboxAnchor(event.currentTarget);
   const handleInboxClose = () => setInboxAnchor(null);
 
@@ -122,8 +121,8 @@ export default function Navbar({ onMenuClick, onOpenChat }) {
       }}
     >
       <Toolbar sx={{ minHeight: "56px !important", display: "flex", justifyContent: "space-between" }}>
-        
-        {}
+
+        { }
         <Tooltip title="Go to Ma3loma home">
           <Box
             component={Link}
@@ -133,14 +132,11 @@ export default function Navbar({ onMenuClick, onOpenChat }) {
               color: "inherit", mr: { xs: 1, md: 2 }, cursor: "pointer"
             }}
           >
-            <Box component="img" src={ma3lomaLogo} alt="Logo" sx={{ height: 32, mr: 1 }} />
-            <Typography variant="h6" noWrap sx={{ fontWeight: "bold", display: { xs: "none", sm: "block" } }}>
-              Ma3loma
-            </Typography>
+            <Box component="img" src="/Ma3loma.png" alt="Logo" sx={{ height: 32, mr: 1 }} />
           </Box>
         </Tooltip>
 
-        {}
+        { }
         <Search onKeyDown={handleSearch}>
           <SearchIconWrapper>
             <SearchIcon />
@@ -151,11 +147,11 @@ export default function Navbar({ onMenuClick, onOpenChat }) {
           />
         </Search>
 
-        {}
+        { }
         <Box sx={{ display: "flex", gap: 1.5, alignItems: "center", minWidth: "fit-content" }}>
           {!user ? (
             <>
-              <Button component={Link} to="/login" variant="outlined" 
+              <Button component={Link} to="/login" variant="outlined"
                 sx={{ ...buttonStyle, bgcolor: "transparent", color: "#D93900", border: "1px solid #D93900", "&:hover": { bgcolor: "#fff3f0", border: "1px solid #bd3200" } }}>
                 Log In
               </Button>
@@ -165,23 +161,23 @@ export default function Navbar({ onMenuClick, onOpenChat }) {
             </>
           ) : (
             <>
-              {}
+              { }
               <IconButton onClick={handleInboxClick} size="medium" sx={{ color: "inherit" }}>
                 <Badge color="error" variant="dot">
-                   <ChatBubbleOutlineIcon />
+                  <ChatBubbleOutlineIcon />
                 </Badge>
               </IconButton>
 
-              <InboxPopover 
-                anchorEl={inboxAnchor} 
-                onClose={handleInboxClose} 
-                onOpenChat={onOpenChat} 
+              <InboxPopover
+                anchorEl={inboxAnchor}
+                onClose={handleInboxClose}
+                onOpenChat={onOpenChat}
               />
 
-              {}
+              { }
               <IconButton onClick={handleMenuClick} size="small" aria-controls={open ? 'account-menu' : undefined} aria-haspopup="true" aria-expanded={open ? 'true' : undefined}>
-                <Avatar 
-                  src={user.image} 
+                <Avatar
+                  src={user.image}
                   alt={user.username}
                   sx={{ width: 38, height: 38, border: "1px solid #dee0e1" }}
                 />
@@ -208,8 +204,8 @@ export default function Navbar({ onMenuClick, onOpenChat }) {
                 anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
               >
                 <Box sx={{ px: 2, py: 1 }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>{user.username}</Typography>
-                    <Typography variant="caption" color="text.secondary">{user.email}</Typography>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>{user.username}</Typography>
+                  <Typography variant="caption" color="text.secondary">{user.email}</Typography>
                 </Box>
                 <Divider />
                 <MenuItem onClick={handleProfile}>
