@@ -27,6 +27,7 @@ app.use(passport.initialize());
 app.use('/api/users', userRoutes);
 app.use('/api/communities', communityRoutes);
 app.use('/api/posts', postRoutes);
+app.use('/api/comments', commentRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/auth', authRoutes);
 app.use(express.static(path.join(__dirname, '../client/reddit/dist')));

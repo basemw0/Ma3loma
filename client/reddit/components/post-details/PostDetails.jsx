@@ -553,6 +553,19 @@ export default function PostDetails() {
         const postResponse = await api.get(`${serverUrl}/api/posts/${postId}`);
         setPost(postResponse.data);
         await fetchComments(1);
+
+
+        if (postResponse.data.communityID?._id) {
+            try {
+                const awardsRes = await api.get(
+                    `${serverUrl}/api/communities/${postResponse.data.communityID._id}`
+                );
+                setCommunityAwards(awardsRes.data.Awards || []);
+            } catch (err) {
+                console.error("Failed to load community awards", err);
+            }
+        }
+
         setLoading(false);
       } catch (error) {
         console.error("Error fetching post details or comments:", error);
@@ -673,7 +686,7 @@ export default function PostDetails() {
               
               const isUnloaded = currentReplies.length > 0 && typeof currentReplies[0] === 'string';
               
-              // ✅ FIX 3: Robust Total Calculation
+              
               const realTotal = isUnloaded 
                   ? currentReplies.length 
                   : (c.totalReplyCount || currentReplies.length);
@@ -759,14 +772,7 @@ export default function PostDetails() {
   };
 
   const toggleAwardMenu = async () => {
-    if (!openAwardMenu) {
-      try {
-        const res = await api.get(`${serverUrl}/api/communities/${post.communityID._id}`);
-        setCommunityAwards(res.data.Awards || []);
-      } catch {
-        console.log("Failed to load awards");
-      }
-    }
+    
     setOpenAwardMenu(!openAwardMenu);
   };
 
@@ -854,7 +860,7 @@ export default function PostDetails() {
       }
     };
 
-    // ✅ FIX 1: Define nextPage properly
+    
     const handleShowMoreReplies = async () => {    
         const nextPage = replyPage + 1;
         const count = await loadReplies(comment._id, nextPage);
@@ -868,7 +874,7 @@ export default function PostDetails() {
     const hasReplies = comment.replies && comment.replies.length > 0;
     const isRepliesOpen = openReplyComments.has(comment._id);
     
-    // ✅ FIX 2: Handle initial state (undefined totalReplyCount)
+    
     const displayCount = comment.totalReplyCount || (comment.replies ? comment.replies.length : 0);
 
     return (
@@ -897,7 +903,7 @@ export default function PostDetails() {
               <div className="award-dropdown">
                 {communityAwards.length === 0 && <div>No awards</div>}
                 {communityAwards.map((award) => (
-                  <div key={award._id} className="award-item" onClick={() => giveCommentAward(comment._id, award._id)}>
+                  <div key={award._id} className="award-item" onClick={() => giveCommentAward(comment._id, award.name)}>
                     {award.icon ? award.icon + " " : "🎖 "} {award.name} – {award.cost} Coins
                   </div>
                 ))}
