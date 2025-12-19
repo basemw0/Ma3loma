@@ -487,6 +487,8 @@ import "./PostDetails.css";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { Button } from "@mui/material";
+import toast from 'react-hot-toast';
+import Award from "./Award";
 
 const COMMENTS_LIMIT = 3;
 
@@ -500,6 +502,7 @@ export default function PostDetails() {
   const { postId } = useParams();
   const navigate = useNavigate();
   const [post, setPost] = useState(null);
+  const [awards, setAwards] = useState([]); // Awards received by the POST
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(true);
@@ -507,7 +510,10 @@ export default function PostDetails() {
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [openReplyComments, setOpenReplyComments] = useState(new Set());
   const [openAwardMenu, setOpenAwardMenu] = useState(false);
-  const [communityAwards, setCommunityAwards] = useState([]);
+  
+  // The list of ALL available awards in this community (includes icons/costs)
+  const [communityAwards, setCommunityAwards] = useState([]); 
+  
   const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
 
   const getUserIdFromToken = () => {
@@ -521,6 +527,13 @@ export default function PostDetails() {
     }
   };
   const currentUserId = getUserIdFromToken();
+
+  // --- Helper to find the icon for a specific award name ---
+  const getAwardIcon = (awardName) => {
+    if (!communityAwards || communityAwards.length === 0) return null;
+    const found = communityAwards.find(a => a.name === awardName);
+    return found ? found.icon : null;
+  };
 
   const fetchComments = async (page) => {
     try {
@@ -550,11 +563,15 @@ export default function PostDetails() {
   useEffect(() => {
     const fetchPostDetails = async () => {
       try {
+        // 1. Fetch Post Data
         const postResponse = await api.get(`${serverUrl}/api/posts/${postId}`);
         setPost(postResponse.data);
+        setAwards(postResponse.data.awardsReceived);
+
+        // 2. Fetch Comments
         await fetchComments(1);
 
-
+        // 3. Fetch Community Awards (to get icons)
         if (postResponse.data.communityID?._id) {
             try {
                 const awardsRes = await api.get(
@@ -569,6 +586,7 @@ export default function PostDetails() {
         setLoading(false);
       } catch (error) {
         console.error("Error fetching post details or comments:", error);
+        setLoading(false);
       }
     };
     fetchPostDetails();
@@ -589,7 +607,7 @@ export default function PostDetails() {
         if (response.data) setComments((prev) => updateCommentInState(prev, response.data));
       }
     } catch (e) {
-      alert("Error: " + e.message);
+      toast.error("Failed to vote. Please try again.");
     }
   };
 
@@ -601,6 +619,8 @@ export default function PostDetails() {
           content: updatedComment.content || c.content,
           upvotes: updatedComment.upvotes,
           downvotes: updatedComment.downvotes,
+          // Ensure we update awards if the backend sends them back
+          awardsReceived: updatedComment.awardsReceived || c.awardsReceived, 
         };
       }
       if (c.replies && c.replies.length > 0) {
@@ -619,7 +639,7 @@ export default function PostDetails() {
       setComments((prev) => updateCommentInState(prev, response.data));
       return true;
     } catch (error) {
-      alert("Failed to edit comment: " + (error.response?.data?.message || error.message));
+      toast.error("Failed to edit comment. Please try again.");
       return false;
     }
   };
@@ -632,14 +652,13 @@ export default function PostDetails() {
       setComments([response.data, ...comments]);
       setNewComment("");
     } catch (error) {
-      alert("error: " + error.message);
+      toast.error("Failed to submit comment. Please try again.");
     }
   };
 
   const addReplyToState = (commentsArray, parentID, newReply) => {
     return commentsArray.map((c) => {
       if (c._id === parentID) {
-        // If adding a reply manually, update total count
         const currentReplies = c.replies || [];
         const currentTotal = c.totalReplyCount || currentReplies.length;
         return { 
@@ -666,7 +685,7 @@ export default function PostDetails() {
       setComments((prev) => addReplyToState(prev, parentID, response.data));
       setOpenReplyComments(prev => new Set(prev).add(parentID));
     } catch (error) {
-      alert("Error: " + error.message);
+      toast.error("Failed to submit reply. Please try again.");
     }
   };
 
@@ -680,13 +699,9 @@ export default function PostDetails() {
       setComments((prev) => {
         const updateRecursive = (list) => {
           return list.map((c) => {
-            
             if (c._id === commentId) {
               const currentReplies = c.replies || [];
-              
               const isUnloaded = currentReplies.length > 0 && typeof currentReplies[0] === 'string';
-              
-              
               const realTotal = isUnloaded 
                   ? currentReplies.length 
                   : (c.totalReplyCount || currentReplies.length);
@@ -707,7 +722,6 @@ export default function PostDetails() {
                 };
               }
             }
-            
             if (c.replies && c.replies.length > 0 && typeof c.replies[0] === 'object') {
               return { ...c, replies: updateRecursive(c.replies) };
             }
@@ -721,7 +735,7 @@ export default function PostDetails() {
       return newReplies.length;
 
     } catch (error) {
-      alert("Failed to load replies: " + error.message);
+      toast.error("Failed to load replies. Please try again.");
       return 0;
     }
   };
@@ -746,16 +760,21 @@ export default function PostDetails() {
         return newSet;
       });
     } catch (error) {
-      alert("Failed to delete comment: " + error.message);
+      toast.error("Failed to delete comment. Please try again.");
     }
   };
 
   const giveCommentAward = async (commentId, awardId) => {
     try {
-      await api.post(`${serverUrl}/api/comments/${commentId}/award/${awardId}`);
-      alert("Award given to comment!");
+      const response = await api.post(
+        `${serverUrl}/api/comments/${commentId}/award/${awardId}`
+      );
+      if (response.data) {
+        setComments((prev) => updateCommentInState(prev, response.data));
+      }
+      toast.success("Award given");
     } catch (error) {
-      alert("Failed to give award: " + error.message);
+      toast.error("Failed to give award: " + (error.response?.data?.message || error.message));
     }
   };
 
@@ -765,46 +784,47 @@ export default function PostDetails() {
       const response = await api.get(`${serverUrl}/api/posts/${post._id}/summarize`);
       setSummary(response.data.summary);
     } catch (error) {
-      alert("Could not summarize: " + (error.response?.data?.message || error.message));
+      toast.error("Failed to summarize post: " + (error.response?.data?.message || error.message));
     } finally {
       setIsSummarizing(false);
     }
   };
 
   const toggleAwardMenu = async () => {
-    
     setOpenAwardMenu(!openAwardMenu);
   };
 
   const giveAward = async (awardId, e) => {
     e.stopPropagation();
     try {
-      await api.post(`${serverUrl}/api/posts/${post._id}/award/${awardId}`);
-      alert("Award given!");
+      const response = await api.post(`${serverUrl}/api/posts/${post._id}/award/${awardId}`);
+      toast.success("Award given");
       setOpenAwardMenu(false);
+      setAwards(response.data.awardsReceived);
     } catch (error) {
-      alert("Failed to give award: " + error.message);
+      toast.error("Failed to give award. Balance not enough");
     }
   };
 
   const handleDelete = async () => {
-    if (!currentUserId || post.userID._id !== currentUserId) {
-      alert("You can only delete your own posts.");
+    if(moderator || currentUserId || post.userID._id === currentUserId){
+      if (!window.confirm("Are you sure you want to delete this post?")) return;
+      try {
+        await api.delete(`${serverUrl}/api/posts/delete/${post._id}`);
+        toast.success("Post deleted successfully.");
+        navigate("/api/communities/"+post.communityID._id);
+      } catch (error) {
+        toast.error("Failed to delete post");
+      }
+    } else {
+      toast.error("You can only delete your own posts.");
       return;
-    }
-    if (!window.confirm("Are you sure you want to delete this post?")) return;
-    try {
-      await api.delete(`${serverUrl}/api/posts/delete/${post._id}`);
-      alert("Post deleted successfully.");
-      navigate("/");
-    } catch (error) {
-      alert("Failed to delete post: " + error.message);
     }
   };
 
   const handleEdit = () => {
     if (!currentUserId || post.userID._id !== currentUserId) {
-      alert("You can only edit your own posts.");
+      toast.error("You can only edit your own posts.");
       return;
     }
     navigate(`/api/posts/${post._id}/edit`);
@@ -819,8 +839,9 @@ export default function PostDetails() {
     });
   };
 
+  // --- RECURSIVE COMMENT COMPONENT ---
   const CommentItem = ({ comment, level = 0 }) => {
-    const [replyPage, setReplyPage] = useState(1);       
+    const [replyPage, setReplyPage] = useState(1);
     const [hasMoreReplies, setHasMoreReplies] = useState(true);
     const [replyContent, setReplyContent] = useState("");
     const [openCommentAwardMenu, setOpenCommentAwardMenu] = useState(false);
@@ -847,63 +868,118 @@ export default function PostDetails() {
         return;
       }
 
-      const repliesAreNotLoaded = comment.replies &&
+      const repliesAreNotLoaded =
+        comment.replies &&
         comment.replies.length > 0 &&
         typeof comment.replies[0] === "string";
 
       if (repliesAreNotLoaded) {
         const count = await loadReplies(comment._id, 1);
-        setReplyPage(1); 
-        if(count < COMMENTS_LIMIT) setHasMoreReplies(false); 
+        setReplyPage(1);
+        if (count < COMMENTS_LIMIT) setHasMoreReplies(false);
       } else {
         toggleReplies(comment._id);
       }
     };
 
-    
-    const handleShowMoreReplies = async () => {    
-        const nextPage = replyPage + 1;
-        const count = await loadReplies(comment._id, nextPage);
-        
-        setReplyPage(nextPage);
-        if (count < COMMENTS_LIMIT) {
-            setHasMoreReplies(false);
-        }
+    const handleShowMoreReplies = async () => {
+      const nextPage = replyPage + 1;
+      const count = await loadReplies(comment._id, nextPage);
+
+      setReplyPage(nextPage);
+      if (count < COMMENTS_LIMIT) {
+        setHasMoreReplies(false);
+      }
     };
 
     const hasReplies = comment.replies && comment.replies.length > 0;
     const isRepliesOpen = openReplyComments.has(comment._id);
-    
-    
-    const displayCount = comment.totalReplyCount || (comment.replies ? comment.replies.length : 0);
+
+    const displayCount =
+      comment.totalReplyCount || (comment.replies ? comment.replies.length : 0);
 
     return (
       <div className="comment" style={{ marginLeft: level * 20 }} key={comment._id}>
-        <span className="comment-author">{comment.userID?.username || "Unknown User"}:</span>
+        <span className="comment-author">
+          {comment.userID?.username || "Unknown User"}:
+        </span>
         {isEditing ? (
           <div className="comment-edit-form">
-            <textarea value={editedContent} onChange={(e) => setEditedContent(e.target.value)} rows="3" style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }} />
-            <Button onClick={handleSaveEdit} variant="contained" size="small" sx={{ marginRight: '8px' }}>Save</Button>
-            <Button onClick={() => { setIsEditing(false); setEditedContent(comment.content); }} variant="outlined" size="small">Cancel</Button>
+            <textarea
+              value={editedContent}
+              onChange={(e) => setEditedContent(e.target.value)}
+              rows="3"
+              style={{ width: "100%", padding: "8px", boxSizing: "border-box" }}
+            />
+            <Button
+              onClick={handleSaveEdit}
+              variant="contained"
+              size="small"
+              sx={{ marginRight: "8px" }}
+            >
+              Save
+            </Button>
+            <Button
+              onClick={() => {
+                setIsEditing(false);
+                setEditedContent(comment.content);
+              }}
+              variant="outlined"
+              size="small"
+            >
+              Cancel
+            </Button>
           </div>
-        ) : <p>{comment.content}</p>}
+        ) : (
+          <p>{comment.content}</p>
+        )}
 
-        <p>{comment.upvotes?.length || 0} Upvotes</p>
-        <p>{comment.downvotes?.length || 0} Downvotes</p>
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <p>{comment.upvotes?.length || 0} Upvotes</p>
+          <p>{comment.downvotes?.length || 0} Downvotes</p>
+          
+          {/* COMMENT AWARDS SECTION */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
+            {comment.awardsReceived &&
+              comment.awardsReceived.map((award, index) => {
+                // Look up the icon using our helper
+                const icon = getAwardIcon(award.awardName);
+                return <Award key={index} type={award.awardName} emoji={icon} />;
+              })}
+          </div>
+        </div>
 
         <div className="comment-actions">
-          <button onClick={() => handlevote(1, comment._id, "comment")}>Upvote</button>
-          <button onClick={() => handlevote(2, comment._id, "comment")}>Downvote</button>
-          {currentUserId && comment.userID?._id === currentUserId && <button onClick={() => setIsEditing(true)}><EditOutlinedIcon fontSize="small" /> Edit</button>}
-          {currentUserId && comment.userID?._id === currentUserId && <button onClick={() => handleDeleteComment(comment._id)}>Delete</button>}
+          <button onClick={() => handlevote(1, comment._id, "comment")}>
+            Upvote
+          </button>
+          <button onClick={() => handlevote(2, comment._id, "comment")}>
+            Downvote
+          </button>
+          {currentUserId && comment.userID?._id === currentUserId && (
+            <button onClick={() => setIsEditing(true)}>
+              <EditOutlinedIcon fontSize="small" /> Edit
+            </button>
+          )}
+          {currentUserId && comment.userID?._id === currentUserId && (
+            <button onClick={() => handleDeleteComment(comment._id)}>
+              Delete
+            </button>
+          )}
 
           <div className="award-container">
-            <button onClick={() => setOpenCommentAwardMenu(!openCommentAwardMenu)}>🎁 Award</button>
+            <button onClick={() => setOpenCommentAwardMenu(!openCommentAwardMenu)}>
+              🎁 Award
+            </button>
             {openCommentAwardMenu && (
               <div className="award-dropdown">
                 {communityAwards.length === 0 && <div>No awards</div>}
                 {communityAwards.map((award) => (
-                  <div key={award._id} className="award-item" onClick={() => giveCommentAward(comment._id, award.name)}>
+                  <div
+                    key={award._id || award.name}
+                    className="award-item"
+                    onClick={() => giveCommentAward(comment._id, award.name)}
+                  >
                     {award.icon ? award.icon + " " : "🎖 "} {award.name} – {award.cost} Coins
                   </div>
                 ))}
@@ -914,46 +990,65 @@ export default function PostDetails() {
 
         {!isEditing && (
           <div className="comment-reply">
-            <input type="text" placeholder="Reply..." value={replyContent} onChange={(e) => setReplyContent(e.target.value)} />
+            <input
+              type="text"
+              placeholder="Reply..."
+              value={replyContent}
+              onChange={(e) => setReplyContent(e.target.value)}
+            />
             <button onClick={handleReply}>Reply</button>
           </div>
         )}
 
         {hasReplies && (
           <button
-            style={{ marginLeft: '10px', cursor: 'pointer', background: 'none', border: 'none', color: '#0079d3' }}
-            onClick={handleToggleReplies} 
+            style={{
+              marginLeft: "10px",
+              cursor: "pointer",
+              background: "none",
+              border: "none",
+              color: "#0079d3",
+            }}
+            onClick={handleToggleReplies}
           >
-            {isRepliesOpen ? "Hide Replies" : `View ${displayCount} ${displayCount === 1 ? 'reply' : 'replies'}`}
+            {isRepliesOpen
+              ? "Hide Replies"
+              : `View ${displayCount} ${
+                  displayCount === 1 ? "reply" : "replies"
+                }`}
           </button>
         )}
 
         {isRepliesOpen && hasReplies && (
-            <>
-                {comment.replies.map((reply) => (
-                     typeof reply === 'object' ? (
-                         <CommentItem key={reply._id} comment={reply} level={level + 1} />
-                     ) : null 
-                ))}
-                
-                {hasMoreReplies && (
-                    <button 
-                        onClick={handleShowMoreReplies} 
-                        style={{ 
-                            marginLeft: '10px', 
-                            marginTop:'5px', 
-                            color: '#ff4500', 
-                            background:'none', 
-                            border:'none', 
-                            cursor:'pointer', 
-                            fontSize:'0.9rem', 
-                            fontWeight: 'bold' 
-                        }}
-                    >
-                        Load more replies...
-                    </button>
-                )}
-            </>
+          <>
+            {comment.replies.map((reply) =>
+              typeof reply === "object" ? (
+                <CommentItem
+                  key={reply._id}
+                  comment={reply}
+                  level={level + 1}
+                />
+              ) : null
+            )}
+
+            {hasMoreReplies && (
+              <button
+                onClick={handleShowMoreReplies}
+                style={{
+                  marginLeft: "10px",
+                  marginTop: "5px",
+                  color: "#ff4500",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: "0.9rem",
+                  fontWeight: "bold",
+                }}
+              >
+                Load more replies...
+              </button>
+            )}
+          </>
         )}
       </div>
     );
@@ -1013,6 +1108,17 @@ export default function PostDetails() {
             </div>
           )}
         </div>
+        
+        {/* MAIN POST AWARDS SECTION */}
+        {awards && awards.length !== 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+            {awards.map((award, index) => {
+               // Look up the icon using our helper
+               const icon = getAwardIcon(award.awardName);
+               return <Award key={index} type={award.awardName} emoji={icon} />;
+            })}
+          </div>
+        )}
 
         <div className="post-actions">
           <span>{post.upvotes.length} Upvotes</span>
@@ -1029,7 +1135,7 @@ export default function PostDetails() {
               <div className="award-dropdown">
                 {communityAwards.length === 0 && <div className="award-item no-awards">No awards available</div>}
                 {communityAwards.map((award) => (
-                  <div key={award._id} className="award-item" onClick={(e) => giveAward(award._id, e)}>
+                  <div key={award.name} className="award-item" onClick={(e) => giveAward(award.name, e)}> 
                     {award.icon ? award.icon + " " : "🎖 "} {award.name} – {award.cost} Coins
                   </div>
                 ))}
@@ -1038,7 +1144,7 @@ export default function PostDetails() {
           </div>
         </div>
 
-        {moderator && <Button sx={{ marginTop: 1 }} variant="outlined" color="error">Delete</Button>}
+        {moderator && <Button sx={{ marginTop: 1 }} onClick={handleDelete} variant="outlined" color="error">Delete</Button>}
       </div>
 
       <div className="post-content">

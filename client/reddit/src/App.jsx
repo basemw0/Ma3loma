@@ -23,8 +23,11 @@ import AuthModal from '../components/Utils/AuthModal';
 import api from '../src/api/axios';
 import SearchResults from '../components/Landing/SearchResults';
 import UserProfile from '../components/UserPage/UserProfile';
+import { Toaster } from 'react-hot-toast';
 
 import Saved from '../components/Saved';
+import toast from 'react-hot-toast'; // Import toast
+
 const AxiosInterceptor = ({ children }) => {
   const { openLogin } = useAuthModal();
   const navigate = useNavigate();
@@ -33,9 +36,23 @@ const AxiosInterceptor = ({ children }) => {
     const interceptor = api.interceptors.response.use(
       (response) => response,
       (error) => {
+        // Case 1: Unauthorized (Token expired or missing)
         if (error.response && error.response.status === 401) {
           openLogin();
+          toast.error("Session expired. Please log in again."); // Friendly message
         }
+        
+        // Case 2: Server Error (500)
+        else if (error.response && error.response.status >= 500) {
+          toast.error("Something went wrong on our server. Please try again later.");
+        }
+
+        // Case 3: Network Error (No internet / Server down)
+        else if (!error.response) {
+          toast.error("Network error. Check your connection.");
+        }
+
+        // We still return the error so specific components can handle 400 errors (like 'Wrong Password')
         return Promise.reject(error);
       }
     );
@@ -44,7 +61,6 @@ const AxiosInterceptor = ({ children }) => {
 
   return children;
 };
-
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -56,6 +72,7 @@ function App() {
       <AuthModalProvider>
         <AxiosInterceptor>
           <AuthModal />
+          <Toaster position="bottom-center" toastOptions={{ duration: 4000 }} />
           <Routes>
             {/* Auth Routes */}
             <Route path="/login" element={<Login />} />

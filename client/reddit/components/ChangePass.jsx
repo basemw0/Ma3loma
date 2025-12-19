@@ -9,7 +9,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, Stack, Divider } from '@mui/material'; // Added for styling
 import api from '../src/api/axios';
-
+import toast from 'react-hot-toast';
 export default function ChangePass({ open, onClose, Iuser }) {
     const [user, setUser] = useState(Iuser);
     const [correct, setCorrect] = useState(false);
@@ -29,27 +29,27 @@ export default function ChangePass({ open, onClose, Iuser }) {
                 setCorrect(false);
             }
         } catch (e) {
-            alert("Incorrect password");
+            toast.error("Incorrect password")
         }
     };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
         if (pass.pass != pass.cPass) {
-            alert("Passwords don't match");
+            toast.error("Passwords don't match")
             return;
         }
         try {
             let response = await api.put('/api/users/changePass', { newPass: pass.pass });
             if (response.status == 200) {
-                alert("Password succesfully updated");
+                toast.success("Password succesfully updated")
                 onClose();
                 navigate('/login');
             } else {
                 alert(response.status);
             }
         } catch (e) {
-            alert("Error: " + e.message);
+            toast.error("Failed to update password")
         }
     };
 

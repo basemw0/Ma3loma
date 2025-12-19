@@ -2,7 +2,6 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const  {connectDB}  = require("./db.js"); 
 const path = require('path'); 
 const userRoutes = require('./routes/userRoute');
 const communityRoutes = require('./routes/communityRoutes');
@@ -12,8 +11,17 @@ const chatRoutes = require('./routes/chatRoutes.js');
 const passport = require("passport"); 
 require('./config/passport');        
 const authRoutes = require('./routes/authRoutes');
+const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://MohamedWBadra:2512006.m@redditclone.5d2hpqu.mongodb.net/?retryWrites=true&w=majority";
 
-
+async function connectDB() {
+  try {
+    await mongoose.connect(MONGO_URI);
+    console.log("✅ MongoDB Connected");
+  } catch (err) {
+    console.error("❌ DB Connection Failed:", err.message);
+    process.exit(1);
+  }
+}
 const app = express();
 app.use(cors({
   origin: process.env.CLIENT_URL || "http://localhost:5173", 

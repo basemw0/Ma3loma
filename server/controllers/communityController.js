@@ -449,7 +449,7 @@ const searchCommunity = async (req, res) => {
 
     return res.json({
       found: !!exactMatch,
-      exactMatch: (page === 1 && exactMatch) ? enhance([exactMatch])[0] : null,
+      exactMatch: (page === 1 && exactMatch) ? enhance([exactMatch]) : null,
       recommendations: enhance(paginatedRecommendations),
       totalRecommendations: recommendations.length, 
       hasMore: (skip + limit) < recommendations.length

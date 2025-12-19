@@ -89,6 +89,7 @@ export default function Navbar({ onMenuClick, onOpenChat }) {
   const handleProfile = () => {
     handleClose();
     navigate(`/api/profile/${user?.id}`);
+    console.log(user.id)
   };
 
   const handleSearch = (e) => {
