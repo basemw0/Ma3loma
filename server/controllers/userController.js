@@ -54,7 +54,6 @@ const signup = async (req, res) => {
       email,
       password: hashedPassword,
       image: "https://www.redditstatic.com/avatars/avatar_default_02_FF4500.png",
-      // You can set a default image or handle uploads
     });
 
     await user.save();
@@ -81,14 +80,12 @@ const signup = async (req, res) => {
 // User Login
 const login = async (req, res) => {
   try {
-    // 1. Accept "loginInput" instead of just "email"
     const { loginInput, password } = req.body;
 
     if (!loginInput || !password) {
       return res.status(400).json({ message: 'Email/Username and password are required' });
     }
 
-    // 2. Check if input matches EITHER email OR username
     const user = await User.findOne({
       $or: [
         { email: loginInput },
@@ -132,10 +129,8 @@ const login = async (req, res) => {
 const sendVerificationCode = async (req, res) => {
   const { email } = req.body;
   try {
-    // Generate 6-digit code
     const code = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Store in DB (Update if exists, or create new)
     await Verification.findOneAndUpdate(
       { email },
       { email, code },
@@ -144,7 +139,7 @@ const sendVerificationCode = async (req, res) => {
 
     // Send Email
     await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+      from: "noreply@ma3loma.online",
       to: email,
       subject: 'Your Reddit Verification Code',
       text: `Your code is: ${code}`
@@ -156,7 +151,6 @@ const sendVerificationCode = async (req, res) => {
   }
 };
 
-// ✅ 3. VERIFY CODE (Step 2 -> 3)
 const verifyEmail = async (req, res) => {
   const { email, code } = req.body;
   try {
@@ -164,14 +158,12 @@ const verifyEmail = async (req, res) => {
     if (!record) {
       return res.status(400).json({ message: 'Invalid or expired code' });
     }
-    // Code is valid
     res.status(200).json({ message: 'Email verified successfully' });
   } catch (err) {
     res.status(500).json({ message: 'Verification failed', error: err.message });
   }
 };
 
-// ✅ 4. FORGOT PASSWORD (Request Link)
 const forgotPassword = async (req, res) => {
   const { email } = req.body;
   try {
@@ -194,7 +186,7 @@ const forgotPassword = async (req, res) => {
 
     // Send Email
     await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+      from: "noreply@ma3loma.online",
       to: email,
       subject: 'Password Reset Request',
       html: `
@@ -210,7 +202,6 @@ const forgotPassword = async (req, res) => {
   }
 };
 
-// ✅ 5. RESET PASSWORD (Actual Change)
 const resetPassword = async (req, res) => {
   try {
     // Get token from URL params
@@ -241,7 +232,6 @@ const resetPassword = async (req, res) => {
 };
 const getMe = async (req, res) => {
   try {
-    // req.userData is set by the check-auth middleware
     const user = await User.findById(req.userData.id).select("-password");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
