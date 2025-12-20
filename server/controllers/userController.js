@@ -9,11 +9,13 @@ const { validationResult } = require('express-validator');
 
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail', // or your provider
+  host: 'smtp.resend.com',
+  secure: true,
+  port: 465,
   auth: {
-    user: process.env.EMAIL_USER, // e.g., 'yourname@gmail.com'
-    pass: process.env.EMAIL_PASS 
-  }
+    user: 'resend',
+    pass: process.env.EMAIL_PASS,
+  },
 });
 // Get all users
 const getUsers = async (req, res) => {
@@ -52,18 +54,18 @@ const signup = async (req, res) => {
       email,
       password: hashedPassword,
       image: "https://www.redditstatic.com/avatars/avatar_default_02_FF4500.png",
- // You can set a default image or handle uploads
+      // You can set a default image or handle uploads
     });
 
     await user.save();
     let token;
-     token = jwt.sign(
+    token = jwt.sign(
       { id: user._id },
-      process.env.JWT_SECRET,{expiresIn: 3600},
+      process.env.JWT_SECRET, { expiresIn: 3600 },
     )
-    
-    res.status(201).json({ 
-      message: 'User created successfully', 
+
+    res.status(201).json({
+      message: 'User created successfully',
       user: {
         id: user._id,
         username: user.username,
@@ -80,7 +82,7 @@ const signup = async (req, res) => {
 const login = async (req, res) => {
   try {
     // 1. Accept "loginInput" instead of just "email"
-    const { loginInput, password } = req.body; 
+    const { loginInput, password } = req.body;
 
     if (!loginInput || !password) {
       return res.status(400).json({ message: 'Email/Username and password are required' });
@@ -88,10 +90,10 @@ const login = async (req, res) => {
 
     // 2. Check if input matches EITHER email OR username
     const user = await User.findOne({
-        $or: [
-            { email: loginInput },
-            { username: loginInput }
-        ]
+      $or: [
+        { email: loginInput },
+        { username: loginInput }
+      ]
     });
 
     if (!user) {
@@ -142,6 +144,7 @@ const sendVerificationCode = async (req, res) => {
 
     // Send Email
     await transporter.sendMail({
+      from: process.env.EMAIL_USER,
       to: email,
       subject: 'Your Reddit Verification Code',
       text: `Your code is: ${code}`
@@ -191,6 +194,7 @@ const forgotPassword = async (req, res) => {
 
     // Send Email
     await transporter.sendMail({
+      from: process.env.EMAIL_USER,
       to: email,
       subject: 'Password Reset Request',
       html: `
@@ -224,7 +228,7 @@ const resetPassword = async (req, res) => {
     // Set new password
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(req.body.password, salt);
-    
+
     // Clear reset fields
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
@@ -238,7 +242,7 @@ const resetPassword = async (req, res) => {
 const getMe = async (req, res) => {
   try {
     // req.userData is set by the check-auth middleware
-    const user = await User.findById(req.userData.id).select("-password"); 
+    const user = await User.findById(req.userData.id).select("-password");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -251,7 +255,7 @@ const getUserById = async (req, res) => {
   const userID = req.params.id;
   console.log(userID + "EL PARAM")
   try {
-    
+
     const user = await User.findById(userID).select("-password");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -260,7 +264,7 @@ const getUserById = async (req, res) => {
     let me = false;
 
     if (req.userData && req.userData.id == userID) {
-        me = true;
+      me = true;
     }
     res.status(200).json({ ...user.toObject(), me });
 
@@ -269,33 +273,34 @@ const getUserById = async (req, res) => {
     res.status(500).json({ message: "Server Error", error: err.message });
   }
 };
-const checkPass = async (req , res)=>{
-  const {pass} = req.body
-  try{
-  const userID = req.userData.id
-  const user = await User.findById(userID)
-  if(user){
-    const result = await bcrypt.compare(pass , user.password) 
-    if(result){
-      res.status(200).json(true)
+const checkPass = async (req, res) => {
+  const { pass } = req.body
+  try {
+    const userID = req.userData.id
+    const user = await User.findById(userID)
+    if (user) {
+      const result = await bcrypt.compare(pass, user.password)
+      if (result) {
+        res.status(200).json(true)
+      }
+      else {
+        res.status(404).json(false)
+      }
     }
-    else{
-      res.status(404).json(false)
-    }
-  }}
-  catch(e){
+  }
+  catch (e) {
     console.log(e.message)
   }
 }
 
-const editUser = async(req, res) =>{
-  try{
+const editUser = async (req, res) => {
+  try {
     const uid = req.userData.id;
 
     const user = await User.findById(uid);
-    if(!user) return res.status(404).json({mssage: 'user not found (edit)'});
+    if (!user) return res.status(404).json({ mssage: 'user not found (edit)' });
 
-    const {username, goldBalance, image} = req.body;
+    const { username, goldBalance, image } = req.body;
 
     const user_u = await User.findByIdAndUpdate(uid,
       {
@@ -303,7 +308,8 @@ const editUser = async(req, res) =>{
         goldBalance,
         image
       },
-      {new: true,
+      {
+        new: true,
         runValidators: true,
         context: 'query'
       }
@@ -312,31 +318,31 @@ const editUser = async(req, res) =>{
     res.status(200).json(user_u);
 
 
-  }catch(error){
+  } catch (error) {
     console.log(error.message);
-    res.status(500).json({message: error.message})
+    res.status(500).json({ message: error.message })
 
   }
 }
-const changePass = async (req , res)=>{
-  const {newPass} = req.body
+const changePass = async (req, res) => {
+  const { newPass } = req.body
   const password = newPass
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
   const userID = req.userData.id;
   let user = await User.findById(userID)
-  try{
-  if(user){
+  try {
+    if (user) {
 
-    user = await User.findByIdAndUpdate(userID , {password : hashedPassword} ,{new : true})
-    console.log(user.password)
-    res.status(200).json(user);
+      user = await User.findByIdAndUpdate(userID, { password: hashedPassword }, { new: true })
+      console.log(user.password)
+      res.status(200).json(user);
+    }
   }
-}
-catch(e){
-  console.log(e.message);
-  res.status(500).json({message: e.message})
-}
+  catch (e) {
+    console.log(e.message);
+    res.status(500).json({ message: e.message })
+  }
 
 }
 
@@ -344,18 +350,18 @@ catch(e){
 
 const searchUsers = async (req, res) => {
   try {
-    const { query } = req.query; 
+    const { query } = req.query;
 
     if (!query || query.trim() === "") {
       return res.status(200).json([]);
     }
 
-    
+
     const users = await User.find({
-      username: { $regex: query, $options: "i" } 
+      username: { $regex: query, $options: "i" }
     })
-    .select("username image") 
-    .limit(10);
+      .select("username image")
+      .limit(10);
 
     res.status(200).json(users);
   } catch (error) {

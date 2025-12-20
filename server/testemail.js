@@ -1,39 +1,28 @@
 require('dotenv').config();
 const nodemailer = require('nodemailer');
 
-async function testEmail() {
-    console.log("1. Starting Email Test...");
-    console.log(`   Host: ${process.env.SMTP_HOST}`);
-    console.log(`   User: ${process.env.SMTP_USER}`);
+const transporter = nodemailer.createTransport({
+    host: 'smtp.resend.com',
+    secure: true,
+    port: 465,
+    auth: {
+        user: 'resend',
+        pass: process.env.EMAIL_PASS,
+    },
+});
 
-    const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: parseInt(process.env.SMTP_PORT || '587'),
-        secure: false,
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-        },
-    });
-
+async function sendTestEmail() {
     try {
-        console.log("2. Verifying connection...");
-        await transporter.verify();
-        console.log("   ✅ Connection Successful!");
-
-        console.log("3. Sending test email...");
         const info = await transporter.sendMail({
-            from: process.env.EMAIL_USER, // Must be a verified sender in Brevo
-            to: process.env.EMAIL_USER,   // Send to yourself
-            subject: "Test Email from Localhost",
-            text: "If you see this, Brevo is working!"
+            from: 'noreply@ma3loma.online', // Must be this until you verify a domain
+            to: 'basemwalid44@gmail.com', // Replace with your email to test
+            subject: 'Resend SMTP Test',
+            html: '<strong>It works!</strong>',
         });
-        console.log("   ✅ Email sent: " + info.messageId);
-
+        console.log('Message sent: %s', info.messageId);
     } catch (error) {
-        console.error("   ❌ ERROR FAILED:");
-        console.error(error);
+        console.error('Error sending email:', error);
     }
 }
 
-testEmail();
+sendTestEmail();
