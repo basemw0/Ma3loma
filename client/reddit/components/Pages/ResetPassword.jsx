@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { Fade, InputAdornment } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { useParams, useNavigate } from "react-router-dom"; // <--- To get the token
+import { useParams, useNavigate } from "react-router-dom";
 import api from "../../src/api/axios";
 
-// Reuse styles from ForgotPassword (they are identical layouts)
 import {
   ResetWrapper,
   ResetCard,
@@ -13,15 +12,15 @@ import {
   ResetTitle,
   Step1Subtitle,
   ToastNotification
-} from "./ForgotPassword.styles"; 
+} from "./ForgotPassword.styles";
 
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import CloseIcon from "@mui/icons-material/Close";
 
 export default function ResetPassword() {
-  const { token } = useParams(); // <--- GRAB TOKEN FROM URL
+  const { token } = useParams(); // Grab el token men el URL
   const navigate = useNavigate();
-  
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [touched, setTouched] = useState(false);
@@ -29,7 +28,7 @@ export default function ResetPassword() {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
 
-  // Validation: At least 6 chars and match
+  // Validation
   const isValid = password.length >= 6 && password === confirmPassword;
 
   const handleReset = async () => {
@@ -37,13 +36,11 @@ export default function ResetPassword() {
     setIsLoading(true);
 
     try {
-      // ✅ CALL THE BACKEND
       await api.put(`/api/users/reset-password/${token}`, { password });
-      
+
       setToastMessage("Password changed! Redirecting...");
       setShowToast(true);
 
-      // Redirect to login after 2 seconds
       setTimeout(() => {
         navigate("/login");
       }, 2000);
@@ -105,9 +102,9 @@ export default function ResetPassword() {
               sx={{ "& .MuiOutlinedInput-root": { borderRadius: "25px" } }}
             />
 
-            <ResetButton 
+            <ResetButton
               fullWidth
-              disabled={!isValid || isLoading} 
+              disabled={!isValid || isLoading}
               onClick={handleReset}
               sx={{ backgroundColor: !isValid ? "#ddd" : "#FF4500" }}
             >
@@ -120,9 +117,9 @@ export default function ResetPassword() {
       {/* Toast Notification */}
       <Fade in={showToast}>
         <ToastNotification>
-            <WarningAmberIcon sx={{ color: "#fff" }} />
-            <span>{toastMessage}</span>
-            <CloseIcon sx={{ cursor: "pointer", marginLeft: "10px" }} onClick={() => setShowToast(false)} />
+          <WarningAmberIcon sx={{ color: "#fff" }} />
+          <span>{toastMessage}</span>
+          <CloseIcon sx={{ cursor: "pointer", marginLeft: "10px" }} onClick={() => setShowToast(false)} />
         </ToastNotification>
       </Fade>
     </ResetWrapper>

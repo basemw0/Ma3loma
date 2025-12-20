@@ -13,7 +13,6 @@ export default function AuthModal() {
   const { register, handleSubmit, reset } = useForm();
   const [error, setError] = useState("");
 
-  // Switch views and clear errors/form
   const switchView = (newView) => {
     setError("");
     reset();
@@ -42,14 +41,13 @@ export default function AuthModal() {
         });
       }
 
-      // Handle Success
       const userData = view === 'login' ? response.data.user : response.data.user;
 
       if (userData && userData.token) {
         localStorage.setItem("token", userData.token);
         localStorage.setItem("user", JSON.stringify(userData));
 
-        // Reload to update UI (Navbar etc) or you can use a UserContext to update state without reload
+        // Reload to update UI 
         window.location.reload();
         closeModal();
       }

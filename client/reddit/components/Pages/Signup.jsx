@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";  // Fixes "useNavigate is not defined"
-import api from "../../src/api/axios";   //Fixes API connection
+import { useNavigate } from "react-router-dom";
+import api from "../../src/api/axios";
 
 import {
   SignupWrapper,
@@ -12,13 +12,13 @@ import {
   GoogleButton,
   SkipButton,
   ToastNotification,
-} from "./Signup.styles"; // [cite: 2]
+} from "./Signup.styles";
 
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import CloseIcon from "@mui/icons-material/Close";
-import { Fade, InputAdornment, Box, Typography } from "@mui/material"; 
+import { Fade, InputAdornment, Box, Typography } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import searchIcon from "./search.png"; 
+import searchIcon from "./search.png";
 
 export default function Signup() {
   const navigate = useNavigate(); // [cite: 5] Fixes initialization error
@@ -29,7 +29,7 @@ export default function Signup() {
   const [verifyCode, setVerifyCode] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  
+
   // UI State
   const [showToast, setShowToast] = useState(false);
   const [touched, setTouched] = useState({
@@ -66,22 +66,20 @@ export default function Signup() {
     <img src={searchIcon} alt="Google" style={{ width: 18, height: 18 }} />
   );
 
-  // ✅ THE CRITICAL FUNCTION: CONNECTS TO BACKEND
   const handleSignup = async () => {
     try {
       const response = await api.post("/api/users/signup", {
         email: email,
-        username: username, 
+        username: username,
         password: password,
-        image: "https://www.redditstatic.com/avatars/avatar_default_02_FF4500.png" 
+        image: "https://www.redditstatic.com/avatars/avatar_default_02_FF4500.png"
       });
 
       console.log("Signup Success:", response.data);
-      
-     if (response.data.user?.token) {
+
+      if (response.data.user?.token) {
         localStorage.setItem("token", response.data.user.token);
-        // ✅ NEW: Save user details
-        localStorage.setItem("user", JSON.stringify(response.data.user)); 
+        localStorage.setItem("user", JSON.stringify(response.data.user));
         navigate("/");
       }
     } catch (error) {
@@ -93,8 +91,8 @@ export default function Signup() {
   return (
     <SignupWrapper>
       <SignupCard elevation={3}>
-        
-        {/* STEP 1 — EMAIL INPUT */}
+
+        {/* EMAIL INPUT */}
         {step === 1 && (
           <Fade in={true}>
             <div>
@@ -110,7 +108,7 @@ export default function Signup() {
                   endAdornment: (
                     <InputAdornment position="end">
                       <Fade in={Boolean(email)}>
-                         <CheckCircleIcon sx={{ color: "#FF4500" }} />
+                        <CheckCircleIcon sx={{ color: "#FF4500" }} />
                       </Fade>
                     </InputAdornment>
                   ),
@@ -148,13 +146,13 @@ export default function Signup() {
           </Fade>
         )}
 
-        {/* STEP 2 — VERIFICATION (Visual Only for now) */}
+        {/* VERIFICATION */}
         {step === 2 && (
           <Fade in={true}>
             <div>
               <Title variant="h5">Verify your email</Title>
               <p style={{ textAlign: "center", marginBottom: "20px" }}>
-                 Enter the 6-digit code we sent to <br /> {email}
+                Enter the 6-digit code we sent to <br /> {email}
               </p>
 
               <RoundedInput
@@ -169,7 +167,7 @@ export default function Signup() {
                 inputProps={{ maxLength: 6 }}
                 sx={{ "& .MuiOutlinedInput-root": { borderRadius: "25px" } }}
               />
-              
+
               <SkipButton onClick={() => setStep(3)}>Skip</SkipButton>
 
               <OrangeButton
@@ -184,7 +182,7 @@ export default function Signup() {
           </Fade>
         )}
 
-        {/* STEP 3 — USERNAME + PASSWORD */}
+        {/* USERNAME + PASSWORD */}
         {step === 3 && (
           <Fade in={true}>
             <div>
@@ -218,8 +216,7 @@ export default function Signup() {
               <OrangeButton
                 fullWidth
                 disabled={!username || !password}
-                // ✅ TRIGGER THE API CALL HERE
-                onClick={handleSignup} 
+                onClick={handleSignup}
                 sx={{ backgroundColor: !username || !password ? "#ddd" : "#FF4500" }}
               >
                 Sign Up
@@ -232,9 +229,9 @@ export default function Signup() {
       {/* Toast Notification */}
       <Fade in={step === 2 && showToast}>
         <ToastNotification>
-            <WarningAmberIcon sx={{ color: "#fff" }} />
-            <span>Email sent to {email}</span>
-            <CloseIcon sx={{ cursor: "pointer", marginLeft: "10px" }} onClick={() => setShowToast(false)} />
+          <WarningAmberIcon sx={{ color: "#fff" }} />
+          <span>Email sent to {email}</span>
+          <CloseIcon sx={{ cursor: "pointer", marginLeft: "10px" }} onClick={() => setShowToast(false)} />
         </ToastNotification>
       </Fade>
     </SignupWrapper>

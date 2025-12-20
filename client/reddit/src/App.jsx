@@ -26,7 +26,7 @@ import UserProfile from '../components/UserPage/UserProfile';
 import { Toaster } from 'react-hot-toast';
 
 import Saved from '../components/Saved';
-import toast from 'react-hot-toast'; // Import toast
+import toast from 'react-hot-toast';
 
 const AxiosInterceptor = ({ children }) => {
   const { openLogin } = useAuthModal();
@@ -36,18 +36,18 @@ const AxiosInterceptor = ({ children }) => {
     const interceptor = api.interceptors.response.use(
       (response) => response,
       (error) => {
-        // Case 1: Unauthorized (Token expired or missing)
+        // Unauthorized (Token expired or missing)
         if (error.response && error.response.status === 401) {
           openLogin();
-          toast.error("Session expired. Please log in again."); // Friendly message
+          toast.error("Session expired. Please log in again.");
         }
-        
-        // Case 2: Server Error (500)
+
+        // Server Error (500)
         else if (error.response && error.response.status >= 500) {
           toast.error("Something went wrong on our server. Please try again later.");
         }
 
-        // Case 3: Network Error (No internet / Server down)
+        // Network Error (No internet / Server down)
         else if (!error.response) {
           toast.error("Network error. Check your connection.");
         }

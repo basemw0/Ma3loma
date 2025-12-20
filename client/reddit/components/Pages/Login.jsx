@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom"; // ✅ Uses Link for smooth navigation
+import { Link } from "react-router-dom";
 import { Box, Typography, InputAdornment, Fade } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useForm } from "react-hook-form";
@@ -31,7 +31,7 @@ export default function Login() {
         localStorage.setItem("token", token);
 
         try {
-         
+
           const response = await api.get("/api/users/me", {
             headers: { Authorization: `Bearer ${token}` }
           });
@@ -153,7 +153,7 @@ export default function Login() {
             style={{
               color: "#5495ff",
               textDecoration: "none",
-              fontSize: "15px", 
+              fontSize: "15px",
               fontWeight: "bold",
               display: "block",
               marginBottom: "16px"

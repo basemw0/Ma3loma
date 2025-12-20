@@ -1,22 +1,21 @@
 const jwt = require('jsonwebtoken');
 
-// Middleware that optionally checks auth (doesn't fail if no token)
 const optionalAuth = (req, res, next) => {
     try {
         if (req.headers.authorization) {
             const token = req.headers.authorization.split(" ")[1];
             if (token) {
-                const decoded = jwt.verify(token, process.env.JWT_SECRET || 'SecretMoot');
+                const decoded = jwt.verify(token, process.env.JWT_SECRET);
                 req.userData = { id: decoded.id };
             }
         }
     } catch (err) {
-        // Silently fail - user not authenticated but that's okay
+        // Silently fail -.-
     }
     next();
 };
 
-// Middleware that requires auth (fails if no valid token)
+
 const requireAuth = (req, res, next) => {
     try {
         if (!req.headers.authorization) {
@@ -26,7 +25,7 @@ const requireAuth = (req, res, next) => {
         if (!token) {
             throw new Error('No token found');
         }
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'SecretMoot');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.userData = { id: decoded.id };
         next();
     } catch (err) {

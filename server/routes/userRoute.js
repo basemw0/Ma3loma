@@ -8,7 +8,7 @@ const router = express.Router();
 router.get('/', usersController.getUsers);
 router.get('/me', checkAuth, usersController.getMe);
 router.get('/search', checkAuth, usersController.searchUsers);
-router.get('/:id', checkAuth , usersController.getUserById);
+router.get('/:id', checkAuth, usersController.getUserById);
 router.post(
   '/signup',
   [
@@ -16,7 +16,7 @@ router.post(
       .not()
       .isEmpty(),
     check('email')
-      .normalizeEmail() // Test@test.com => test@test.com
+      .normalizeEmail()
       .isEmail(),
     check('password').isLength({ min: 6 })
   ],
@@ -28,7 +28,7 @@ router.post('/send-verification', usersController.sendVerificationCode);
 router.post('/verify-email', usersController.verifyEmail);
 router.post('/forgot-password', usersController.forgotPassword);
 router.put('/reset-password/:resetToken', usersController.resetPassword);
-router.put('/changePass',checkAuth ,  usersController.changePass);
-router.put('/edit' ,checkAuth,usersController.editUser);
-router.put('/checkPass' ,checkAuth,usersController.checkPass);
+router.put('/changePass', checkAuth, usersController.changePass);
+router.put('/edit', checkAuth, usersController.editUser);
+router.put('/checkPass', checkAuth, usersController.checkPass);
 module.exports = router;

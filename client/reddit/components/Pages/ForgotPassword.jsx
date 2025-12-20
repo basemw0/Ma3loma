@@ -4,7 +4,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import MarkEmailUnreadIcon from '@mui/icons-material/MarkEmailUnread'; 
+import MarkEmailUnreadIcon from '@mui/icons-material/MarkEmailUnread';
 import { useNavigate, Link } from "react-router-dom";
 import api from "../../src/api/axios";
 
@@ -12,11 +12,11 @@ import {
   ResetWrapper,
   ResetCard,
   ResetInput,
-  ResetButton, 
+  ResetButton,
   ResetTitle,
   Step1Subtitle,
   NavIconBtn,
-  ToastNotification 
+  ToastNotification
 } from "./ForgotPassword.styles.js";
 
 export default function ForgotPassword() {
@@ -27,10 +27,8 @@ export default function ForgotPassword() {
   const [isLoading, setIsLoading] = useState(false);
   const [showToast, setShowToast] = useState(false);
 
-  // Validation: Check for @ symbol
   const isValid = email.includes("@");
-  
-  // Auto-dismiss toast
+
   useEffect(() => {
     let timer;
     if (showToast) {
@@ -39,23 +37,20 @@ export default function ForgotPassword() {
     return () => clearTimeout(timer);
   }, [showToast]);
 
-  // ✅ CONNECTED TO BACKEND
   const handleReset = async () => {
     if (!isValid) return;
     setIsLoading(true);
 
     try {
-      // Sends request to: /api/users/forgot-password
       await api.post("/api/users/forgot-password", { email });
-      
-      // On success, show next step
+
       console.log("Reset link sent to:", email);
-      setStep(2); 
+      setStep(2);
       setShowToast(true);
     } catch (error) {
       console.error(error);
       const msg = error.response?.data?.message || "Failed to send reset email";
-      alert(msg); // Simple alert for error
+      alert(msg);
     } finally {
       setIsLoading(false);
     }
@@ -79,7 +74,7 @@ export default function ForgotPassword() {
   return (
     <ResetWrapper>
       <ResetCard elevation={3}>
-        {/* Back Arrow (Step 1 only) */}
+        {/* Back Arrow */}
         {step === 1 && (
           <NavIconBtn style={{ left: "15px", top: "15px" }} onClick={() => navigate("/login")}>
             <ArrowBackIcon sx={{ fontSize: 20 }} />
@@ -91,7 +86,7 @@ export default function ForgotPassword() {
           <CloseIcon sx={{ fontSize: 20 }} />
         </NavIconBtn>
 
-        {/* STEP 1: INPUT FORM */}
+        {/* INPUT FORM */}
         {step === 1 && (
           <Fade in={true}>
             <div style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "20px" }}>
@@ -118,65 +113,65 @@ export default function ForgotPassword() {
                 }}
                 sx={{
                   "& .MuiOutlinedInput-root": {
-                      borderRadius: "25px",
-                      "& fieldset": { borderColor: getBorderColor(isValid, touched) },
-                      "&:hover fieldset": { borderColor: getBorderColor(isValid, touched) },
-                      "&.Mui-focused fieldset": { borderColor: getBorderColor(isValid, touched) },
-                    },
-                  }}
+                    borderRadius: "25px",
+                    "& fieldset": { borderColor: getBorderColor(isValid, touched) },
+                    "&:hover fieldset": { borderColor: getBorderColor(isValid, touched) },
+                    "&.Mui-focused fieldset": { borderColor: getBorderColor(isValid, touched) },
+                  },
+                }}
               />
 
               {/* Helper Link */}
               <a href="#" style={{ fontSize: "12px", color: "#0079d3", textDecoration: "none", alignSelf: "flex-start", marginBottom: "20px", marginLeft: "10px" }}>
-                  Need help?
+                Need help?
               </a>
 
-              <ResetButton 
+              <ResetButton
                 fullWidth
-                disabled={!isValid || isLoading} 
+                disabled={!isValid || isLoading}
                 onClick={handleReset}
                 sx={{ backgroundColor: !isValid ? "#ddd" : "#FF4500" }}
               >
                 {isLoading ? "Sending..." : "Reset password"}
               </ResetButton>
-              
-              {/* Login / Signup Links (Fixed to use Link) */}
+
+              {/* Login / Signup Links */}
               <div style={{ marginTop: "15px", display: "flex", alignItems: "center" }}>
-                 <Link to="/login" style={{ fontSize: "12px", fontWeight: "600", color: "#0079d3", textDecoration: "none" }}>
-                    LOG IN 
-                 </Link>
-                 <span style={{ margin: "0 5px", color: "#0079d3" }}>•</span>
-                 <Link to="/signup" style={{ fontSize: "12px", fontWeight: "600", color: "#0079d3", textDecoration: "none" }}>
-                    SIGN UP
-                 </Link>
+                <Link to="/login" style={{ fontSize: "12px", fontWeight: "600", color: "#0079d3", textDecoration: "none" }}>
+                  LOG IN
+                </Link>
+                <span style={{ margin: "0 5px", color: "#0079d3" }}>•</span>
+                <Link to="/signup" style={{ fontSize: "12px", fontWeight: "600", color: "#0079d3", textDecoration: "none" }}>
+                  SIGN UP
+                </Link>
               </div>
             </div>
           </Fade>
         )}
 
-        {/* STEP 2: CHECK INBOX */}
+        {/* CHECK INBOX */}
         {step === 2 && (
           <Fade in={true}>
             <div style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "20px" }}>
               <ResetTitle variant="h5">Check your inbox</ResetTitle>
-              
+
               <p style={{
                 fontSize: "0.875rem",
                 lineHeight: "1.25rem",
                 textAlign: "center",
                 margin: "0.5rem 0",
                 color: "#1a1a1b",
-               }}>
+              }}>
                 An email with a link to reset your password was sent to the email address associated with your account
               </p>
 
               <div style={{ margin: "20px 0" }}>
-                 <MarkEmailUnreadIcon sx={{ fontSize: 80, color: "#FF4500" }} />
+                <MarkEmailUnreadIcon sx={{ fontSize: 80, color: "#FF4500" }} />
               </div>
-              
+
               <p style={{ fontSize: "14px", color: "#1a1a1b" }}>
                 Didn't get an email?{' '}
-                <span 
+                <span
                   onClick={handleResend}
                   style={{ color: "#0079d3", fontWeight: "bold", cursor: "pointer", textDecoration: "none" }}
                 >
@@ -191,12 +186,12 @@ export default function ForgotPassword() {
       {/* TOAST NOTIFICATION */}
       <Fade in={step === 2 && showToast}>
         <ToastNotification>
-            <WarningAmberIcon sx={{ color: "#fff" }} />
-            <span>Email sent to {email}</span>
-            <CloseIcon 
-                sx={{ cursor: "pointer", marginLeft: "10px", fontSize: "18px" }} 
-                onClick={() => setShowToast(false)} 
-            />
+          <WarningAmberIcon sx={{ color: "#fff" }} />
+          <span>Email sent to {email}</span>
+          <CloseIcon
+            sx={{ cursor: "pointer", marginLeft: "10px", fontSize: "18px" }}
+            onClick={() => setShowToast(false)}
+          />
         </ToastNotification>
       </Fade>
 

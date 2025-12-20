@@ -30,7 +30,7 @@ const getUsers = async (req, res) => {
 // User Signup
 const signup = async (req, res) => {
   try {
-    // Check for validation errors
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -97,13 +97,13 @@ const login = async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // 3. Compare passwords
+    // Compare passwords
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // 4. Generate Token
+    // Generate Token
     const token = jwt.sign(
       { id: user._id },
       process.env.JWT_SECRET,
