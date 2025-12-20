@@ -203,7 +203,7 @@ const forgotPassword = async (req, res) => {
     res.status(500).json({
       message: 'Error sending code',
       error: err.message,
-      stack: err.code // Look for EAUTH or ETIMEDOUT here });
+      stack: err.code
     })
   };
 }
