@@ -10,8 +10,8 @@ const { validationResult } = require('express-validator');
 
 const transporter = nodemailer.createTransport({
   host: 'smtp.resend.com',
-  port: 587,
-  secure: false,
+  port: 465,
+  secure: true,
   auth: {
     user: 'resend',
     pass: process.env.EMAIL_PASS,
@@ -183,9 +183,7 @@ const forgotPassword = async (req, res) => {
     // Create Reset URL (Frontend URL)
     const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
     const resetUrl = `${clientUrl}/reset-password/${resetToken}`;
-    console.log("--- SMTP DEBUG ---");
-    console.log("Recipient:", email);
-    console.log("API Key length:", process.env.EMAIL_PASS ? process.env.EMAIL_PASS.length : "MISSING");
+
     // Send Email
     await transporter.sendMail({
       from: "noreply@ma3loma.online",
@@ -197,13 +195,11 @@ const forgotPassword = async (req, res) => {
         <a href="${resetUrl}">${resetUrl}</a>
       `
     });
-    onsole.log("Email sent successfully:", info.messageId);
     res.status(200).json({ message: 'Email sent' });
   } catch (err) {
     res.status(500).json({
       message: 'Error sending code',
       error: err.message,
-      stack: err.code
     })
   };
 }
