@@ -1,3 +1,4 @@
+require('dotenv').config();
 const User = require('../models/User');
 const Verification = require('../models/Verification');
 const bcrypt = require('bcryptjs');
@@ -182,7 +183,9 @@ const forgotPassword = async (req, res) => {
     // Create Reset URL (Frontend URL)
     const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
     const resetUrl = `${clientUrl}/reset-password/${resetToken}`;
-
+    console.log("--- SMTP DEBUG ---");
+    console.log("Recipient:", email);
+    console.log("API Key length:", process.env.EMAIL_PASS ? process.env.EMAIL_PASS.length : "MISSING");
     // Send Email
     await transporter.sendMail({
       from: "noreply@ma3loma.online",
@@ -194,182 +197,185 @@ const forgotPassword = async (req, res) => {
         <a href="${resetUrl}">${resetUrl}</a>
       `
     });
-
+    onsole.log("Email sent successfully:", info.messageId);
     res.status(200).json({ message: 'Email sent' });
   } catch (err) {
-    res.status(500).json({ message: 'Error processing request', error: err.message });
-  }
-};
-
-const resetPassword = async (req, res) => {
-  try {
-    // Get token from URL params
-    const resetToken = crypto.createHash('sha256').update(req.params.resetToken).digest('hex');
-
-    const user = await User.findOne({
-      resetPasswordToken: resetToken,
-      resetPasswordExpire: { $gt: Date.now() } // Check if not expired
-    });
-
-    if (!user) {
-      return res.status(400).json({ message: 'Invalid or expired token' });
-    }
-
-    // Set new password
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(req.body.password, salt);
-
-    // Clear reset fields
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpire = undefined;
-    await user.save();
-
-    res.status(200).json({ message: 'Password updated successfully' });
-  } catch (err) {
-    res.status(500).json({ message: 'Error resetting password', error: err.message });
-  }
-};
-const getMe = async (req, res) => {
-  try {
-    const user = await User.findById(req.userData.id).select("-password");
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    res.status(200).json(user);
-  } catch (err) {
-    res.status(500).json({ message: "Server Error", error: err.message });
-  }
-};
-const getUserById = async (req, res) => {
-  const userID = req.params.id;
-  console.log(userID + "EL PARAM")
-  try {
-
-    const user = await User.findById(userID).select("-password");
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    let me = false;
-
-    if (req.userData && req.userData.id == userID) {
-      me = true;
-    }
-    res.status(200).json({ ...user.toObject(), me });
-
-  } catch (err) {
-    console.log(err.message)
-    res.status(500).json({ message: "Server Error", error: err.message });
-  }
-};
-const checkPass = async (req, res) => {
-  const { pass } = req.body
-  try {
-    const userID = req.userData.id
-    const user = await User.findById(userID)
-    if (user) {
-      const result = await bcrypt.compare(pass, user.password)
-      if (result) {
-        res.status(200).json(true)
-      }
-      else {
-        res.status(404).json(false)
-      }
-    }
-  }
-  catch (e) {
-    console.log(e.message)
-  }
-}
-
-const editUser = async (req, res) => {
-  try {
-    const uid = req.userData.id;
-
-    const user = await User.findById(uid);
-    if (!user) return res.status(404).json({ mssage: 'user not found (edit)' });
-
-    const { username, goldBalance, image } = req.body;
-
-    const user_u = await User.findByIdAndUpdate(uid,
-      {
-        username,
-        goldBalance,
-        image
-      },
-      {
-        new: true,
-        runValidators: true,
-        context: 'query'
-      }
-    );
-
-    res.status(200).json(user_u);
-
-
-  } catch (error) {
-    console.log(error.message);
-    res.status(500).json({ message: error.message })
-
-  }
-}
-const changePass = async (req, res) => {
-  const { newPass } = req.body
-  const password = newPass
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
-  const userID = req.userData.id;
-  let user = await User.findById(userID)
-  try {
-    if (user) {
-
-      user = await User.findByIdAndUpdate(userID, { password: hashedPassword }, { new: true })
-      console.log(user.password)
-      res.status(200).json(user);
-    }
-  }
-  catch (e) {
-    console.log(e.message);
-    res.status(500).json({ message: e.message })
-  }
-
-}
-
-
-
-const searchUsers = async (req, res) => {
-  try {
-    const { query } = req.query;
-
-    if (!query || query.trim() === "") {
-      return res.status(200).json([]);
-    }
-
-
-    const users = await User.find({
-      username: { $regex: query, $options: "i" }
+    res.status(500).json({
+      message: 'Error sending code',
+      error: err.message,
+      stack: err.code // Look for EAUTH or ETIMEDOUT here });
     })
-      .select("username image")
-      .limit(10);
+  };
 
-    res.status(200).json(users);
-  } catch (error) {
-    res.status(500).json({ message: "Error searching users", error: error.message });
+  const resetPassword = async (req, res) => {
+    try {
+      // Get token from URL params
+      const resetToken = crypto.createHash('sha256').update(req.params.resetToken).digest('hex');
+
+      const user = await User.findOne({
+        resetPasswordToken: resetToken,
+        resetPasswordExpire: { $gt: Date.now() } // Check if not expired
+      });
+
+      if (!user) {
+        return res.status(400).json({ message: 'Invalid or expired token' });
+      }
+
+      // Set new password
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(req.body.password, salt);
+
+      // Clear reset fields
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpire = undefined;
+      await user.save();
+
+      res.status(200).json({ message: 'Password updated successfully' });
+    } catch (err) {
+      res.status(500).json({ message: 'Error resetting password', error: err.message });
+    }
+  };
+  const getMe = async (req, res) => {
+    try {
+      const user = await User.findById(req.userData.id).select("-password");
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.status(200).json(user);
+    } catch (err) {
+      res.status(500).json({ message: "Server Error", error: err.message });
+    }
+  };
+  const getUserById = async (req, res) => {
+    const userID = req.params.id;
+    console.log(userID + "EL PARAM")
+    try {
+
+      const user = await User.findById(userID).select("-password");
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      let me = false;
+
+      if (req.userData && req.userData.id == userID) {
+        me = true;
+      }
+      res.status(200).json({ ...user.toObject(), me });
+
+    } catch (err) {
+      console.log(err.message)
+      res.status(500).json({ message: "Server Error", error: err.message });
+    }
+  };
+  const checkPass = async (req, res) => {
+    const { pass } = req.body
+    try {
+      const userID = req.userData.id
+      const user = await User.findById(userID)
+      if (user) {
+        const result = await bcrypt.compare(pass, user.password)
+        if (result) {
+          res.status(200).json(true)
+        }
+        else {
+          res.status(404).json(false)
+        }
+      }
+    }
+    catch (e) {
+      console.log(e.message)
+    }
   }
-};
 
-module.exports = {
-  getUsers,
-  signup,
-  login,
-  sendVerificationCode,
-  verifyEmail,
-  forgotPassword,
-  resetPassword,
-  getMe,
-  getUserById,
-  editUser,
-  changePass,
-  checkPass,
-  searchUsers
-};
+  const editUser = async (req, res) => {
+    try {
+      const uid = req.userData.id;
+
+      const user = await User.findById(uid);
+      if (!user) return res.status(404).json({ mssage: 'user not found (edit)' });
+
+      const { username, goldBalance, image } = req.body;
+
+      const user_u = await User.findByIdAndUpdate(uid,
+        {
+          username,
+          goldBalance,
+          image
+        },
+        {
+          new: true,
+          runValidators: true,
+          context: 'query'
+        }
+      );
+
+      res.status(200).json(user_u);
+
+
+    } catch (error) {
+      console.log(error.message);
+      res.status(500).json({ message: error.message })
+
+    }
+  }
+  const changePass = async (req, res) => {
+    const { newPass } = req.body
+    const password = newPass
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    const userID = req.userData.id;
+    let user = await User.findById(userID)
+    try {
+      if (user) {
+
+        user = await User.findByIdAndUpdate(userID, { password: hashedPassword }, { new: true })
+        console.log(user.password)
+        res.status(200).json(user);
+      }
+    }
+    catch (e) {
+      console.log(e.message);
+      res.status(500).json({ message: e.message })
+    }
+
+  }
+
+
+
+  const searchUsers = async (req, res) => {
+    try {
+      const { query } = req.query;
+
+      if (!query || query.trim() === "") {
+        return res.status(200).json([]);
+      }
+
+
+      const users = await User.find({
+        username: { $regex: query, $options: "i" }
+      })
+        .select("username image")
+        .limit(10);
+
+      res.status(200).json(users);
+    } catch (error) {
+      res.status(500).json({ message: "Error searching users", error: error.message });
+    }
+  };
+
+  module.exports = {
+    getUsers,
+    signup,
+    login,
+    sendVerificationCode,
+    verifyEmail,
+    forgotPassword,
+    resetPassword,
+    getMe,
+    getUserById,
+    editUser,
+    changePass,
+    checkPass,
+    searchUsers
+  };
