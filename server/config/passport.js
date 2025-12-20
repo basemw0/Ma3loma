@@ -4,21 +4,20 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/User');
 
 passport.use(new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID, 
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET, 
-    callbackURL: "/auth/google/callback"
-  },
+  clientID: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  callbackURL: "/auth/google/callback"
+},
   async (accessToken, refreshToken, profile, done) => {
     try {
-      // 1. Check if user exists by email
+      // Check if user exists by email
       let user = await User.findOne({ email: profile.emails[0].value });
 
       if (user) {
-        // User exists, return them
+        // User exists, return
         return done(null, user);
       } else {
-        // 2. If no user, create one
-        // Google doesn't give a username, so we generate a random one based on their name
+        // If no user, create one
         const randomNum = Math.floor(1000 + Math.random() * 9000);
         const generatedUsername = profile.displayName.replace(/\s+/g, '') + randomNum;
 
@@ -38,17 +37,3 @@ passport.use(new GoogleStrategy({
   }
 ));
 
-// Serialize user for session
-passport.serializeUser((user, done) => {
-  done(null, user.id);
-});
-
-// Deserialize user from session
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await User.findById(id);
-    done(null, user);
-  } catch (err) {
-    done(err, null);
-  }
-});
