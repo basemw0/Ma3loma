@@ -9,7 +9,7 @@ const { validationResult } = require('express-validator');
 
 
 const transporter = nodemailer.createTransport({
-  host: 'smtp.resend.com',]
+  host: 'smtp.resend.com',
   port: 587,
   secure: false,
   auth: {
