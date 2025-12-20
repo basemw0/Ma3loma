@@ -6,7 +6,6 @@ import Button from "@mui/material/Button";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import toast from 'react-hot-toast'; 
 
-// 1. Import your upload utility
 import uploadToCloudinary from "../../src/utils/uploadCloudinary"; 
 
 const CreatePost = () => {
@@ -14,7 +13,7 @@ const CreatePost = () => {
   const [content, setContent] = useState("");
   const [mediaUrl, setMediaUrl] = useState("");
   const [file, setFile] = useState(null);
-  const [isUploading, setIsUploading] = useState(false); // 2. Add loading state
+  const [isUploading, setIsUploading] = useState(false);
   const {communityID} = useParams();
   const [selectedCommunity, setSelectedCommunity] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
@@ -52,22 +51,20 @@ const CreatePost = () => {
     }
 
     try {
-      setIsUploading(true); // Start loading
+      setIsUploading(true); 
       let finalMediaUrl = "";
       let finalMediaType = "none";
 
-      // 3. Upload file to Cloudinary first if a file exists
       if (file) {
-        // This uploads the file and waits for the REAL internet URL
+   
         const uploadData = await uploadToCloudinary(file);
         
         if (uploadData && uploadData.url) {
-            finalMediaUrl = uploadData.url; // Use the Cloudinary URL
+            finalMediaUrl = uploadData.url; 
             finalMediaType = uploadData.type === "video" ? "video" : "image";
         }
       }
 
-      // 4. Create the post using the Cloudinary URL (not the blob!)
       const newPost = {
         title,
         content,
@@ -80,7 +77,6 @@ const CreatePost = () => {
       
       toast.success("Post created successfully!");
       
-      // Cleanup
       setTitle("");
       setContent("");
       setMediaUrl("");
@@ -93,7 +89,7 @@ const CreatePost = () => {
       setErrorMessage("Something went wrong while creating the post.");
       toast.error("Failed to create post");
     } finally {
-      setIsUploading(false); // Stop loading
+      setIsUploading(false); 
     }
   };
 

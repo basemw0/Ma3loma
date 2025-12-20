@@ -35,7 +35,7 @@ export default function CommentItem(props) {
       >
         <Stack direction="row" alignItems="center" spacing={1} mb={1}>
           <Avatar 
-            sx={{ width: 20, height: 20, bgcolor: "#D93900", fontSize: "10px" }} // Default generic avatar color
+            sx={{ width: 20, height: 20, bgcolor: "#D93900", fontSize: "10px" }}
             
             src={comment.userID.image}
           >

@@ -21,7 +21,6 @@ export default function Login() {
   const password = watch("password");
   const isDisabled = !username || !password;
 
-  // Track touched fields for green border logic
   const [touched, setTouched] = useState({ username: false, password: false });
   useEffect(() => {
     const handleGoogleLogin = async () => {
@@ -29,22 +28,17 @@ export default function Login() {
       const token = params.get("token");
 
       if (token) {
-        // 1. Save Token
         localStorage.setItem("token", token);
 
         try {
-          // 2. Fetch User Details using the new endpoint
-          // We must manually set the header here since 'api' interceptor 
-          // might not have picked up the localStorage change yet.
+         
           const response = await api.get("/api/users/me", {
             headers: { Authorization: `Bearer ${token}` }
           });
 
-          // 3. Save User Data
           const userData = { ...response.data, id: response.data._id };
           localStorage.setItem("user", JSON.stringify(userData));
 
-          // 4. Redirect Home
           window.location.href = "/";
 
         } catch (error) {
@@ -67,7 +61,7 @@ export default function Login() {
 
       if (token) {
         localStorage.setItem("token", token);
-        // ✅ NEW: Save user details so Navbar can show the avatar
+
         localStorage.setItem("user", JSON.stringify(userData));
         window.location.href = "/";
       } else {
@@ -103,7 +97,6 @@ export default function Login() {
 
         <form onSubmit={handleSubmit(onSubmit)}>
 
-          {/* Username Input */}
           <RoundedInput
             label={<>Email or username <span style={{ color: "#ee0000" }}>*</span> </>}
             variant="outlined"
@@ -129,7 +122,6 @@ export default function Login() {
             }}
           />
 
-          {/* Password Input */}
           <RoundedInput
             label={<>Password <span style={{ color: "#ee0000" }}>*</span> </>}
             type="password"
@@ -156,13 +148,12 @@ export default function Login() {
             }}
           />
 
-          {/* Forgot password link */}
           <Link
             to="/forgot-password"
             style={{
               color: "#5495ff",
               textDecoration: "none",
-              fontSize: "15px", // Friend's specific styling
+              fontSize: "15px", 
               fontWeight: "bold",
               display: "block",
               marginBottom: "16px"
@@ -171,7 +162,6 @@ export default function Login() {
             Forgot Password?
           </Link>
 
-          {/* New to Reddit? Sign up */}
           <p style={{ textAlign: "left", marginTop: "0", color: "#000" }}>
             New to Reddit?{" "}
             <Link
@@ -179,7 +169,7 @@ export default function Login() {
               style={{
                 color: "#5495ff",
                 textDecoration: "none",
-                fontSize: "15px", // Friend's specific styling
+                fontSize: "15px",
                 fontWeight: "bold",
               }}
             >
@@ -187,7 +177,6 @@ export default function Login() {
             </Link>
           </p>
 
-          {/* Submit Button */}
           <OrangeButton
             type="submit"
             fullWidth
@@ -203,14 +192,12 @@ export default function Login() {
             Log In
           </OrangeButton>
 
-          {/* OR Divider */}
           <Box sx={{ display: "flex", alignItems: "center", my: 2 }}>
             <Box sx={{ flex: 1, height: 1, background: "#e0e0e0" }} />
             <Typography sx={{ mx: 2, fontSize: 12, color: "#6b6b6b" }}>or</Typography>
             <Box sx={{ flex: 1, height: 1, background: "#e0e0e0" }} />
           </Box>
 
-          {/* Google Button */}
           <GoogleButton variant="outlined" fullWidth startIcon={<GoogleIcon />} onClick={continueWithGoogle}>
             Continue with Google
           </GoogleButton>

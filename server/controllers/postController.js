@@ -8,32 +8,26 @@ const summarizePost = async (req, res) => {
     try {
         const { pid } = req.params;
 
-        // 1. Fetch the post
         const post = await Post.findById(pid);
         if (!post) {
             return res.status(404).json({ message: 'Post Not Found' });
         }
 
-        // 2. Validate content exists
         if (!post.content || post.content.length < 50) {
             return res.status(400).json({ message: 'Post content is too short to summarize.' });
         }
 
-        // 3. specific model (Gemini 1.5 Flash is fast and cheap)
         const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-        // 4. Construct the prompt
         const prompt = `Summarize the following Reddit post in a concise, bulleted format (maximum 3 bullet points). 
         
         Title: ${post.title}
         Content: ${post.content}`;
 
-        // 5. Generate Content
         const result = await model.generateContent(prompt);
         const response = result.response;
         const summaryText = response.text();
 
-        // 6. Return result
         res.status(200).json({ summary: summaryText });
 
     } catch (error) {
@@ -106,9 +100,7 @@ const getPostsHomePage = async (req, res) => {
             new Set([...joinedIds, ...interestIds])
         );
 
-        // =============================
-        // SINGLE AGGREGATION QUERY
-        // =============================
+        
         const posts = await Post.aggregate([
             {
                 $addFields: {
@@ -156,7 +148,7 @@ const getPostsHomePage = async (req, res) => {
 const getPostsCommunity = async (req, res) => {
     try {
         const { cid } = req.params;
-        const uid = req.userData?.id; // Optional - may be undefined if not logged in
+        const uid = req.userData?.id; 
 
         const filter = req.query.filter || 'new';
         let sortOption = {};
@@ -361,20 +353,17 @@ const upvotePost = async (req, res) => {
         let updateQuery = {};
 
         if (isUpvoted) {
-            // 1. Already Upvoted -> Remove it (Toggle OFF)
             updateQuery = {
                 $pull: { upvotes: uid },
                 $inc: { voteCount: -1 }
             };
         } else if (isDownvoted) {
-            // 2. Was Downvoted -> Switch to Upvote (Big Jump +2)
             updateQuery = {
                 $pull: { downvotes: uid },
                 $addToSet: { upvotes: uid },
-                $inc: { voteCount: 2 } // +1 to neutralize, +1 to go up
+                $inc: { voteCount: 2 } 
             };
         } else {
-            // 3. Neutral -> New Upvote (+1)
             updateQuery = {
                 $addToSet: { upvotes: uid },
                 $inc: { voteCount: 1 }
@@ -418,20 +407,20 @@ const downvotePost = async (req, res) => {
         let updateQuery = {};
 
         if (isDownvoted) {
-            // 1. Already Downvoted -> Remove it (Toggle OFF)
+            
             updateQuery = {
                 $pull: { downvotes: uid },
                 $inc: { voteCount: 1 }
             };
         } else if (isUpvoted) {
-            // 2. Was Upvoted -> Switch to Downvote (Big Drop -2)
+            
             updateQuery = {
                 $pull: { upvotes: uid },
                 $addToSet: { downvotes: uid },
-                $inc: { voteCount: -2 } // -1 to neutralize, -1 to go down
+                $inc: { voteCount: -2 } 
             };
         } else {
-            // 3. Neutral -> New Downvote (-1)
+            
             updateQuery = {
                 $addToSet: { downvotes: uid },
                 $inc: { voteCount: -1 }
@@ -622,8 +611,7 @@ const searchPosts = async (req, res) => {
     const results = [];
     let excludedIds = [];
 
-    // 1. PRIMARY SEARCH: Title & Content (Paginated)
-    // We apply skip/limit here because this is the main source of truth
+    
     const searchRegex = new RegExp(q, "i");
     
     const directMatches = await Post.find({
@@ -633,21 +621,20 @@ const searchPosts = async (req, res) => {
       ]
     })
     .sort(sortOption) 
-    .skip(skip)      // ✅ Skip previous pages
-    .limit(limit)    // ✅ Limit current page
+    .skip(skip)      
+    .limit(limit)    
     .populate('userID', 'username image')
     .populate('communityID', 'name icon');
 
     results.push(...directMatches);
     directMatches.forEach(p => excludedIds.push(p._id));
 
-    // 2. FILLER LOGIC (Only run on Page 1 if we have few results)
-    // We don't want "Recommended" posts showing up randomly on Page 5.
+    
     if (page === 1 && results.length < limit) {
         
         const remainingLimit = limit - results.length;
 
-        // A. Search Communities by Name
+        
         const matchedCommunities = await Community.find({ name: { $regex: searchRegex } }).select('_id');
         
         if (matchedCommunities.length > 0) {
@@ -666,15 +653,14 @@ const searchPosts = async (req, res) => {
         }
     }
 
-    // 3. User Personalization (Enhance with isMember/isSaved)
-    // (Optimization: Fetch user data ONLY if we have results to enhance)
+    
     if (results.length > 0 && userID) {
         const user = await User.findById(userID).select("joinedCommunities savedPosts");
         if (user) {
             const joinedSet = new Set(user.joinedCommunities.map(jc => jc.community.toString()));
             const savedSet = new Set(user.savedPosts.map(sp => sp.toString()));
 
-            // Enhance in-memory
+            
             const finalResults = results.map(post => {
                 const obj = post.toObject ? post.toObject() : post;
                 const commId = obj.communityID?._id?.toString() || obj.communityID?.toString();
@@ -688,7 +674,7 @@ const searchPosts = async (req, res) => {
         }
     }
 
-    // If no user or no results, return clean objects
+    
     return res.json(results.map(r => r.toObject ? r.toObject() : r));
 
   } catch (err) {
@@ -696,12 +682,12 @@ const searchPosts = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
-// Add this to controllers/postController.js
+
 
 const getPostsByUser = async (req, res) => {
     try {
-        const { uid } = req.params; // The ID of the profile we are viewing
-        const currentUserId = req.userData?.id; // The ID of the person browsing (if logged in)
+        const { uid } = req.params; 
+        const currentUserId = req.userData?.id; 
 
         const page = parseInt(req.query.page) || 1;
         const limit = 20;
@@ -713,7 +699,6 @@ const getPostsByUser = async (req, res) => {
         if (filter === 'best') sortOption = { voteCount: -1 };
         if (filter === 'hot') sortOption = { commentCount: -1 };
 
-        // 1. Fetch posts by this user
         const posts = await Post.find({ userID: uid })
             .sort(sortOption)
             .skip(skip)
@@ -722,7 +707,6 @@ const getPostsByUser = async (req, res) => {
             .populate('communityID', 'name icon')
             .lean();
 
-        // 2. Add isMember/isSaved flags if the viewer is logged in
         if (currentUserId) {
             const currentUser = await User.findById(currentUserId).select('joinedCommunities savedPosts');
             
@@ -740,7 +724,6 @@ const getPostsByUser = async (req, res) => {
             }
         }
 
-        // 3. If viewer is guest
         const guestPosts = posts.map(post => ({
             ...post,
             isMember: false,

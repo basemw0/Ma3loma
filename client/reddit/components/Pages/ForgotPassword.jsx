@@ -5,8 +5,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import MarkEmailUnreadIcon from '@mui/icons-material/MarkEmailUnread'; 
-import { useNavigate, Link } from "react-router-dom"; // ✅ Import Link
-import api from "../../src/api/axios"; // ✅ Import API
+import { useNavigate, Link } from "react-router-dom";
+import api from "../../src/api/axios";
 
 import {
   ResetWrapper,

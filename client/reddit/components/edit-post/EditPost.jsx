@@ -6,7 +6,7 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import api from "../../src/api/axios";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import uploadToCloudinary from "../../src/utils/uploadCloudinary";
-import toast from 'react-hot-toast'; // Consistent error handling
+import toast from 'react-hot-toast'; 
 
 const EditPost = () => {
   const { postId } = useParams();
@@ -23,9 +23,9 @@ const EditPost = () => {
     communityID: "",
   });
   
-  const [file, setFile] = useState(null); // Stores the NEW file if selected
-  const [loading, setLoading] = useState(true); // Initial fetch loading
-  const [isSaving, setIsSaving] = useState(false); // Saving/Uploading loading state
+  const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(true); 
+  const [isSaving, setIsSaving] = useState(false); 
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -57,25 +57,24 @@ const EditPost = () => {
     
     setFile(selectedFile);
     
-    // INSTANT PREVIEW: Create a local blob URL so the user sees it immediately
     const previewUrl = URL.createObjectURL(selectedFile);
     
     setPost({
       ...post,
-      mediaUrl: previewUrl, // Show blob locally
+      mediaUrl: previewUrl, 
       mediaType: selectedFile.type.startsWith("image") ? "image" : "video",
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSaving(true); // Start loading
+    setIsSaving(true);
 
     try {
       let finalMediaUrl = post.mediaUrl;
       let finalMediaType = post.mediaType;
 
-      // Only upload if a NEW file was selected
+    
       if (file) {
         const uploadData = await uploadToCloudinary(file);
         if (uploadData && uploadData.url) {
@@ -84,10 +83,9 @@ const EditPost = () => {
         }
       }
 
-      // Prepare the object to send to backend
       const updatedPost = {
         ...post,
-        mediaUrl: finalMediaUrl, // Ensure we send the Cloudinary URL (not the blob)
+        mediaUrl: finalMediaUrl, 
         mediaType: finalMediaType
       };
 
@@ -183,7 +181,7 @@ const EditPost = () => {
           )}
         </div>
 
-        {/* This field is technically auto-calculated, but kept if you want manual override */}
+        
         <TextField
           select
           SelectProps={{ native: true }}
