@@ -33,13 +33,13 @@ This project moves beyond basic CRUD by implementing industry-standard infrastru
 ```bash
 git clone [https://github.com/basemw0/Ma3loma.git](https://github.com/basemw0/Ma3loma.git)
 cd ma3loma
-'''
+```
 
 ## 🤝 Contributing
 
 Built with ❤️ by an amazing engineering team:
 
-- Amir Tamer  
+- Amir Tamer 
 - Moaz Ahmed  
 - Mohamed Badra  
 - Omar Abouraia  
