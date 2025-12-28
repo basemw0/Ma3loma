@@ -39,8 +39,8 @@ cd ma3loma
 
 Built with ❤️ by an amazing engineering team:
 
-- [Amir Tamer] (https://github.com/amirtamer-27)
-- [Moaz Ahmed]  (https://github.com/Moaz715)
-- [Mohamed Badra]  (https://github.com/MWbadra)
-- [Omar Abouraia]  (https://github.com/OmarAbouraia)  
-- [Omar Fouad]  (https://github.com/omarrrfouad)
+- [Amir Tamer](https://github.com/amirtamer-27)
+- [Moaz Ahmed](https://github.com/Moaz715)
+- [Mohamed Badra](https://github.com/MWbadra)
+- [Omar Abouraia](https://github.com/OmarAbouraia)  
+- [Omar Fouad](https://github.com/omarrrfouad)
